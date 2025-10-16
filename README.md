@@ -1,61 +1,74 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚗 Sistema de Gestión de Citas - Taller Automotriz
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> **Proyecto Final - 11vo Cuatrimestre**  
+> Taller: "Ctrl+Alt+Del Motors"
 
-## About Laravel
+[![Laravel](https://img.shields.io/badge/Laravel-12-red.svg)](https://laravel.com)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-blue.svg)](https://www.mysql.com)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg)](https://www.docker.com)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📚 Documentación
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+**📖 [Ver documentación completa del proyecto](https://github.com/ArnoxCore/TCADMProyectoFinal/tree/docs)**
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Para acceder a la documentación localmente:
+```bash
+git checkout docs
+```
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 📋 Descripción
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Sistema web para la gestión de citas de mantenimiento vehicular que permite a los clientes agendar servicios y al taller administrar su calendario de trabajo de manera eficiente.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Características principales
 
-## Laravel Sponsors
+- 📅 Agendamiento de citas online
+- 👤 Gestión de clientes y vehículos
+- 🔧 Catálogo de servicios de mantenimiento
+- 📊 Panel administrativo para el taller
+- 📧 Notificaciones por correo
+- 📱 Interfaz responsive
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## 🛠️ Stack Tecnológico
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- **Backend:** Laravel 12
+- **Base de datos:** MySQL 8.0
+- **Frontend:** Blade Templates, Tailwind CSS
+- **Containerización:** Docker & Docker Compose
+- **Control de versiones:** Git/GitHub
+- **Gestión de proyecto:** Notion (Scrum)
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 👥 Equipo de Desarrollo
 
-## Code of Conduct
+| Nombre | Rol | GitHub |
+|--------|-----|--------|
+| [Nombre 1] | Full Stack Developer | [@usuario1](https://github.com/usuario1) |
+| [Nombre 2] | Frontend Developer | [@usuario2](https://github.com/usuario2) |
+| [Nombre 3] | Backend Developer | [@usuario3](https://github.com/usuario3) |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## 🔄 Flujo de Trabajo Git
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Ramas principales
 
-## License
+- `main` - Producción (versión final)
+- `develop` - Integración de features
+- `docs` - Documentación del proyecto
+- `nombre` - Rama de trabajo de los integrantes del equipo
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## 📄 Licencia
+
+Este proyecto es de uso académico para el proyecto final universitario.
+
+---
+
+**Desarrollado con ❤️ para el proyecto final universitario - Octubre 2025**
