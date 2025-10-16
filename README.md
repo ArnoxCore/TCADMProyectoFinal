@@ -48,10 +48,10 @@ Sistema web para la gestión de citas de mantenimiento vehicular que permite a l
 
 | Nombre | Rol | GitHub |
 |--------|-----|--------|
-| [Jose Angel Espinoza Preciado] | Desarrollador full stack y Lider del Proyecto | [@ArnoxCore](https://github.com/ArnoxCore) |
-| [Aarón Emmanuel Aguilar Monroy] | Desarrollador Backend | [@GhostKraust](https://github.com/GhostKraust) |
-| [Antonio Cárdenas Cibrian] | Diseñador UX/UI | [@HansieAimond](https://github.com/HansieAimond) |
-| [Diego Cardona Espino] | Diseñador de base de datos | [@diegocardona224](https://github.com/diegocardona224) |
+| Jose Angel Espinoza Preciado | Desarrollador full stack y Lider del Proyecto | [@ArnoxCore](https://github.com/ArnoxCore) |
+| Aarón Emmanuel Aguilar Monroy | Desarrollador Backend | [@GhostKraust](https://github.com/GhostKraust) |
+| Antonio Cárdenas Cibrian | Diseñador UX/UI | [@HansieAimond](https://github.com/HansieAimond) |
+| Diego Cardona Espino | Diseñador de base de datos | [@diegocardona224](https://github.com/diegocardona224) |
 
 ---
 
