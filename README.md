@@ -48,9 +48,10 @@ Sistema web para la gestión de citas de mantenimiento vehicular que permite a l
 
 | Nombre | Rol | GitHub |
 |--------|-----|--------|
-| [Nombre 1] | Full Stack Developer | [@usuario1](https://github.com/usuario1) |
-| [Nombre 2] | Frontend Developer | [@usuario2](https://github.com/usuario2) |
-| [Nombre 3] | Backend Developer | [@usuario3](https://github.com/usuario3) |
+| [Jose Angel Espinoza Preciado] | Desarrollador full stack y Lider del Proyecto | [@ArnoxCore](https://github.com/ArnoxCore) |
+| [Aarón Emmanuel Aguilar Monroy] | Desarrollador Backend | [@GhostKraust](https://github.com/GhostKraust) |
+| [Antonio Cárdenas Cibrian] | Diseñador UX/UI | [@HansieAimond](https://github.com/HansieAimond) |
+| [Diego Cardona Espino] | Diseñador de base de datos | [@diegocardona224](https://github.com/diegocardona224) |
 
 ---
 
@@ -59,7 +60,7 @@ Sistema web para la gestión de citas de mantenimiento vehicular que permite a l
 ### Ramas principales
 
 - `main` - Producción (versión final)
-- `develop` - Integración de features
+- `develop` - Desarrollo del proyecto
 - `docs` - Documentación del proyecto
 - `nombre` - Rama de trabajo de los integrantes del equipo
 
@@ -70,5 +71,3 @@ Sistema web para la gestión de citas de mantenimiento vehicular que permite a l
 Este proyecto es de uso académico para el proyecto final universitario.
 
 ---
-
-**Desarrollado con ❤️ para el proyecto final universitario - Octubre 2025**
