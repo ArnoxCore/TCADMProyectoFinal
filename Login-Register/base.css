@@ -1,0 +1,30 @@
+/* ===== base.css ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: "Arimo", system-ui, sans-serif;
+  background: linear-gradient(135deg, #0f172b, #1d293d 50%, #0f172b);
+  color: #fff;
+  line-height: 1.5;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: #155dfc;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}

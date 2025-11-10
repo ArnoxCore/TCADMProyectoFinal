@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — Servicios</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-page="servicios">
+  <header class="header">
+    <div class="wrap">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true"></div>
+        <div>
+          <div class="brand-title">Panel de Administración</div>
+          <div class="brand-sub">Bienvenido, Admin</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="index.html" data-nav="index">Asignar Mecánicos</a>
+        <a href="servicios.html" data-nav="servicios">Servicios</a>
+        <a href="reportes.html" data-nav="reportes">Reportes</a>
+        <a href="estadisticas.html" data-nav="estadisticas">Estadísticas</a>
+        <button class="button ghost">Cerrar sesión</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h3 style="margin:0;font-size:16px">Servicios Disponibles</h3>
+          <p class="section-desc">Gestiona los servicios que ofreces</p>
+        </div>
+        <button class="button primary" data-open="#modalServicio">+ Nuevo Servicio</button>
+      </div>
+
+      <div class="table cols-4">
+        <header>
+          <div>Servicio</div>
+          <div>Descripción</div>
+          <div>Duración</div>
+          <div class="text-right">Precio</div>
+        </header>
+        <div class="row">
+          <div>Cambio de aceite</div>
+          <div>Cambio de aceite y filtro</div>
+          <div>30 min</div>
+          <div class="text-right">$50</div>
+        </div>
+        <div class="row">
+          <div>Alineación y balanceo</div>
+          <div>Alineación de ruedas y balanceo</div>
+          <div>60 min</div>
+          <div class="text-right">$80</div>
+        </div>
+        <div class="row">
+          <div>Revisión de frenos</div>
+          <div>Inspección y cambio de pastillas</div>
+          <div>45 min</div>
+          <div class="text-right">$120</div>
+        </div>
+        <div class="row">
+          <div>Cambio de neumáticos</div>
+          <div>Montaje y desmontaje de neumáticos</div>
+          <div>40 min</div>
+          <div class="text-right">$100</div>
+        </div>
+        <div class="row">
+          <div>Mantenimiento general</div>
+          <div>Revisión completa del vehículo</div>
+          <div>120 min</div>
+          <div class="text-right">$200</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal Nuevo Servicio -->
+  <div class="modal-backdrop" id="modalServicio">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="sTitle">
+      <div class="m-head">
+        <div id="sTitle" class="m-title">Nuevo Servicio</div>
+        <div class="m-sub">Agrega un servicio a tu catálogo</div>
+      </div>
+      <div class="m-body">
+        <label class="label" for="sNombre">Nombre del servicio</label>
+        <input id="sNombre" class="input" placeholder="Ej. Lavado de inyectores" />
+
+        <label class="label" for="sDesc">Descripción</label>
+        <textarea id="sDesc" class="textarea" placeholder="Breve descripción..."></textarea>
+
+        <div class="grid-2">
+          <div>
+            <label class="label" for="sDuracion">Duración</label>
+            <input id="sDuracion" class="input" placeholder="Ej. 60 min" />
+          </div>
+          <div>
+            <label class="label" for="sPrecio">Precio</label>
+            <input id="sPrecio" class="input" placeholder="Ej. $150" />
+          </div>
+        </div>
+      </div>
+      <div class="m-footer">
+        <button class="button" data-close>Cancelar</button>
+        <button class="button primary" data-close>Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

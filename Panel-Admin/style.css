@@ -1,0 +1,183 @@
+/* ------------------------------
+   Variables & Reset
+------------------------------ */
+:root {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #0f172b;
+  --muted: #45556c;
+  --muted-2: #717182;
+  --line: rgba(0,0,0,0.1);
+  --brand: #0b3a75;      /* azul oscuro */
+  --brand-2: #0073e7;    /* azul acento */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+  --danger: #ef4444;
+  --badge-blue-bg: #dbeafe;
+  --badge-blue-text: #193cb8;
+  --badge-green-bg: #dcfce7;
+  --badge-green-text: #016630;
+  --badge-amber-bg: #fef9c2;
+  --badge-amber-text: #894b00;
+  --radius-card: 14px;
+  --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: "Arimo", system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; text-decoration: none; }
+
+/* ------------------------------
+   Layout base
+------------------------------ */
+.header {
+  position: sticky;
+  top: 0;
+  background: var(--card);
+  border-bottom: 1px solid #e2e8f0;
+  z-index: 50;
+}
+.header .wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.brand {
+  display: flex; align-items: center; gap: 12px;
+}
+.brand-logo {
+  width: 40px; height: 40px; border-radius: 10px; background: var(--brand);
+}
+.brand-title { font-weight: 700; color: var(--brand); }
+.brand-sub { font-size: 14px; color: var(--muted); }
+
+.nav {
+  display: flex; gap: 8px; align-items: center;
+}
+.nav a {
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+}
+.nav a.active, .nav a:hover { background: #ececf0; }
+
+.button {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: #fff; color: #0a0a0a; font-size: 14px;
+}
+.button.primary { background: #030213; color: #fff; border-color: transparent; }
+.button.ghost { background: #fff; }
+.button.icon { padding: 8px 12px; }
+
+.main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+  display: grid; gap: 32px;
+}
+
+.cards-3 {
+  display: grid; gap: 16px;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+}
+
+@media (max-width: 1024px) {
+  .cards-3 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 720px) {
+  .header .wrap { flex-wrap: wrap; gap: 8px; }
+  .cards-3 { grid-template-columns: 1fr; }
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  display: flex; flex-direction: column; gap: 16px;
+}
+.card .head {
+  padding: 16px 24px 0; display: flex; align-items: center; justify-content: space-between;
+}
+.card .title { font-size: 14px; color: var(--muted); }
+.card .body { padding: 0 24px 20px; display: grid; gap: 6px; }
+.card .kpi { font-size: 28px; font-weight: 700; color: var(--text); }
+.card .sub { font-size: 12px; color: var(--muted); }
+
+/* ------------------------------
+   Table
+------------------------------ */
+.table {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+.table header, .table .row {
+  display: grid; align-items: center; gap: 12px;
+}
+/* Ajusta columnas por pantalla */
+.table.cols-7 header, .table.cols-7 .row { grid-template-columns: 1.1fr .7fr 1fr 1.2fr 1fr .9fr .9fr; }
+.table.cols-4 header, .table.cols-4 .row { grid-template-columns: 1.2fr 2fr .8fr .8fr; }
+
+.table header { padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+.table .row { padding: 12px 16px; border-top: 1px solid var(--line); font-size: 14px; color: var(--text); }
+
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 8px; font-size: 12px; }
+.badge.blue { background: var(--badge-blue-bg); color: var(--badge-blue-text); }
+.badge.green { background: var(--badge-green-bg); color: var(--badge-green-text); }
+.badge.amber { background: var(--badge-amber-bg); color: var(--badge-amber-text); }
+
+/* ------------------------------
+   Sections & Utilities
+------------------------------ */
+.section { display: grid; gap: 16px; }
+.section-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.section-desc { font-size: 14px; color: var(--muted-2); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+.text-right { text-align: right; }
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+
+/* ------------------------------
+   Modal (reusable)
+------------------------------ */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; place-items: center; z-index: 100;
+}
+.modal { width: 100%; max-width: 520px; background: #fff; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1); }
+.modal .m-head { padding: 20px 24px 8px; display: grid; gap: 8px; }
+.modal .m-title { font-weight: 700; font-size: 18px; }
+.modal .m-sub { color: var(--muted-2); font-size: 14px; }
+.modal .m-body { padding: 12px 24px; display: grid; gap: 12px; }
+.modal .m-footer { padding: 12px 24px 20px; display: flex; justify-content: flex-end; gap: 8px; }
+
+.label { font-size: 13px; color: var(--muted); }
+.input, .select, .textarea {
+  width: 100%; border: 1px solid transparent; background: #f3f3f5; border-radius: 8px; padding: 10px 12px; font-size: 14px; color: #0a0a0a;
+}
+.textarea { min-height: 90px; resize: vertical; }
+
+/* ------------------------------
+   Charts wrappers
+------------------------------ */
+.chart-card .body { padding: 16px 24px 24px; }
+.canvas-wrap { position: relative; width: 100%; height: 320px; }

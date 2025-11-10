@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel de Mecánico</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="mecanico">
+  <header class="header">
+    <div class="wrap">
+      <div class="brand">
+        <div class="brand-logo mechanic" aria-hidden="true"></div>
+        <div>
+          <div class="brand-title">Panel de Mecánico</div>
+          <div class="brand-sub">Bienvenido, Carlos Ruiz</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <button class="button ghost">Cerrar sesión</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- Tarjetas de resumen -->
+    <section class="cards-4">
+      <article class="card">
+        <div class="head"><span class="title">Citas Hoy</span></div>
+        <div class="body"><div class="kpi">0</div></div>
+      </article>
+      <article class="card">
+        <div class="head"><span class="title">En Proceso</span></div>
+        <div class="body"><div class="kpi">0</div></div>
+      </article>
+      <article class="card">
+        <div class="head"><span class="title">Completadas</span></div>
+        <div class="body"><div class="kpi">0</div></div>
+      </article>
+      <article class="card">
+        <div class="head"><span class="title">Pendientes</span></div>
+        <div class="body"><div class="kpi">0</div></div>
+      </article>
+    </section>
+
+    <!-- Filtro -->
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h3 style="margin:0;font-size:16px">Filtrar Citas</h3>
+          <p class="section-desc">Filtra las citas según la fecha</p>
+        </div>
+      </div>
+      <div class="filter-row">
+        <div class="filter-field">
+          <label for="fecha">Fecha</label>
+          <input type="date" id="fecha" class="input">
+        </div>
+        <button class="button">Limpiar</button>
+      </div>
+    </section>
+
+    <!-- Citas de Hoy -->
+    <section class="section">
+      <div class="section-head">
+        <h3 style="margin:0;font-size:16px">Citas de Hoy</h3>
+      </div>
+      <div class="empty-card">
+        <div class="icon-placeholder" aria-hidden="true">📅</div>
+        <p>No hay citas asignadas para hoy</p>
+      </div>
+    </section>
+
+    <!-- Citas de la Semana -->
+    <section class="section">
+      <div class="section-head">
+        <h3 style="margin:0;font-size:16px">Citas esta Semana</h3>
+      </div>
+      <div class="empty-card">
+        <div class="icon-placeholder" aria-hidden="true">📅</div>
+        <p>No hay citas asignadas para esta semana</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

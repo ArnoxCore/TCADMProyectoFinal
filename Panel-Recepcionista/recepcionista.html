@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Panel de Recepción</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-page="recepcionista">
+  <header class="header">
+    <div class="wrap">
+      <div class="brand">
+        <div class="brand-logo green" aria-hidden="true"></div>
+        <div>
+          <div class="brand-title">Panel de Recepción</div>
+          <div class="brand-sub">Bienvenido, Ana García</div>
+        </div>
+      </div>
+      <button class="button ghost">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- KPIs -->
+    <section class="cards-3">
+      <article class="card">
+        <div class="head"><span class="title">Total Citas</span></div>
+        <div class="body"><div class="kpi">0</div><div class="sub">—</div></div>
+      </article>
+      <article class="card">
+        <div class="head"><span class="title">Resultados Filtrados</span></div>
+        <div class="body"><div class="kpi">0</div><div class="sub">—</div></div>
+      </article>
+      <article class="card">
+        <div class="head"><span class="title">Pendientes</span></div>
+        <div class="body"><div class="kpi">0</div><div class="sub">—</div></div>
+      </article>
+      <article class="card">
+        <div class="head"><span class="title">Completadas</span></div>
+        <div class="body"><div class="kpi">0</div><div class="sub">—</div></div>
+      </article>
+    </section>
+
+    <!-- Filtros -->
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h3 style="margin:0;font-size:16px">Filtrar Citas</h3>
+          <p class="section-desc">Busca y filtra las citas según diferentes criterios</p>
+        </div>
+        <button class="button" id="btnClear">Limpiar Filtros</button>
+      </div>
+
+      <div class="filters">
+        <div class="field">
+          <label>Buscar Cliente</label>
+          <input type="text" id="searchCliente" placeholder="Nombre del cliente...">
+        </div>
+        <div class="field">
+          <label>Fecha</label>
+          <input type="date" id="searchFecha">
+        </div>
+        <div class="field">
+          <label>Mecánico</label>
+          <select id="searchMecanico">
+            <option value="">Todos</option>
+            <option>Diego Cardona</option>
+            <option>Carlos Ruiz</option>
+            <option>Aarón Emmanuel</option>
+            <option>Jorge Avendaño</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Estatus</label>
+          <select id="searchEstatus">
+            <option value="">Todos</option>
+            <option>Confirmada</option>
+            <option>Completada</option>
+            <option>Pendiente</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tabla -->
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h3 style="margin:0;font-size:16px">Resultados (1)</h3>
+          <p class="section-desc">Citas encontradas según los filtros aplicados</p>
+        </div>
+      </div>
+
+      <div class="table">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Cliente</th>
+              <th>Vehículo</th>
+              <th>Servicio</th>
+              <th>Mecánico</th>
+              <th>Estatus</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr>
+              <td>2025-10-28</td>
+              <td>10:00</td>
+              <td>Juan Pérez</td>
+              <td>Toyota Corolla 2020</td>
+              <td>Cambio de aceite</td>
+              <td>Diego Cardona</td>
+              <td><span class="badge blue">Confirmada</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
