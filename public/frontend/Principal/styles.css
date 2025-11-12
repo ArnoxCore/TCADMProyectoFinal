@@ -1,0 +1,137 @@
+/* ========== Base & tokens ========== */
+:root{
+    --font-sans: "Arimo", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+
+    --bg: #0f172b;
+    --bg-2: #1d293d;
+    --text: #ffffff;
+    --muted: #d1d5dc;
+    --primary: #0074e7;
+
+    --container: 1200px;
+    --radius: 12px;
+    --space-1: .25rem; /* 4 */
+    --space-2: .5rem;  /* 8 */
+    --space-3: .75rem; /* 12 */
+    --space-4: 1rem;   /* 16 */
+    --space-6: 1.5rem; /* 24 */
+    --space-8: 2rem;   /* 32 */
+
+    /* Ruta de tu imagen de héroe */
+    --hero-image: url("./Login and User Dashboard-1.png");
+}
+
+*{ box-sizing: border-box; }
+html, body { height: 100%; }
+body{
+    margin: 0;
+    font-family: var(--font-sans);
+    color: var(--text);
+    background: linear-gradient(135deg, var(--bg), var(--bg-2) 50%, var(--bg));
+}
+
+/* ========== Utils ========== */
+.container{
+    width: 100%;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--space-4);
+}
+
+/* ========== Header ========== */
+.site-header{
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: saturate(140%) blur(6px);
+    background: linear-gradient(90deg, rgba(15,23,43,.2), rgba(28,41,61,.2) 50%, rgba(15,23,43,.2));
+    border-bottom: 1px solid rgba(255,255,255,.1);
+}
+.site-header .container{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 80px;
+}
+.brand{
+    text-decoration: none;
+    color: inherit;
+    display: inline-flex;
+    gap: .5ch;
+    font-size: 1rem;
+    line-height: 1;
+}
+.brand__main{ font-weight: 600; }
+.brand__accent{ color: var(--primary); font-weight: 700; }
+
+/* ========== Hero ========== */
+.hero{
+    position: relative;
+    min-height: min(92vh, 1100px);
+    display: grid;
+    align-items: center;
+    overflow: clip;
+}
+.hero::before{
+    /* Imagen de fondo */
+    content: "";
+    position: absolute; inset: 0;
+    background-image: var(--hero-image);
+    background-size: cover;
+    background-position: center;
+    transform: scale(1.02); /* leve zoom para evitar bordes */
+}
+.hero__overlay{
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(0,0,0,.9), rgba(0,0,0,.7) 50%, rgba(0,0,0,.5));
+}
+.hero__content{
+    position: relative;
+    z-index: 1;
+    max-width: 44rem;
+    padding-block: clamp(3rem, 8vw, 8rem);
+}
+.hero__title{
+    margin: 0 0 .25em 0;
+    font-size: clamp(2rem, 6vw, 4.5rem);
+    line-height: 1.05;
+    letter-spacing: .2px;
+    font-weight: 700;
+}
+.hero__subtitle{
+    margin: 0 0 var(--space-6) 0;
+    font-size: clamp(1rem, 2.2vw, 1.25rem);
+    color: var(--muted);
+}
+
+/* ========== Buttons ========== */
+.btn{
+    --pad-y: .625rem;
+    --pad-x: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: var(--pad-y) var(--pad-x);
+    border-radius: var(--radius);
+    text-decoration: none;
+    border: 1px solid transparent;
+    font-weight: 600;
+    line-height: 1;
+}
+.btn--primary{
+    background: var(--primary);
+    color: #fff;
+}
+.btn--primary:hover{ filter: brightness(1.05); }
+.btn--primary:active{ transform: translateY(1px); }
+.btn__icon{ display: inline-block; }
+
+/* ========== Responsive tweaks ========== */
+@media (max-width: 768px){
+    .site-header .container{ height: 64px; }
+    .hero__content{ max-width: 36rem; }
+}
+@media (max-width: 480px){
+    .brand{ font-size: .95rem; }
+    .btn{ font-size: .95rem; }
+}
