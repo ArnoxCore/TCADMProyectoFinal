@@ -1,7 +1,6 @@
 <?php
+use App\Http\Controllers\CitaController;
 
-use Illuminate\Support\Facades\Route;
+Route::get('/panel-cliente', [CitaController::class, 'index'])->name('panel.cliente');
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::post('/citas', [CitaController::class, 'store'])->name('citas.store');
