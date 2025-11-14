@@ -1,0 +1,272 @@
+:root {
+  --white: #fff;
+  --bg: #f8fafc;
+  --text: #0f172b;
+  --muted: #62748e;
+  --line: #e2e8f0;
+  --primary: #1e40af;
+  --warning: #facc15;
+  --success: #16a34a;
+  --font: 'Arimo', sans-serif;
+}
+
+/* Base */
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--bg);
+}
+
+/* Header */
+.header {
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--primary);
+}
+
+.brand-title {
+  font-weight: 600;
+}
+
+.brand-sub {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* Buttons */
+.button {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.button.primary {
+  background: var(--primary);
+  color: var(--white);
+}
+
+.button.ghost {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.button.small {
+  font-size: 13px;
+  padding: 6px 12px;
+}
+
+/* Main Layout */
+.main {
+  max-width: 1100px;
+  margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.section.center {
+  text-align: center;
+  background: transparent;
+  border: none;
+}
+
+/* Cards */
+.cards-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+}
+
+.card .title {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.kpi {
+  font-size: 24px;
+  font-weight: 700;
+  margin-top: 0.5rem;
+}
+
+.sub {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tab {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.tab.active {
+  background: var(--primary);
+  color: var(--white);
+  border-color: var(--primary);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Appointments */
+.appointment {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.appointment header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.appointment-info {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.appointment-notes {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.badge {
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge.warning {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.badge.success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-backdrop.active {
+  display: flex;
+}
+
+.modal {
+  background: var(--white);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  padding: 1.5rem;
+}
+
+.m-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.m-body label {
+  display: block;
+  margin-bottom: 1rem;
+  font-size: 14px;
+}
+
+.m-body input,
+.m-body select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f3f4f6;
+}
+
+.m-body .row {
+  display: flex;
+  gap: 1rem;
+}
+
+.m-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
