@@ -7,6 +7,7 @@ use App\Http\Controllers\Cliente\DashboardController;
 use App\Http\Controllers\Cliente\CitaController;
 use App\Http\Controllers\Cliente\VehiculoController;
 use App\Http\Controllers\Cliente\PerfilController;
+use App\Http\Controllers\API\CarsXEController;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,7 +67,7 @@ Route::middleware(['auth', 'role:1'])
 
             Route::post('/', [CitaController::class, 'store'])->name('store');
 
-            Route::get('/{id}', [CitaController::class, 'show'])->name('show');
+            Route::patch('/{id}/actualizar', [CitaController::class, 'update'])->name('actualizar');
 
             Route::post('/{id}/cancelar', [CitaController::class, 'cancel'])->name('cancelar');
         });
@@ -133,6 +134,7 @@ Route::middleware(['auth', 'role:4'])
         })->name('dashboard');
     });
 
+Route::get('/api/car-image', [CarsXEController::class, 'getImage']);
 
 // Rutas Breeze (login, register, password reset...)
 require __DIR__.'/auth.php';

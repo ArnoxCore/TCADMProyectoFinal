@@ -13,26 +13,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
             tab.classList.add("active");
             if (tab.dataset.tab) {
-                const target = document.getElementById(tab.dataset.tab);
-                if (target) target.classList.add("active");
+                document.getElementById(tab.dataset.tab)?.classList.add("active");
             }
         });
     });
 
     // ===============================
-    //              MODAL
+    //              MODAL AGENDAR
     // ===============================
-    const modal      = document.getElementById("modal");
-    const openBtn    = document.getElementById("openModal");
-    const closeBtn   = document.getElementById("closeModal");
-    const cancelBtn  = document.getElementById("cancelModal");
+    const modal = document.getElementById("modal");
+    const openBtn = document.getElementById("openModal");
+    const closeBtn = document.getElementById("closeModal");
+    const cancelBtn = document.getElementById("cancelModal");
 
-    // ==============================================
-    //  VALIDACIÓN: PERFIL INCOMPLETO → BLOQUEAR
-    // ==============================================
     if (openBtn && modal) {
         openBtn.addEventListener("click", () => {
-
             const perfilCompleto = openBtn.dataset.perfil == "1";
 
             if (!perfilCompleto) {
@@ -48,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (cancelBtn) cancelBtn.addEventListener("click", () => modal.classList.remove("active"));
 
     // ===============================
-    //       FORMULARIO DE CITA
+    //              AGENDAR CITA
     // ===============================
     const agendar = document.getElementById("agendar-btn");
 
@@ -70,13 +65,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.content || ""
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
                 },
                 body: JSON.stringify({
                     servicio_id: servicio,
                     vehiculo_id: vehiculo,
-                    fecha: fecha,
-                    hora: hora
+                    fecha,
+                    hora
                 })
             });
 
@@ -84,24 +79,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (response.ok) {
                 toast.success("Cita agendada exitosamente");
-                modal?.classList.remove("active");
-                window.location.reload();
+                modal.classList.remove("active");
+                location.reload();
             } else {
                 toast.error(data.message || "No se pudo agendar la cita");
             }
         } catch (error) {
-            console.error("Error:", error);
+            console.error(error);
             toast.error("Error al enviar la solicitud");
         }
-    });
-
-    // ===============================
-    //   MAYÚSCULAS AUTOMÁTICAS
-    // ===============================
-    const upperFields = ["vin-input", "marca", "modelo", "color"];
-    upperFields.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener("input", () => el.value = el.value.toUpperCase());
     });
 
     // =======================================================
@@ -110,23 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const vinInput = document.getElementById("vin-input");
     const vinStatus = document.getElementById("vin-status");
     const buscarBtn = document.getElementById("buscar-vin-btn");
-
-    const marcaEl = document.getElementById("marca");
-    const modeloEl = document.getElementById("modelo");
-    const anoEl = document.getElementById("ano");
-
-    const resetVinFields = () => {
-        marcaEl.value = "";
-        modeloEl.value = "";
-        anoEl.value = "";
-
-        marcaEl.readOnly = false;
-        modeloEl.readOnly = false;
-        anoEl.readOnly = false;
-
-        vinStatus.style.display = "none";
-        vinStatus.textContent = "";
-    };
 
     async function buscarVin() {
         const vin = vinInput.value.toUpperCase().trim();
@@ -152,65 +121,78 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!make || !model || !year) {
                 vinStatus.style.color = "#d97706";
-                vinStatus.textContent = "VIN no disponible en la base de EE.UU. Llena los datos manualmente.";
-
-                resetVinFields();
-
-                toast.info("Este VIN no existe en la base estadounidense. Puedes llenar los datos manualmente.");
+                vinStatus.textContent = "VIN no disponible en la base de EE.UU.";
                 return;
             }
 
-            marcaEl.value = make.toUpperCase();
-            modeloEl.value = model.toUpperCase();
-            anoEl.value = year;
-
-            marcaEl.readOnly = true;
-            modeloEl.readOnly = true;
-            anoEl.readOnly = true;
+            document.getElementById("marca").value = make.toUpperCase();
+            document.getElementById("modelo").value = model.toUpperCase();
+            document.getElementById("ano").value = year;
 
             vinStatus.style.color = "#16a34a";
             vinStatus.textContent = `Vehículo identificado: ${make} ${model} ${year}`;
-
             toast.success(`Vehículo identificado: ${make} ${model} ${year}`);
 
-        } catch (error) {
-            console.error("Error VIN API:", error);
+        } catch (err) {
+            console.error(err);
             vinStatus.style.color = "#dc2626";
             vinStatus.textContent = "Error al consultar el VIN.";
-            toast.error("No se pudo validar el VIN.");
-            resetVinFields();
         }
     }
 
     if (buscarBtn) buscarBtn.addEventListener("click", buscarVin);
 
-    if (vinInput) {
-        vinInput.addEventListener("input", () => {
-            if (vinInput.value.trim().length < 17) {
-                resetVinFields();
+    // ==========================================================
+    //   VALIDACIÓN DE PLACA
+    // ==========================================================
+    const placaInput = document.getElementById("placa");
+
+    if (placaInput) {
+        placaInput.addEventListener("input", () => {
+            placaInput.value = placaInput.value.toUpperCase();
+        });
+
+        placaInput.addEventListener("keyup", () => {
+            let raw = placaInput.value.replace(/[^A-Z0-9]/g, "");
+
+            if (raw.length >= 3 && raw.length <= 6) {
+                raw = raw.replace(/^([A-Z]{3})(\d{1,3})$/, "$1-$2");
             }
+            if (raw.length > 6) {
+                raw = raw.replace(/^([A-Z]{3})(\d{3})([A-Z0-9]{1,2})$/, "$1-$2-$3");
+            }
+            placaInput.value = raw;
+        });
+
+        placaInput.addEventListener("blur", () => {
+            const v = placaInput.value;
+            const regex = /^[A-Z]{3}-\d{3}-[A-Z0-9]{1,2}$/;
+            if (!regex.test(v)) toast.warning("Formato inválido: ABC-123-A");
         });
     }
 
     // ==========================================================
-    //   CARGA DINÁMICA DE IMÁGENES DE VEHÍCULOS + SKELETON
+    //   IMÁGENES (CarsXE)
     // ==========================================================
-    const carPhotos = document.querySelectorAll('.car-photo');
+    const carPhotos = document.querySelectorAll(".car-photo");
 
     carPhotos.forEach(async img => {
-
-        const marca = img.dataset.marca?.trim();
-        const modelo = img.dataset.modelo?.trim();
-        const ano = img.dataset.ano?.trim();
-
+        const marca = img.dataset.marca;
+        const modelo = img.dataset.modelo;
+        const ano = img.dataset.ano;
         const skeleton = img.previousElementSibling;
-
-        const fallback = "https://cdn.imagin.studio/getImage?customer=hrjavascript-mastery&make=generic&model=car&angle=23";
+        const fallback = "/images/fallback-car.png";
 
         try {
-            const url = `https://cdn.imagin.studio/getImage?customer=hrjavascript-mastery&make=${encodeURIComponent(marca)}&model=${encodeURIComponent(modelo)}&modelYear=${encodeURIComponent(ano)}&angle=23`;
+            const url = `/api/car-image?make=${encodeURIComponent(marca)}&model=${encodeURIComponent(modelo)}&year=${encodeURIComponent(ano)}`;
 
-            img.src = url;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error();
+
+            const data = await response.json();
+            if (!data.image) throw new Error();
+
+            img.src = data.image;
 
             img.onload = () => {
                 img.style.display = "block";
@@ -219,18 +201,113 @@ document.addEventListener("DOMContentLoaded", () => {
 
             img.onerror = () => {
                 img.src = fallback;
-                img.onload = () => {
-                    img.style.display = "block";
-                    skeleton.remove();
-                };
+                skeleton.remove();
             };
 
         } catch {
             img.src = fallback;
-            img.onload = () => {
-                img.style.display = "block";
-                skeleton.remove();
-            };
+            img.onload = () => skeleton.remove();
+        }
+    });
+
+    // =========================================================
+    // 🔥 FUNCIÓN GENERAL PARA LIMITAR DATEPICKERS
+    // =========================================================
+    function limitarFechas(input) {
+        const hoy = new Date();
+        const yyyy = hoy.getFullYear();
+        const mm = String(hoy.getMonth() + 1).padStart(2, "0");
+        const dd = String(hoy.getDate()).padStart(2, "0");
+
+        input.min = `${yyyy}-${mm}-${dd}`;
+
+        const max = new Date();
+        max.setDate(hoy.getDate() + 7);
+
+        const yyyy2 = max.getFullYear();
+        const mm2 = String(max.getMonth() + 1).padStart(2, "0");
+        const dd2 = String(max.getDate()).padStart(2, "0");
+
+        input.max = `${yyyy2}-${mm2}-${dd2}`;
+
+        input.addEventListener("change", () => {
+            const d = new Date(input.value);
+            if (d.getDay() === 0) {
+                toast.warning("No se pueden agendar citas los domingos.");
+                input.value = "";
+            }
+        });
+    }
+
+    // Aplicar límites a modal AGENDAR
+    const fechaCrear = document.getElementById("fechaCita");
+    if (fechaCrear) limitarFechas(fechaCrear);
+
+    // =========================================================
+    // 🔥 MODAL EDITAR CITA
+    // =========================================================
+
+    const modalEditar = document.getElementById("modalEditar");
+    const fechaEditar = document.getElementById("editFechaCita");
+    const horaEditar = document.getElementById("editHoraCita");
+    const closeEdit = document.getElementById("closeModalEditar");
+    const cancelEdit = document.getElementById("cancelModalEditar");
+    const guardarEdit = document.getElementById("guardarCambiosCita");
+
+    let citaEditId = null;
+
+    // Aplicamos limites igual que crear
+    if (fechaEditar) limitarFechas(fechaEditar);
+
+    // Abrir modal editar
+    document.querySelectorAll(".btn-modificar-cita").forEach(btn => {
+        btn.addEventListener("click", () => {
+            citaEditId = btn.dataset.citaId;
+
+            fechaEditar.value = btn.dataset.fecha;
+            horaEditar.value = btn.dataset.hora;
+
+            modalEditar.classList.add("active");
+        });
+    });
+
+    // Cerrar modal
+    if (closeEdit) closeEdit.addEventListener("click", () => modalEditar.classList.remove("active"));
+    if (cancelEdit) cancelEdit.addEventListener("click", () => modalEditar.classList.remove("active"));
+
+    // Guardar actualización
+    guardarEdit?.addEventListener("click", async () => {
+        if (!fechaEditar.value || !horaEditar.value) {
+            toast.error("Completa la fecha y hora");
+            return;
+        }
+
+        try {
+            const res = await fetch(`/mi-cuenta/citas/${citaEditId}/actualizar`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    fecha: fechaEditar.value,
+                    hora: horaEditar.value
+                })
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                toast.success("Cita actualizada");
+                modalEditar.classList.remove("active");
+                setTimeout(() => location.reload(), 800);
+            } else {
+                toast.error("No se pudo actualizar");
+            }
+
+        } catch (err) {
+            console.error(err);
+            toast.error("Error al actualizar");
         }
     });
 

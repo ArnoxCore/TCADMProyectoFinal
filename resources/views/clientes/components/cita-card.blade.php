@@ -17,8 +17,31 @@
         </div>
     @endisset
 
-    <footer>
-        <button class="button ghost small">Modificar</button>
-        <button class="button ghost small">Cancelar</button>
-    </footer>
+    {{-- FOOTER SOLO SI LA CITA NO ESTÁ CANCELADA --}}
+    @if (strtolower($estadoTexto) !== 'cancelada')
+        <footer>
+
+            {{-- MODIFICAR --}}
+            <button
+                type="button"
+                class="button ghost small btn-modificar-cita"
+                data-id="{{ $citaId }}"
+                data-fecha="{{ $fecha }}"
+                data-hora="{{ $hora }}"
+            >
+                Modificar
+            </button>
+
+            {{-- CANCELAR --}}
+            <button
+                type="button"
+                class="button ghost small btn-cancelar-cita"
+                data-cita-id="{{ $citaId }}"
+                data-cancel-url="{{ route('cliente.citas.cancelar', $citaId) }}"
+            >
+                Cancelar
+            </button>
+
+        </footer>
+    @endif
 </article>

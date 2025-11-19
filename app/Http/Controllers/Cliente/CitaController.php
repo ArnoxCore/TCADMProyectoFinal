@@ -13,8 +13,7 @@ use Carbon\Carbon;
 class CitaController extends Controller
 {
     /**
-     * LISTAR CITAS DEL CLIENTE
-     * GET /mi-cuenta/citas
+     * LISTAR CITAS
      */
     public function index()
     {
@@ -29,10 +28,8 @@ class CitaController extends Controller
         return view('clientes.citas.index', compact('citas'));
     }
 
-
     /**
-     * MOSTRAR FORMULARIO PARA CREAR UNA CITA
-     * GET /mi-cuenta/citas/crear
+     * CREAR CITA
      */
     public function create()
     {
@@ -45,10 +42,8 @@ class CitaController extends Controller
         return view('clientes.citas.crear', compact('vehiculos', 'servicios'));
     }
 
-
     /**
-     * GUARDAR UNA CITA
-     * POST /mi-cuenta/citas
+     * GUARDAR CITA
      */
     public function store(Request $request)
     {
@@ -58,41 +53,32 @@ class CitaController extends Controller
             'servicios.*' => 'exists:servicios,id',
             'fecha'       => 'required|date|after_or_equal:today',
             'hora'        => 'required|date_format:H:i',
-        ], [
-            'vehiculo_id.required' => 'Selecciona un vehículo',
-            'servicios.required'   => 'Debes seleccionar al menos un servicio',
-            'fecha.after_or_equal' => 'La fecha debe ser hoy o mayor',
         ]);
 
         $user = auth()->user();
         $cliente = Cliente::where('user_id', $user->id)->firstOrFail();
 
-        // Validar que el vehículo pertenezca al cliente
         $vehiculo = Vehiculo::where('id', $request->vehiculo_id)
             ->where('cliente_id', $cliente->id)
             ->firstOrFail();
 
-        // Obtener duración total = suma de los servicios
         $servicios = Servicio::whereIn('id', $request->servicios)->get();
         $duracionTotal = $servicios->sum('duracion_estimada');
 
-        // Calcular hora_fin
         $horaInicio = Carbon::createFromFormat('H:i', $request->hora);
         $horaFin = $horaInicio->copy()->addMinutes($duracionTotal);
 
-        // Crear cita
         $cita = Cita::create([
-            'cliente_id'   => $cliente->id,
-            'vehiculo_id'  => $vehiculo->id,
-            'mecanico_id'  => null,                   // se asigna después
-            'fecha'        => $request->fecha,
-            'hora_inicio'  => $horaInicio->format('H:i:s'),
-            'hora_fin'     => $horaFin->format('H:i:s'),
-            'estatus'      => 'pendiente',
+            'cliente_id'  => $cliente->id,
+            'vehiculo_id' => $vehiculo->id,
+            'mecanico_id' => null,
+            'fecha'       => $request->fecha,
+            'hora_inicio' => $horaInicio->format('H:i:s'),
+            'hora_fin'    => $horaFin->format('H:i:s'),
+            'estatus'     => 'pendiente',
             'observaciones_cliente' => $request->observaciones ?? null,
         ]);
 
-        // Asociar servicios a la cita (pivot)
         foreach ($servicios as $servicio) {
             $cita->servicios()->attach($servicio->id, [
                 'precio_unitario' => $servicio->precio_base,
@@ -105,27 +91,41 @@ class CitaController extends Controller
     }
 
 
+
     /**
-     * VER DETALLES DE UNA CITA
-     * GET /mi-cuenta/citas/{id}
+     * ACTUALIZAR CITA (FECHA / HORA)
      */
-    public function show($id)
+    public function update(Request $request, $id)
     {
+        $request->validate([
+            'fecha' => 'required|date|after_or_equal:today',
+            'hora'  => 'required|date_format:H:i',
+        ]);
+
         $user = auth()->user();
         $cliente = Cliente::where('user_id', $user->id)->firstOrFail();
 
         $cita = Cita::where('id', $id)
             ->where('cliente_id', $cliente->id)
-            ->with(['vehiculo', 'servicios'])
+            ->with('servicios')
             ->firstOrFail();
 
-        return view('clientes.citas.show', compact('cita'));
-    }
+        $horaInicio = Carbon::createFromFormat('H:i', $request->hora);
+        $horaFin = $horaInicio->copy()->addMinutes(
+            $cita->servicios->sum('duracion_estimada')
+        );
 
+        $cita->update([
+            'fecha'       => $request->fecha,
+            'hora_inicio' => $horaInicio->format('H:i:s'),
+            'hora_fin'    => $horaFin->format('H:i:s'),
+        ]);
+
+        return response()->json(['success' => true]);
+    }
 
     /**
      * CANCELAR CITA
-     * POST /mi-cuenta/citas/{id}/cancelar
      */
     public function cancel($id)
     {

@@ -2,6 +2,8 @@
 
 @section('content')
 
+    @include('clientes.components.modal-editar')
+
     @include('clientes.components.stats-cards')
 
     @include('clientes.components.dashboard-tabs', [

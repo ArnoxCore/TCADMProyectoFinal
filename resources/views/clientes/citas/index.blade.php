@@ -24,4 +24,6 @@
         @endif
     </section>
 
+    @include('clientes.components.modal-editar')
+
 @endsection

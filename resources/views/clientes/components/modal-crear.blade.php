@@ -38,7 +38,7 @@
 
             <div class="row">
                 <label>Fecha
-                    <input type="date">
+                    <input type="date" id="fechaCita">
                 </label>
 
                 <label>Hora

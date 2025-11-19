@@ -34,6 +34,8 @@ class VehiculoController extends Controller
             'vin'          => 'required|string|size:17|regex:/^[A-HJ-NPR-Z0-9]{17}$/',
             'color'        => 'required|string|max:50',
             'kilometraje'  => 'required|integer|min:0',
+        ], [
+            'placa.regex' => 'El formato de la placa es inválido. Ejemplo: ABC-123-A',
         ]);
 
         $user = auth()->user();
