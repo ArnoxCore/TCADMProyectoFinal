@@ -1,10 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
 
-use App\Http\Controllers\CitaController;
-use App\Http\Controllers\ProfileController;
+// Controladores del módulo Cliente
+use App\Http\Controllers\Cliente\DashboardController;
+use App\Http\Controllers\Cliente\CitaController;
+use App\Http\Controllers\Cliente\VehiculoController;
+use App\Http\Controllers\Cliente\PerfilController;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,38 +14,125 @@ use App\Http\Controllers\ProfileController;
 |--------------------------------------------------------------------------
 */
 
-// Landing Page
+// Redirección inteligente según rol
+Route::get('/redirigir', function () {
+
+    if (!auth()->check()) {
+        return redirect()->route('login');
+    }
+
+    $role = auth()->user()->role_id;
+
+    switch ($role) {
+        case 1:
+            return redirect()->route('cliente.dashboard');
+        case 2:
+            return redirect()->route('mecanico.dashboard');
+        case 3:
+            return redirect()->route('recepcion.dashboard');
+        case 4:
+            return redirect()->route('admin.dashboard');
+        default:
+            return redirect()->route('login');
+    }
+})->name('redirigir');
+
+// Landing Page pública
 Route::get('/', function () {
     return view('landing');
-});
+})->name('landing');
 
-// Dashboard (protegido)
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
-// Panel del cliente (de tu compa)
-Route::get('/panel-cliente', [CitaController::class, 'panelCliente'])
-    ->middleware('auth')
-    ->name('panel.cliente');
+// ======================================================
+//  RUTAS DEL CLIENTE (ROL 1)
+//  URL base: /mi-cuenta
+//  Todas requieren autenticación y rol = cliente
+// ======================================================
+Route::middleware(['auth', 'role:1'])
+    ->prefix('mi-cuenta')
+    ->name('cliente.')
+    ->group(function () {
 
-// Crear cita (de tu compa)
-Route::post('/citas', [CitaController::class, 'store'])
-    ->middleware('auth')
-    ->name('citas.store');
+        // Dashboard
+        Route::get('/', [DashboardController::class, 'index'])
+            ->name('dashboard');
 
-// Perfil (Breeze)
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
+        // ----------------------- C I T A S -----------------------
+        Route::prefix('citas')->name('citas.')->group(function () {
 
-// Logout rápido de pruebas
-Route::get('/dev-logout', function () {
-    Auth::logout();
-    return redirect('/login');
-})->name('dev.logout');
+            Route::get('/', [CitaController::class, 'index'])->name('index');
 
-// Rutas Breeze (login / register)
+            Route::get('/crear', [CitaController::class, 'create'])->name('crear');
+
+            Route::post('/', [CitaController::class, 'store'])->name('store');
+
+            Route::get('/{id}', [CitaController::class, 'show'])->name('show');
+
+            Route::post('/{id}/cancelar', [CitaController::class, 'cancel'])->name('cancelar');
+        });
+
+        // --------------------- V E H I C U L O S ---------------------
+        Route::prefix('vehiculos')->name('vehiculos.')->group(function () {
+
+            Route::get('/', [VehiculoController::class, 'index'])->name('index');
+
+            Route::get('/crear', [VehiculoController::class, 'create'])->name('crear');
+
+            Route::post('/', [VehiculoController::class, 'store'])->name('store');
+
+            Route::get('/{id}/editar', [VehiculoController::class, 'edit'])->name('editar');
+
+            Route::put('/{id}', [VehiculoController::class, 'update'])->name('update');
+        });
+
+        // ------------------------ P E R F I L ------------------------
+        Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil');
+
+        Route::patch('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
+    });
+
+
+// ======================================================
+//  RUTAS DEL MECÁNICO (ROL 2)
+//  URL base: /mecanico
+// ======================================================
+Route::middleware(['auth', 'role:2'])
+    ->prefix('mecanico')
+    ->name('mecanico.')
+    ->group(function () {
+        Route::get('/', function () {
+            return 'Panel del mecánico (en construcción)';
+        })->name('dashboard');
+    });
+
+
+// ======================================================
+//  RUTAS DE LA RECEPCIONISTA (ROL 3)
+//  URL base: /recepcion
+// ======================================================
+Route::middleware(['auth', 'role:3'])
+    ->prefix('recepcion')
+    ->name('recepcion.')
+    ->group(function () {
+        Route::get('/', function () {
+            return 'Panel de recepción (en construcción)';
+        })->name('dashboard');
+    });
+
+
+// ======================================================
+//  RUTAS DEL ADMIN (ROL 4)
+//  URL base: /admin
+// ======================================================
+Route::middleware(['auth', 'role:4'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/', function () {
+            return 'Panel del administrador (en construcción)';
+        })->name('dashboard');
+    });
+
+
+// Rutas Breeze (login, register, password reset...)
 require __DIR__.'/auth.php';

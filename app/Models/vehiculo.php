@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Vehiculo extends Model {
     use HasFactory, SoftDeletes;
-    protected $fillable = ['cliente_id','marca','modelo','anio','placa','vin','color','kilometraje'];
+    protected $fillable = ['cliente_id','marca','modelo','ano','placa','vin','color','kilometraje'];
 
     public function cliente(): BelongsTo { return $this->belongsTo(Cliente::class); }
     public function citas(): HasMany { return $this->hasMany(Cita::class); }

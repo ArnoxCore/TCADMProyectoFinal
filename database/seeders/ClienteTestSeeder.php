@@ -20,7 +20,7 @@ class ClienteTestSeeder extends Seeder
             [
                 'name' => 'Cliente Test',
                 'password' => bcrypt('password123'),
-                'phone' => '5551234567',
+                'phone' => '3222007222',
             ]
         );
 

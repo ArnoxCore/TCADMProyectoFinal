@@ -13,7 +13,7 @@ use Illuminate\Validation\Rules;
 class RegisteredUserController extends Controller
 {
     /**
-     * Mostrar vista de registro.
+     * Mostrar formulario de registro
      */
     public function create()
     {
@@ -21,32 +21,33 @@ class RegisteredUserController extends Controller
     }
 
     /**
-     * Procesar registro.
+     * Procesar registro
      */
     public function store(Request $request)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email:rfc,dns', 'max:255', 'unique:users,email'],
-            'phone' => ['required', 'regex:/^(\+?\d{10,15})$/'],
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'string', 'lowercase', 'email:rfc,dns', 'max:255', 'unique:users,email'],
+            'phone'    => ['required', 'regex:/^(\+?\d{10,15})$/'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // Crear usuario con rol de Cliente
+        // Crear usuario como CLIENTE
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'phone'    => $request->phone,
             'password' => Hash::make($request->password),
-            'role_id' => 1, // Cliente por defecto
+            'role_id'  => 1,
         ]);
 
-        // Crear registro en la tabla clientes (1:1 con users)
+        // Crear registro en tabla clientes (1:1)
         Cliente::create([
             'user_id' => $user->id,
         ]);
 
-        // No iniciar sesión automáticamente
-        return redirect()->route('login')->with('success', 'Cuenta creada con éxito. Ahora inicia sesión.');
+        // Redirigir al login
+        return redirect()->route('login')
+            ->with('success', 'Cuenta creada con éxito. Ahora inicia sesión para continuar.');
     }
 }

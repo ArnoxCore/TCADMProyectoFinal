@@ -18,9 +18,7 @@ class Cita extends Model {
     ];
 
     protected $casts = [
-        'fecha' => 'date',
-        'hora_inicio' => 'datetime:H:i:s',
-        'hora_fin' => 'datetime:H:i:s',
+        'fecha' => 'date:Y-m-d',
     ];
 
     public function cliente(): BelongsTo { return $this->belongsTo(Cliente::class); }
@@ -31,6 +29,30 @@ class Cita extends Model {
         return $this->belongsToMany(Servicio::class, 'citas_servicios')
                     ->withPivot(['precio_unitario'])
                     ->withTimestamps();
+    }
+
+    public function getEstatusCssAttribute()
+    {
+        return match ($this->estatus) {
+            'pendiente'   => 'warning',
+            'confirmada'  => 'info',
+            'en_proceso'  => 'primary',
+            'completada'  => 'success',
+            'cancelada'   => 'danger',
+            default       => 'secondary',
+        };
+    }
+
+    public function getEstatusTextoAttribute()
+    {
+        return match ($this->estatus) {
+            'pendiente'   => 'Pendiente de Confirmación',
+            'confirmada'  => 'Confirmada',
+            'en_proceso'  => 'En Proceso',
+            'completada'  => 'Completada',
+            'cancelada'   => 'Cancelada',
+            default       => 'Desconocido',
+        };
     }
 
     public function observaciones(): HasMany {

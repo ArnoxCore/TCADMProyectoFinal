@@ -20,4 +20,13 @@ class Cliente extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function isProfileComplete()
+    {
+        return $this->direccion
+            && $this->rfc
+            && $this->fecha_nacimiento
+            && $this->user
+            && $this->user->phone;
+    }
 }

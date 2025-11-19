@@ -37,12 +37,15 @@
             </h1>
             <p class="hero__subtitle">Regístrate y agenda tu cita ahora</p>
 
-            <a class="btn btn--primary" href="{{ route('login') }}">
+            <a class="btn btn--primary" href="{{ route('redirigir') }}">
                 Agendar Cita
                 <svg class="btn__icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M5 12h14M13 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5 12h14M13 5l7 7-7 7"
+                          fill="none" stroke="currentColor" stroke-width="2"
+                          stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </a>
+
         </div>
     </section>
 </main>
