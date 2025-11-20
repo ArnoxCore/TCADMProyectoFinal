@@ -85,12 +85,20 @@ class CitaController extends Controller
             ]);
         }
 
+        // Si viene desde AJAX/JSON (fetch), responder en JSON
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success'  => true,
+                'message'  => 'Cita creada exitosamente.',
+                'cita_id'  => $cita->id,
+            ]);
+        }
+
+        // Flujo normal (sin AJAX)
         return redirect()
             ->route('cliente.citas.index')
             ->with('success', 'Cita creada exitosamente.');
     }
-
-
 
     /**
      * ACTUALIZAR CITA (FECHA / HORA)
@@ -127,7 +135,7 @@ class CitaController extends Controller
     /**
      * CANCELAR CITA
      */
-    public function cancel($id)
+    public function cancel(Request $request, $id)
     {
         $user = auth()->user();
         $cliente = Cliente::where('user_id', $user->id)->firstOrFail();
@@ -139,6 +147,15 @@ class CitaController extends Controller
         $cita->estatus = 'cancelada';
         $cita->save();
 
+        // Si viene desde fetch/AJAX
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'La cita fue cancelada.',
+            ]);
+        }
+
+        // Flujo normal (submit de form clásico)
         return redirect()
             ->route('cliente.citas.index')
             ->with('success', 'La cita fue cancelada.');

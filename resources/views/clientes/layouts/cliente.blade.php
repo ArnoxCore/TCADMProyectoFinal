@@ -35,9 +35,6 @@
     @yield('content')
 </main>
 
-<!-- JS del cliente -->
-<script src="{{ asset('frontend/Panel-cliente/cliente.js') }}"></script>
-
 <!-- NOTYF JS -->
 <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
 
@@ -71,6 +68,9 @@
     toast.info("{{ session('info') }}");
     @endif
 </script>
+
+<!-- CARGA CLIENTE.JS AL FINAL -->
+<script src="{{ asset('frontend/Panel-cliente/cliente.js') }}?v={{ time() }}"></script>
 
 </body>
 </html>

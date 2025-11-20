@@ -34,5 +34,8 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'carsxe' => [
+        'key' => env('CARSXE_API_KEY'),
+    ],
 
 ];

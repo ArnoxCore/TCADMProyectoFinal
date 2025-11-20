@@ -1,47 +1,89 @@
-<article class="appointment">
-    <header>
-        <h3>{{ $titulo }}</h3>
-        <span class="badge {{ $estado }}">{{ $estadoTexto }}</span>
-    </header>
+<article class="appointment appointment--with-car">
 
-    <ul class="appointment-info">
-        @foreach($detalles as $detalle)
-            <li>{{ $detalle }}</li>
-        @endforeach
-    </ul>
+    @php
+        /** @var \App\Models\Cita|null $citaModel */
+        $citaModel = $cita ?? null;
 
-    @isset($notas)
-        <div class="appointment-notes">
-            <strong>Observaciones:</strong>
-            <span>{{ $notas }}</span>
+        $citaIdFinal = $citaId
+            ?? ($citaModel->id ?? null);
+
+        $fechaFinal = $fecha
+            ?? (
+                $citaModel && $citaModel->fecha
+                    ? (\Carbon\Carbon::parse($citaModel->fecha)->format('Y-m-d'))
+                    : ''
+            );
+
+        $horaFinal = $hora
+            ?? (
+                $citaModel && $citaModel->hora_inicio
+                    ? substr($citaModel->hora_inicio, 0, 5)
+                    : ''
+            );
+    @endphp
+
+    {{-- Columna izquierda: texto --}}
+    <div class="appointment-main">
+        <header class="appointment-header appointment-header--stacked">
+            <h3>{{ $titulo }}</h3>
+            <span class="badge {{ $estado }}">{{ $estadoTexto }}</span>
+        </header>
+
+        <ul class="appointment-info">
+            @foreach($detalles as $detalle)
+                <li>{{ $detalle }}</li>
+            @endforeach
+        </ul>
+
+        @isset($notas)
+            <div class="appointment-notes">
+                <strong>Observaciones:</strong>
+                <span>{{ $notas }}</span>
+            </div>
+        @endisset
+
+        {{-- FOOTER SOLO SI LA CITA NO ESTÁ CANCELADA --}}
+        @if (strtolower($estadoTexto) !== 'cancelada')
+            <footer>
+                {{-- MODIFICAR --}}
+                <button
+                    type="button"
+                    class="button ghost small btn-modificar-cita"
+                    data-cita-id="{{ $citaIdFinal }}"
+                    data-fecha="{{ $fechaFinal }}"
+                    data-hora="{{ $horaFinal }}"
+                >
+                    Modificar
+                </button>
+
+                {{-- CANCELAR --}}
+                <button
+                    type="button"
+                    class="button ghost small btn-cancelar-cita"
+                    data-cita-id="{{ $citaIdFinal }}"
+                    data-cancel-url="{{ route('cliente.citas.cancelar', $citaIdFinal) }}"
+                >
+                    Cancelar
+                </button>
+            </footer>
+        @endif
+    </div>
+
+    {{-- Columna derecha: imagen del vehículo --}}
+    @if($citaModel && $citaModel->vehiculo)
+        <div class="appointment-car">
+            <div class="car-img-wrapper">
+                <div class="car-skeleton"></div>
+
+                <img
+                    class="car-photo"
+                    data-marca="{{ $citaModel->vehiculo->marca }}"
+                    data-modelo="{{ $citaModel->vehiculo->modelo }}"
+                    data-ano="{{ $citaModel->vehiculo->ano }}"
+                    alt="Foto del vehículo"
+                    style="display:none;"
+                >
+            </div>
         </div>
-    @endisset
-
-    {{-- FOOTER SOLO SI LA CITA NO ESTÁ CANCELADA --}}
-    @if (strtolower($estadoTexto) !== 'cancelada')
-        <footer>
-
-            {{-- MODIFICAR --}}
-            <button
-                type="button"
-                class="button ghost small btn-modificar-cita"
-                data-id="{{ $citaId }}"
-                data-fecha="{{ $fecha }}"
-                data-hora="{{ $hora }}"
-            >
-                Modificar
-            </button>
-
-            {{-- CANCELAR --}}
-            <button
-                type="button"
-                class="button ghost small btn-cancelar-cita"
-                data-cita-id="{{ $citaId }}"
-                data-cancel-url="{{ route('cliente.citas.cancelar', $citaId) }}"
-            >
-                Cancelar
-            </button>
-
-        </footer>
     @endif
 </article>
