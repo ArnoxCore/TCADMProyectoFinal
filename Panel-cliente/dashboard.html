@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Cliente</title>
+    <link rel="stylesheet" href="./base.css" />
+    <link rel="stylesheet" href="./cliente.css" />
+</head>
+
+<body>
+
+    <!-- Modal Editar Cita -->
+    <div class="modal-backdrop" id="modalEditarCita" style="display:none;">
+        <div class="modal">
+            <div class="m-head">
+                <div class="m-title">Modificar Cita</div>
+                <button id="closeModalEditar" class="modal-close">×</button>
+            </div>
+
+            <div class="m-body">
+                <label>Fecha
+                    <input type="date" id="edit-fecha">
+                </label>
+
+                <label>Hora
+                    <select id="edit-hora">
+                        <option value="">Selecciona hora</option>
+                        <option value="08:00">08:00 AM</option>
+                        <option value="09:00">09:00 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="12:00">12:00 PM</option>
+                        <option value="13:00">1:00 PM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="15:00">3:00 PM</option>
+                        <option value="16:00">4:00 PM</option>
+                        <option value="17:00">5:00 PM</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="m-footer">
+                <button id="cancelModalEditar" class="button ghost">Cancelar</button>
+                <button id="guardarCambiosCita" class="button primary">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjetas de estadísticas -->
+    <section class="stats-cards">
+        <div class="stat-card">
+            <h3>Próximas Citas</h3>
+            <p>0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Citas Completadas</h3>
+            <p>0</p>
+        </div>
+    </section>
+
+    <!-- Tabs Dashboard -->
+    <section class="dashboard-tabs">
+
+        <div class="tabs">
+            <button class="tab active" data-tab="tab-proximas">Próximas</button>
+            <button class="tab" data-tab="tab-historial">Historial</button>
+        </div>
+
+        <div class="tab-wrapper">
+
+            <div id="tab-proximas" class="tab-content active">
+                <p>No hay citas próximas.</p>
+            </div>
+
+            <div id="tab-historial" class="tab-content">
+                <p>No hay historial disponible.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Modal Agendar Cita -->
+    <div class="modal-backdrop" id="modal" style="display:none;">
+        <div class="modal">
+            <div class="m-head">
+                <div class="m-title">Agendar Nueva Cita</div>
+                <button id="closeModal" class="modal-close">×</button>
+            </div>
+
+            <div class="m-body">
+
+                <label>Servicio
+                    <select name="servicio" id="servicio">
+                        <option value="">Selecciona un servicio</option>
+                        <option value="1">Cambio de aceite - $500</option>
+                        <option value="2">Alineación - $350</option>
+                    </select>
+                </label>
+
+                <label>Vehículo
+                    <select name="vehiculo_id" id="vehiculo_id">
+                        <option value="">Selecciona un vehículo</option>
+                        <option value="1">Toyota Corolla (ABC-123-A)</option>
+                    </select>
+                </label>
+
+                <div class="row">
+                    <label>Fecha
+                        <input type="date" id="fechaCita">
+                    </label>
+
+                    <label>Hora
+                        <select id="hora">
+                            <option value="">Selecciona hora</option>
+                            <option value="08:00">08:00 AM</option>
+                            <option value="09:00">09:00 AM</option>
+                            <option value="10:00">10:00 AM</option>
+                        </select>
+                    </label>
+                </div>
+
+            </div>
+
+            <div class="m-footer">
+                <button id="cancelModal" class="button ghost">Cancelar</button>
+                <button id="agendar-btn" class="button primary">Agendar</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="./cliente.js"></script>
+</body>
+</html>

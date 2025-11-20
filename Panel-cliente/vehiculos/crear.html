@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Vehículo</title>
+    <link rel="stylesheet" href="./base.css">
+    <link rel="stylesheet" href="./cliente.css">
+</head>
+
+<body>
+
+<section class="section">
+    <h2 style="font-weight:600; margin-bottom:1rem;">Agregar Vehículo</h2>
+
+    <form class="perfil-form">
+
+        <div class="perfil-grid">
+
+            <label class="perfil-label">
+                <span>Marca</span>
+                <input type="text" placeholder="AUDI" required>
+            </label>
+
+            <label class="perfil-label">
+                <span>Modelo</span>
+                <input type="text" placeholder="RS3" required>
+            </label>
+
+            <label class="perfil-label">
+                <span>Año</span>
+                <input type="number" min="1900" max="2100" placeholder="2025" required>
+            </label>
+
+            <label class="perfil-label">
+                <span>Placa</span>
+                <input type="text" placeholder="AAA-123-A" required>
+            </label>
+
+            <label class="perfil-label" style="position:relative;">
+                <span>VIN</span>
+
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="text" maxlength="17" placeholder="5NPLM4AG1MH056782" required style="flex:1;">
+                    <button type="button" class="button ghost small" style="white-space:nowrap;">
+                        Buscar VIN
+                    </button>
+                </div>
+
+                <small style="color:#62748e; font-size:13px; display:none; margin-top:4px;"></small>
+            </label>
+
+            <label class="perfil-label">
+                <span>Color</span>
+                <input type="text" placeholder="GRIS OXFORD">
+            </label>
+
+            <label class="perfil-label">
+                <span>Kilometraje</span>
+                <input type="number" min="0" placeholder="85000">
+            </label>
+
+        </div>
+
+        <div class="perfil-footer">
+            <a class="button ghost" style="margin-right:1rem;">Cancelar</a>
+            <button class="button primary">Guardar Vehículo</button>
+        </div>
+
+    </form>
+
+</section>
+
+<script src="./cliente.js"></script>
+</body>
+</html>

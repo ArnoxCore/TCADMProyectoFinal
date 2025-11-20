@@ -1,0 +1,47 @@
+<section class="section">
+    <div style="display:flex; justify-content: space-between; align-items:center;">
+        <h2 style="font-weight: 600;">Mis Vehículos</h2>
+
+        <a href="#" class="button primary">
+            + Agregar Vehículo
+        </a>
+    </div>
+
+    <hr style="border: none; border-top:1px solid var(--line); margin:1rem 0;">
+
+    <div class="appointment car-card">
+        <div class="car-info">
+            <header>
+                <h3>MARCA MODELO</h3>
+                <span class="badge info">PLAC-123-A</span>
+            </header>
+
+            <ul class="appointment-info">
+                <li><strong>Año:</strong> 2022</li>
+                <li><strong>Color:</strong> NEGRO</li>
+                <li><strong>Kilometraje:</strong> 85000 km</li>
+            </ul>
+
+            <footer>
+                <a href="#" class="button ghost small">Editar</a>
+            </footer>
+        </div>
+
+        <div class="car-img-wrapper">
+            <div class="car-skeleton"></div>
+
+            <img
+                class="car-photo"
+                data-marca="MARCA"
+                data-modelo="MODELO"
+                data-ano="2022"
+                alt="Foto del vehículo"
+                style="display:none;"
+            >
+        </div>
+    </div>
+
+    <p style="color: var(--muted); margin-top:1rem;">
+        Aún no has registrado vehículos.
+    </p>
+</section>

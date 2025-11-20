@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Panel del Cliente | Ctrl + Alt + Del Motors</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS del Cliente -->
+    <link rel="stylesheet" href="frontend/Panel-cliente/cliente.css">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="96x96" href="frontend/icons/favicon-96x96.png">
+    <link rel="icon" type="image/svg+xml" href="frontend/icons/favicon.svg">
+    <link rel="shortcut icon" href="frontend/icons/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="frontend/icons/apple-touch-icon.png">
+    <link rel="manifest" href="frontend/icons/site.webmanifest">
+
+    <!-- NOTYF CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+</head>
+
+<body data-page="cliente">
+
+<header class="client-header">
+    <div class="client-header__left">
+        <img src="frontend/assets/logo.png" alt="Logo" class="client-header__logo">
+        <div>
+            <h1>Ctrl + Alt + Del Motors</h1>
+            <p>Bienvenido, Nombre del cliente</p>
+        </div>
+    </div>
+
+    <button class="btn btn--outline">Cerrar Sesión</button>
+</header>
+
+<main class="main">
+    
+</main>
+
+<script src="frontend/Panel-cliente/cliente.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+
+<script>
+    window.toast = new Notyf({
+        duration: 3500,
+        position: {
+            x: 'right',
+            y: 'top'
+        },
+        dismissible: true
+    });
+</script>
+
+</body>
+</html>

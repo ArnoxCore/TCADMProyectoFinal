@@ -1,0 +1,79 @@
+<section class="section">
+    <h2 style="font-weight:600; margin-bottom:1rem;">Editar Vehículo</h2>
+
+    <form action="#" method="POST" class="perfil-form">
+
+        <div class="perfil-grid">
+
+            <label class="perfil-label">
+                <span>Marca</span>
+                <input type="text" name="marca" id="marca" value="AUDI" required>
+            </label>
+
+            <label class="perfil-label">
+                <span>Modelo</span>
+                <input type="text" name="modelo" id="modelo" value="RS3" required>
+            </label>
+
+            <label class="perfil-label">
+                <span>Año</span>
+                <input type="number" name="ano" id="ano" min="1900" max="2100" value="2022" required>
+            </label>
+
+            <label class="perfil-label">
+                <span>Placa</span>
+                <input type="text" name="placa" id="placa" placeholder="AAA-123-A" value="ABC-123-A" required>
+            </label>
+
+            <label class="perfil-label" style="position:relative;">
+                <span>VIN</span>
+
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="text"
+                           name="vin"
+                           id="vin-input"
+                           maxlength="17"
+                           value="WBA8D9C56HA003217"
+                           required
+                           style="flex:1;">
+
+                    <button type="button"
+                            id="buscar-vin-btn"
+                            class="button ghost small"
+                            style="white-space:nowrap;">
+                        Buscar VIN
+                    </button>
+                </div>
+
+                <small id="vin-status"
+                       style="
+                           color:#62748e;
+                           font-size:13px;
+                           display:none;
+                           margin-top:4px;
+                       ">
+                </small>
+            </label>
+
+            <label class="perfil-label">
+                <span>Color</span>
+                <input type="text" name="color" id="color" value="GRIS OXFORD">
+            </label>
+
+            <label class="perfil-label">
+                <span>Kilometraje</span>
+                <input type="number" name="kilometraje" min="0" value="85000">
+            </label>
+
+        </div>
+
+        <div class="perfil-footer">
+            <a href="#" class="button ghost" style="margin-right:1rem;">
+                Cancelar
+            </a>
+            <button class="button primary">Guardar cambios</button>
+        </div>
+
+    </form>
+
+</section>

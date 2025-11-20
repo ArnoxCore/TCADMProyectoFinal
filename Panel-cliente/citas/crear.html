@@ -1,0 +1,63 @@
+<section class="section">
+
+    <div class="card-form">
+
+        <h2 class="title-form">Agendar Nueva Cita</h2>
+
+        <form action="#" method="POST">
+
+            <div class="form-grid">
+
+                <label class="form-label">
+                    <span>Servicio</span>
+                    <select name="servicios[]" id="servicio_id" required>
+                        <option value="">Selecciona un servicio</option>
+                        <option value="1">Cambio de Aceite - $500.00</option>
+                        <option value="2">Alineación y Balanceo - $350.00</option>
+                        <option value="3">Servicio General - $1,200.00</option>
+                    </select>
+                </label>
+
+                <label class="form-label">
+                    <span>Vehículo</span>
+                    <select name="vehiculo_id" id="vehiculo_id" required>
+                        <option value="">Selecciona un vehículo</option>
+                        <option value="1">AUDI RS3 (AAA-123-A)</option>
+                        <option value="2">BMW M4 (BBB-456-B)</option>
+                        <option value="3">Ford Mustang (CCC-789-C)</option>
+                    </select>
+                </label>
+
+                <label class="form-label">
+                    <span>Fecha</span>
+                    <input type="date" name="fecha" required>
+                </label>
+
+                <label class="form-label">
+                    <span>Hora</span>
+                    <select name="hora" id="hora" required>
+                        <option value="">Selecciona hora</option>
+                        <option value="08:00">08:00 AM</option>
+                        <option value="09:00">09:00 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="12:00">12:00 PM</option>
+                        <option value="13:00">1:00 PM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="15:00">3:00 PM</option>
+                        <option value="16:00">4:00 PM</option>
+                        <option value="17:00">5:00 PM</option>
+                    </select>
+                </label>
+
+                <div class="form-footer">
+                    <button class="button primary" type="submit">Agendar Cita</button>
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</section>

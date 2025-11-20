@@ -1,0 +1,95 @@
+<section class="section">
+    <h2 style="margin-bottom: 1rem; font-weight: 600;">Mis Citas</h2>
+
+    <div class="appointment">
+        <header>
+            <h3>Cambio de Aceite</h3>
+            <span class="badge warning">Pendiente</span>
+        </header>
+
+        <ul class="appointment-info">
+            <li>AUDI RS3</li>
+            <li>Fecha: 15/02/2025</li>
+            <li>Hora: 10:00 - 11:00</li>
+        </ul>
+
+        <footer>
+            <button class="button ghost small">Modificar</button>
+            <button class="button ghost small">Cancelar</button>
+        </footer>
+    </div>
+
+    <div class="appointment">
+        <header>
+            <h3>Servicio General</h3>
+            <span class="badge success">Completada</span>
+        </header>
+
+        <ul class="appointment-info">
+            <li>BMW M4</li>
+            <li>Fecha: 03/01/2025</li>
+            <li>Hora: 09:00 - 10:30</li>
+        </ul>
+    </div>
+
+    <div class="appointment">
+        <header>
+            <h3>Alineación y Balanceo</h3>
+            <span class="badge warning">Pendiente</span>
+        </header>
+
+        <ul class="appointment-info">
+            <li>Ford Mustang</li>
+            <li>Fecha: 20/02/2025</li>
+            <li>Hora: 13:00 - 14:00</li>
+        </ul>
+
+        <footer>
+            <button class="button ghost small">Modificar</button>
+            <button class="button ghost small">Cancelar</button>
+        </footer>
+    </div>
+
+</section>
+
+<div class="modal-backdrop" id="modalEditar">
+    <div class="modal">
+        <div class="m-head">
+            <div class="m-title">Modificar Cita</div>
+            <button id="closeModalEditar" class="modal-close">×</button>
+        </div>
+
+        <div class="m-body">
+            <div class="row">
+                <label>
+                    Fecha
+                    <input type="date" id="editFechaCita">
+                </label>
+
+                <label>
+                    Hora
+                    <select id="editHoraCita">
+                        <option value="">Selecciona hora</option>
+                        <option value="08:00">08:00 AM</option>
+                        <option value="09:00">09:00 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="12:00">12:00 PM</option>
+                        <option value="13:00">1:00 PM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="15:00">3:00 PM</option>
+                        <option value="16:00">4:00 PM</option>
+                        <option value="17:00">5:00 PM</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+
+        <div class="m-footer">
+            <button id="cancelModalEditar" class="button ghost">Cancelar</button>
+            <button id="guardarCambiosCita" class="button primary">
+                Guardar Cambios
+            </button>
+        </div>
+    </div>
+</div>
