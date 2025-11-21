@@ -1,13 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
-// Controladores del módulo Cliente
-use App\Http\Controllers\Cliente\DashboardController;
-use App\Http\Controllers\Cliente\CitaController;
-use App\Http\Controllers\Cliente\VehiculoController;
-use App\Http\Controllers\Cliente\PerfilController;
 use App\Http\Controllers\API\CarsXEController;
+// Controladores del módulo Cliente
+use App\Http\Controllers\Cliente\CitaController;
+use App\Http\Controllers\Cliente\DashboardController;
+use App\Http\Controllers\Cliente\PerfilController;
+use App\Http\Controllers\Cliente\VehiculoController;
+use App\Http\Controllers\Recepcion\RecepcionDashboardController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,7 +18,7 @@ use App\Http\Controllers\API\CarsXEController;
 // Redirección inteligente según rol
 Route::get('/redirigir', function () {
 
-    if (!auth()->check()) {
+    if (! auth()->check()) {
         return redirect()->route('login');
     }
 
@@ -42,7 +42,6 @@ Route::get('/redirigir', function () {
 Route::get('/', function () {
     return view('landing');
 })->name('landing');
-
 
 // ======================================================
 //  RUTAS DEL CLIENTE (ROL 1)
@@ -92,7 +91,6 @@ Route::middleware(['auth', 'role:1'])
         Route::patch('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
     });
 
-
 // ======================================================
 //  RUTAS DEL MECÁNICO (ROL 2)
 //  URL base: /mecanico
@@ -106,7 +104,6 @@ Route::middleware(['auth', 'role:2'])
         })->name('dashboard');
     });
 
-
 // ======================================================
 //  RUTAS DE LA RECEPCIONISTA (ROL 3)
 //  URL base: /recepcion
@@ -115,11 +112,14 @@ Route::middleware(['auth', 'role:3'])
     ->prefix('recepcion')
     ->name('recepcion.')
     ->group(function () {
-        Route::get('/', function () {
-            return 'Panel de recepción (en construcción)';
-        })->name('dashboard');
-    });
+        // Panel principal (citas del día)
+        Route::get('/', [RecepcionDashboardController::class, 'index'])
+            ->name('dashboard');
 
+        // (Opcional) Endpoint JSON para recargar citas por fecha vía AJAX
+        Route::get('/citas-por-fecha', [RecepcionDashboardController::class, 'citasPorFecha'])
+            ->name('citas.fecha');
+    });
 
 // ======================================================
 //  RUTAS DEL ADMIN (ROL 4)

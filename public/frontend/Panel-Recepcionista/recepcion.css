@@ -1,0 +1,353 @@
+:root {
+    --white: #fff;
+    --bg: #f8fafc;
+    --text: #0f172b;
+    --muted: #62748e;
+    --line: #e2e8f0;
+    --primary: #1e40af;
+    --warning: #facc15;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --font: 'Arimo', sans-serif;
+}
+
+/* ===== RESET BÁSICO ===== */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font);
+    color: var(--text);
+    background: var(--bg);
+}
+
+/* ===== LAYOUT GENERAL ===== */
+
+.layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== LOGO EN TOPBAR ===== */
+
+.brand-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.brand-logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* ===== TOPBAR RECEPCIÓN ===== */
+
+.topbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--line);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-title {
+    font-weight: 600;
+}
+
+.brand-sub {
+    font-size: 14px;
+    color: var(--muted);
+}
+
+/* Botón cerrar sesión */
+
+.btn-logout {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    background: var(--white);
+    color: var(--text);
+    transition: 0.2s ease;
+}
+
+.btn-logout:hover {
+    background: #f3f4f6;
+}
+
+/* ===== MAIN CONTENT ===== */
+
+.main {
+    max-width: 1150px;
+    width: 100%;
+    margin: 2rem auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.main-header h1 {
+    margin: 0 0 0.25rem 0;
+    font-size: 24px;
+}
+
+.main-header p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+/* ===== TARJETAS KPI ===== */
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+}
+
+.kpi-card {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.5rem 1.8rem;
+    transition: 0.25s ease;
+}
+
+.kpi-card:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+}
+
+.kpi-card h3 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.kpi {
+    font-size: 24px;
+    font-weight: 700;
+    margin-top: 0.5rem;
+}
+
+.sub {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+/* ===== BLOQUE FILTROS ===== */
+
+.filtros {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1.5rem 1.8rem;
+}
+
+.filtros-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 14px;
+}
+
+.campo label {
+    font-weight: 600;
+}
+
+/* Inputs y selects */
+
+.campo input,
+.campo select {
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: #f9fbff;
+    padding: 0.5rem 0.7rem;
+    font-size: 14px;
+    transition: 0.15s ease;
+}
+
+.campo input:focus,
+.campo select:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: #eef2ff;
+}
+
+.campo-acciones {
+    align-self: flex-end;
+}
+
+#btnClear {
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    padding: 0.5rem 0.9rem;
+    font-size: 14px;
+    background: var(--white);
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+#btnClear:hover {
+    background: #f3f4f6;
+}
+
+/* ===== TABLA ===== */
+
+.tabla-citas {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1.5rem 1.8rem;
+}
+
+.tabla-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 1rem;
+}
+
+.tabla-header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.tabla-header span {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.tabla-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.tabla-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    min-width: 700px;
+}
+
+.tabla-wrapper thead th {
+    text-align: left;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.tabla-wrapper tbody td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+}
+
+/* ===== BADGES DE ESTATUS ===== */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Clases según el valor de $estatus en la BD:
+   class="badge badge-pendiente", etc. */
+
+.badge-pendiente {
+    background: #fef9c3;
+    color: #854d0e;
+}
+
+.badge-confirmada {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.badge-en_proceso {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.badge-completada {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge-cancelada {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 1024px) {
+    .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .filtros-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .main {
+        margin: 1.5rem auto;
+        padding: 0 1rem;
+    }
+
+    .kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filtros-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tabla-wrapper table {
+        font-size: 13px;
+    }
+}
