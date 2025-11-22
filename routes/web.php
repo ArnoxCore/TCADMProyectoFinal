@@ -101,12 +101,18 @@ Route::middleware(['auth', 'role:2'])
     ->prefix('mecanico')
     ->name('mecanico.')
     ->group(function () {
-        Route::get('/', function () {
-            return 'Panel del mecánico (en construcción)';
-        })->name('dashboard');
+        Route::get('/', [App\Http\Controllers\Mecanico\MecanicoController::class, 'dashboard'])
+            ->name('dashboard');
+
+        Route::patch('/citas/{id}/estatus', [App\Http\Controllers\Mecanico\MecanicoController::class, 'updateEstatus'])
+            ->name('citas.updateEstatus');
+
+        Route::patch('/citas/{id}/mecanico', [App\Http\Controllers\Mecanico\MecanicoController::class, 'assignMecanico'])
+            ->name('citas.assignMecanico');
+
+        Route::get('/mecanicos-list', [App\Http\Controllers\Mecanico\MecanicoController::class, 'getMecanicosList'])
+            ->name('mecanicos.list');
     });
-
-
 // ======================================================
 //  RUTAS DE LA RECEPCIONISTA (ROL 3)
 //  URL base: /recepcion
