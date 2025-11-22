@@ -23,10 +23,10 @@
 </head>
 
 <body>
-<div class="auth-wrapper">
+<div class="auth-wrapper register-view">
     <div class="auth-container">
         <header class="auth-header">
-            <img src="{{ asset('frontend/icons/logo.png') }}" alt="Logo Ctrl Alt Del Motors">
+            <img src="{{ asset('frontend/icons/favicon-96x96.png') }}" alt="Logo Ctrl Alt Del Motors">
             <h1>Ctrl + Alt + Del Motors</h1>
             <p>Sistema de Gestión de Citas</p>
         </header>
@@ -36,12 +36,12 @@
             <button class="auth-tab active">Registrarse</button>
         </div>
 
-        <div class="auth-card">
+        <div class="auth-card auth-card-register">
             <h2>Crear Cuenta</h2>
             <p>Regístrate como nuevo cliente</p>
 
             <!-- ==== FORMULARIO FUNCIONAL ==== -->
-            <form method="POST" action="{{ route('register') }}">
+            <form method="POST" action="{{ route('register') }}" class="register-form">
                 @csrf
 
                 <!-- Mostrar errores -->
@@ -73,12 +73,12 @@
 
                 <div class="form-group">
                     <label for="password">Contraseña</label>
-                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                    <input type="password" id="password" name="password" placeholder="Ingresa tu contraseña" required>
                 </div>
 
                 <div class="form-group">
                     <label for="password_confirmation">Confirmar contraseña</label>
-                    <input type="password" id="password_confirmation" name="password_confirmation" placeholder="••••••••" required>
+                    <input class="password-confirm" type="password" id="password_confirmation" name="password_confirmation" placeholder="Ingresa de nuevo tu contraseña" required>
                 </div>
 
                 <button type="submit" class="auth-button">Registrar Cuenta</button>

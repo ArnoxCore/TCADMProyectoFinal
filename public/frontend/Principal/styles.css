@@ -18,7 +18,7 @@
     --space-8: 2rem;   /* 32 */
 
     /* Ruta de tu imagen de héroe */
-    --hero-image: url("./Login and User Dashboard-1.png");
+    --hero-image: url("/images/coche-m.jpg");
 }
 
 *{ box-sizing: border-box; }
@@ -79,7 +79,7 @@ body{
     background-image: var(--hero-image);
     background-size: cover;
     background-position: center;
-    transform: scale(1.02); /* leve zoom para evitar bordes */
+    transform: scale(1.02);
 }
 .hero__overlay{
     position: absolute; inset: 0;

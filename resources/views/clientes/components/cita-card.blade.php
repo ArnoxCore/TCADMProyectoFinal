@@ -20,6 +20,32 @@
                     ? substr($citaModel->hora_inicio, 0, 5)
                     : ''
             );
+
+        // ==============================
+        //   LÓGICA DE BOTONES
+        // ==============================
+        $hoy = \Carbon\Carbon::today('America/Mexico_City');
+
+        // Si hay modelo, calculamos si la fecha es pasada
+        $esPasada = false;
+        if ($citaModel && $citaModel->fecha) {
+            $fechaCarbon = $citaModel->fecha instanceof \Carbon\Carbon
+                ? $citaModel->fecha
+                : \Carbon\Carbon::parse($citaModel->fecha);
+
+            $esPasada = $fechaCarbon->lt($hoy);
+        }
+
+        // Normalizamos texto de estado
+        $estadoTextoLower = strtolower($estadoTexto ?? '');
+
+        // Estados donde NO debe haber botones
+        $estadoBloqueado = in_array($estadoTextoLower, ['cancelada', 'completada']);
+
+        // Solo mostramos botones si:
+        // - NO es pasada
+        // - NO está cancelada ni completada
+        $mostrarBotones = !$esPasada && !$estadoBloqueado;
     @endphp
 
     {{-- Columna izquierda: texto --}}
@@ -42,8 +68,8 @@
             </div>
         @endisset
 
-        {{-- FOOTER SOLO SI LA CITA NO ESTÁ CANCELADA --}}
-        @if (strtolower($estadoTexto) !== 'cancelada')
+        {{-- FOOTER: SOLO SI SE PUEDE EDITAR / CANCELAR --}}
+        @if ($mostrarBotones)
             <footer>
                 {{-- MODIFICAR --}}
                 <button

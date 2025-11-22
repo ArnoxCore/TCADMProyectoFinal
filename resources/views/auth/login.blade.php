@@ -23,7 +23,7 @@
 <div class="auth-wrapper">
     <div class="auth-container">
         <header class="auth-header">
-            <img src="{{ asset('frontend/icons/logo.png') }}" alt="Logo Ctrl Alt Del Motors">
+            <img src="{{ asset('frontend/icons/favicon-96x96.png') }}" alt="Logo Ctrl Alt Del Motors">
             <h1>Ctrl + Alt + Del Motors</h1>
             <p>Sistema de Gestión de Citas</p>
         </header>
@@ -66,7 +66,7 @@
 
                 <div class="form-group">
                     <label for="password">Contraseña</label>
-                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                    <input type="password" id="password" name="password" placeholder="Ingresa tu Contraseña" required>
                 </div>
 
                 {{-- <div class="auth-extra">

@@ -1,5 +1,3 @@
-console.log("CLIENTE.JS NUEVO CARGADO");
-
 document.addEventListener("DOMContentLoaded", () => {
     // ===============================
     //              TABS

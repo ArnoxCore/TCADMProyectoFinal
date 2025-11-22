@@ -8,17 +8,18 @@
 }
 
 .auth-container {
-    width: 420px;
+    width: 550px;
     display: flex;
     flex-direction: column;
     gap: 2rem;
 }
 
 .auth-header img {
-    width: 64px;
-    height: 64px;
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
     margin: 0 auto 1rem;
-    border-radius: 50%;
+    border-radius: 12px;
 }
 
 .auth-header h1 {
@@ -117,4 +118,47 @@
     font-size: 0.8rem;
     margin-top: 2rem;
     text-align: center;
+}
+
+.register-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 1.25rem;
+}
+
+.register-form button {
+    grid-column: span 2;
+}
+
+.register-form > div[style*="background"] {
+    grid-column: span 2;
+}
+
+.auth-wrapper.register-view {
+    align-items: flex-start;
+    padding-top: 60px;
+}
+
+.auth-card.auth-card-register {
+    width: 550px;
+}
+
+.auth-card.auth-card-register form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem 0.5rem;
+}
+
+.auth-card.auth-card-register button.auth-button {
+    grid-column: span 2;
+}
+
+.auth-card.auth-card-register .validation-errors,
+.auth-card.auth-card-register .success-msg {
+    grid-column: span 2;
+}
+
+.auth-card.auth-card-register h2,
+.auth-card.auth-card-register p {
+    grid-column: span 2;
 }

@@ -12,18 +12,17 @@ class RecepcionDashboardController extends Controller
 {
     public function index(Request $request)
     {
-        // Fecha que se está viendo (si no viene, usamos HOY en zona de México)
+        // Fecha que se está viendo
         $fecha = $request->input('fecha');
 
         if (!$fecha) {
             $fecha = Carbon::now('America/Mexico_City')->toDateString();
         }
 
-        // Citas de ese día con todas las relaciones necesarias
         $citasQuery = Cita::with([
             'cliente.user',
             'vehiculo',
-            'servicios',       // <- aquí va la relación MANY-TO-MANY real
+            'servicios',
             'mecanico.user'
         ])
             ->whereDate('fecha', $fecha);
@@ -48,10 +47,10 @@ class RecepcionDashboardController extends Controller
         return view('recepcion.dashboard', compact('citas', 'mecanicos', 'fecha', 'stats'));
     }
 
-    // Endpoint JSON para AJAX (fecha opcional)
+    // Endpoint JSON para AJAX
     public function citasPorFecha(Request $request)
     {
-        $fecha = $request->input('fecha'); // puede venir null / "" / "2025-11-25"
+        $fecha = $request->input('fecha');
 
         $query = Cita::with([
             'cliente.user',
@@ -60,7 +59,6 @@ class RecepcionDashboardController extends Controller
             'mecanico.user'
         ]);
 
-        // Si hay fecha, filtramos; si viene vacía, traemos TODAS
         if (!empty($fecha)) {
             $query->whereDate('fecha', $fecha);
         }
@@ -89,7 +87,7 @@ class RecepcionDashboardController extends Controller
                 'servicio' => $servicios ?: '—',
                 'mecanico' => optional(optional($cita->mecanico)->user)->name ?? 'Sin asignar',
                 'estatus'  => [
-                    'value' => $estatus, // pendiente / confirmada / ...
+                    'value' => $estatus,
                     'label' => $cita->estatus_texto ?? ucfirst(str_replace('_', ' ', $estatus)),
                 ],
             ];

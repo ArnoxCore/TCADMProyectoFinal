@@ -1,11 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const searchCliente = document.getElementById("searchCliente");
-    const searchFecha = document.getElementById("searchFecha");
+    const searchCliente  = document.getElementById("searchCliente");
+    const searchFecha    = document.getElementById("searchFecha");
     const searchMecanico = document.getElementById("searchMecanico");
-    const searchEstatus = document.getElementById("searchEstatus");
-    const btnClear = document.getElementById("btnClear");
-    const tableBody = document.getElementById("tableBody");
-    const kpiFiltrados = document.getElementById("kpiFiltrados");
+    const searchEstatus  = document.getElementById("searchEstatus");
+    const btnClear       = document.getElementById("btnClear");
+    const tableBody      = document.getElementById("tableBody");
+    const kpiFiltrados   = document.getElementById("kpiFiltrados");
     const labelResultados = document.getElementById("labelResultados");
 
     let rows = [];
@@ -16,31 +16,44 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function aplicarFiltros() {
-        const clienteFiltro = (searchCliente?.value || "").toLowerCase().trim();
+        const clienteFiltro  = (searchCliente?.value || "").toLowerCase().trim();
         const mecanicoFiltro = (searchMecanico?.value || "").trim();
-        const estatusFiltro = (searchEstatus?.value || "").trim();
+        const estatusFiltro  = (searchEstatus?.value || "").toLowerCase().trim();
 
         let visibles = 0;
 
         rows.forEach(row => {
-            // [Fecha, Hora, Cliente, Vehículo, Servicio, Mecánico, Estatus]
-            const [colFecha, , colCliente, , , colMecanico, colEstatus] = row.children;
+            const cells = row.children;
 
-            const clienteTexto = colCliente.textContent.toLowerCase();
+            // Fila "No hay citas para esta fecha." -> la dejamos visible y no la filtramos
+            if (cells.length < 7) {
+                row.style.display = "";
+                return;
+            }
+
+            // [Fecha, Hora, Cliente, Vehículo, Servicio, Mecánico, Estatus]
+            const colCliente  = cells[2];
+            const colMecanico = cells[5];
+            const colEstatus  = cells[6];
+
+            const clienteTexto  = colCliente.textContent.toLowerCase();
             const mecanicoTexto = colMecanico.textContent.trim();
-            const estatusTexto = colEstatus.textContent.trim();
+            const estatusTexto  = colEstatus.textContent.toLowerCase();
 
             let mostrar = true;
 
+            // Cliente contiene texto
             if (clienteFiltro && !clienteTexto.includes(clienteFiltro)) {
                 mostrar = false;
             }
 
+            // Mecánico exacto (nombre completo)
             if (mecanicoFiltro && mecanicoTexto !== mecanicoFiltro) {
                 mostrar = false;
             }
 
-            // includes para que "Pendiente de Confirmación" matchee con "Pendiente"
+            // Estatus: usamos includes en minúsculas
+            // ej: "pendiente de confirmación" incluye "pendiente"
             if (estatusFiltro && !estatusTexto.includes(estatusFiltro)) {
                 mostrar = false;
             }
@@ -121,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Cambio de fecha -> recargar (si la borras, trae TODAS)
     if (searchFecha) {
         searchFecha.addEventListener("change", () => {
-            const value = searchFecha.value || ""; // si queda vacío, backend entiende "todas"
+            const value = searchFecha.value || ""; // si queda vacío, backend trae todas
             cargarCitas(value);
         });
     }
@@ -137,9 +150,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // y recarga TODAS las citas
     if (btnClear) {
         btnClear.addEventListener("click", () => {
-            if (searchCliente) searchCliente.value = "";
+            if (searchCliente)  searchCliente.value = "";
             if (searchMecanico) searchMecanico.value = "";
-            if (searchEstatus) searchEstatus.value = "";
+            if (searchEstatus)  searchEstatus.value = "";
 
             if (searchFecha) {
                 searchFecha.value = "";

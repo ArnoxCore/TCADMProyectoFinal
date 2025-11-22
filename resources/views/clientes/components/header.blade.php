@@ -3,7 +3,7 @@
         <div class="brand">
             <img src="{{ asset('frontend/icons/favicon.svg') }}" alt="Logo" class="brand-logo-img">
             <div>
-                <div class="brand-title">Ctrl + Alt + Del Motors</div>
+                <div class="brand-title">Ctrl + Alt + Del Motors | Panel Cliente</div>
                 <div class="brand-sub">Bienvenido, {{ Auth::user()->name }}</div>
             </div>
         </div>

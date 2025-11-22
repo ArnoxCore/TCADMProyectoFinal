@@ -144,6 +144,23 @@ class CitaController extends Controller
             ->where('cliente_id', $cliente->id)
             ->firstOrFail();
 
+        // 🛑 Bloquear cancelación si la cita ya es de una fecha pasada
+        $hoy = \Carbon\Carbon::today('America/Mexico_City');
+
+        if ($cita->fecha->isBefore($hoy)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No puedes cancelar una cita que ya pasó. Solo se muestra en tu historial.',
+                ], 422);
+            }
+
+            return redirect()
+                ->route('cliente.citas.index')
+                ->with('error', 'No puedes cancelar una cita que ya pasó. Solo se muestra en tu historial.');
+        }
+
+        // ✅ Si la cita es de hoy o futura, sí se puede cancelar
         $cita->estatus = 'cancelada';
         $cita->save();
 
@@ -155,7 +172,7 @@ class CitaController extends Controller
             ]);
         }
 
-        // Flujo normal (submit de form clásico)
+        // Flujo normal (submit clásico)
         return redirect()
             ->route('cliente.citas.index')
             ->with('success', 'La cita fue cancelada.');
