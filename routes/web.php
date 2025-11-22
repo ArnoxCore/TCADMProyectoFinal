@@ -8,6 +8,7 @@ use App\Http\Controllers\Cliente\CitaController;
 use App\Http\Controllers\Cliente\VehiculoController;
 use App\Http\Controllers\Cliente\PerfilController;
 use App\Http\Controllers\API\CarsXEController;
+use App\Http\Controllers\Admin\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -135,9 +136,17 @@ Route::middleware(['auth', 'role:4'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::get('/', function () {
-            return 'Panel del administrador (en construcción)';
-        })->name('dashboard');
+        Route::get('/', [AdminController::class, 'dashboard'])
+            ->name('dashboard');
+
+        Route::get('/servicios', [AdminController::class, 'servicios'])
+            ->name('servicios');
+
+        Route::get('/reportes', [AdminController::class, 'reportes'])
+            ->name('reportes');
+
+        Route::get('/estadisticas', [AdminController::class, 'estadisticas'])
+            ->name('estadisticas');
     });
 
 Route::get('/api/car-image', [CarsXEController::class, 'getImage']);
