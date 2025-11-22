@@ -18,7 +18,7 @@
         <div class="brand-logo mechanic" aria-hidden="true"></div>
         <div>
           <div class="brand-title">Panel de Mecánico</div>
-          <div class="brand-sub">Bienvenido, {{ Auth::user()->name }}</div>
+          <div class="brand-sub">Bienvenido, {{ (isset($mecanico) && $mecanico && $mecanico->user) ? $mecanico->user->name : Auth::user()->name }}</div>
         </div>
       </div>
       <nav class="nav">
@@ -94,8 +94,8 @@
                   </div>
                 </div>
                 <div style="text-align:right; min-width:140px;">
-                  <div style="font-size:13px; color:#777;">Mecánico: {{ $cita->mecanico ? ($cita->mecanico->user->name ?? 'Asignado') : 'Sin asignar' }}</div>
-                  <div style="margin-top:8px;"><button type="button" class="button" onclick="abrirModalCita({{ $cita->id }}, '{{ addslashes($cita->servicios->pluck('nombre')->join(', ')) }}', '{{ $cita->vehiculo ? strtoupper($cita->vehiculo->marca.' '.$cita->vehiculo->modelo) : '' }}', '{{ $cita->fecha?->format('d/m/Y') }}', '{{ $cita->hora_inicio ?? '' }} {{ $cita->hora_fin ? '- '.$cita->hora_fin : '' }}', '{{ $cita->estatus }}', {{ $cita->mecanico_id ?? 'null' }}, '{{ addslashes($cita->observaciones_cliente ?? '') }}')">Ver</button></div>
+                  <div style="font-size:13px; color:#777;">Cliente: {{ $cita->cliente ? ($cita->cliente->user->name ?? 'Sin nombre') : 'Sin cliente' }}</div>
+                  <div style="margin-top:8px;"><button type="button" class="button" onclick="abrirModalCita({{ $cita->id }}, '{{ addslashes($cita->servicios->pluck('nombre')->join(', ')) }}', '{{ $cita->vehiculo ? strtoupper($cita->vehiculo->marca.' '.$cita->vehiculo->modelo) : '' }}', '{{ $cita->fecha?->format('d/m/Y') }}', '{{ $cita->hora_inicio ?? '' }} {{ $cita->hora_fin ? '- '.$cita->hora_fin : '' }}', '{{ $cita->estatus }}', {{ $cita->mecanico_id ?? 'null' }}, '', '{{ addslashes($cita->cliente?->user?->name ?? '') }}')">Ver</button></div>
                 </div>
               </div>
             @endforeach
@@ -112,7 +112,7 @@
     <!-- Citas de Hoy -->
     <section class="section">
       <div class="section-head">
-        <h3 style="margin:0;font-size:16px">Citas Pendientes</h3>
+        <h3 style="margin:0;font-size:16px">Citas Confirmadas</h3>
       </div>
       @if(isset($citasHoy) && $citasHoy->count())
         <div class="list-citas">
@@ -136,8 +136,8 @@
                 </div>
               </div>
               <div style="text-align:right; min-width:140px;">
-                <div style="font-size:13px; color:#777;">Mecánico: {{ $cita->mecanico ? ($cita->mecanico->user->name ?? 'Asignado') : 'Sin asignar' }}</div>
-                <div style="margin-top:8px;"><button type="button" class="button" onclick="abrirModalCita({{ $cita->id }}, '{{ addslashes($cita->servicios->pluck('nombre')->join(', ')) }}', '{{ $cita->vehiculo ? strtoupper($cita->vehiculo->marca.' '.$cita->vehiculo->modelo) : '' }}', '{{ $cita->fecha?->format('d/m/Y') }}', '{{ $cita->hora_inicio ?? '' }} {{ $cita->hora_fin ? '- '.$cita->hora_fin : '' }}', '{{ $cita->estatus }}', {{ $cita->mecanico_id ?? 'null' }}, '{{ addslashes($cita->observaciones_cliente ?? '') }}')">Ver</button></div>
+                <div style="font-size:13px; color:#777;">Cliente: {{ $cita->cliente ? ($cita->cliente->user->name ?? 'Sin nombre') : 'Sin cliente' }}</div>
+                <div style="margin-top:8px;"><button type="button" class="button" onclick="abrirModalCita({{ $cita->id }}, '{{ addslashes($cita->servicios->pluck('nombre')->join(', ')) }}', '{{ $cita->vehiculo ? strtoupper($cita->vehiculo->marca.' '.$cita->vehiculo->modelo) : '' }}', '{{ $cita->fecha?->format('d/m/Y') }}', '{{ $cita->hora_inicio ?? '' }} {{ $cita->hora_fin ? '- '.$cita->hora_fin : '' }}', '{{ $cita->estatus }}', {{ $cita->mecanico_id ?? 'null' }}, '', '{{ addslashes($cita->cliente?->user?->name ?? '') }}')">Ver</button></div>
               </div>
             </div>
           @endforeach
@@ -171,8 +171,8 @@
                 </div>
               </div>
               <div style="text-align:right; min-width:140px;">
-                <div style="font-size:13px; color:#777;">Mecánico: {{ $cita->mecanico ? ($cita->mecanico->user->name ?? 'Asignado') : 'Sin asignar' }}</div>
-                <div style="margin-top:8px;"><button type="button" class="button" onclick="abrirModalCita({{ $cita->id }}, '{{ addslashes($cita->servicios->pluck('nombre')->join(', ')) }}', '{{ $cita->vehiculo ? strtoupper($cita->vehiculo->marca.' '.$cita->vehiculo->modelo) : '' }}', '{{ $cita->fecha?->format('d/m/Y') }}', '{{ $cita->hora_inicio ?? '' }} {{ $cita->hora_fin ? '- '.$cita->hora_fin : '' }}', '{{ $cita->estatus }}', {{ $cita->mecanico_id ?? 'null' }}, '{{ addslashes($cita->observaciones_cliente ?? '') }}')">Ver</button></div>
+                <div style="font-size:13px; color:#777;">Cliente: {{ $cita->cliente ? ($cita->cliente->user->name ?? 'Sin nombre') : 'Sin cliente' }}</div>
+                <div style="margin-top:8px;"><button type="button" class="button" onclick="abrirModalCita({{ $cita->id }}, '{{ addslashes($cita->servicios->pluck('nombre')->join(', ')) }}', '{{ $cita->vehiculo ? strtoupper($cita->vehiculo->marca.' '.$cita->vehiculo->modelo) : '' }}', '{{ $cita->fecha?->format('d/m/Y') }}', '{{ $cita->hora_inicio ?? '' }} {{ $cita->hora_fin ? '- '.$cita->hora_fin : '' }}', '{{ $cita->estatus }}', {{ $cita->mecanico_id ?? 'null' }}, '', '{{ addslashes($cita->cliente?->user?->name ?? '') }}')">Ver</button></div>
               </div>
             </div>
           @endforeach
@@ -220,21 +220,12 @@
             <option value="confirmada">Confirmada</option>
             <option value="en_proceso">En Proceso</option>
             <option value="completada">Completada</option>
-            <option value="cancelada">Cancelada</option>
           </select>
         </div>
 
         <div style="margin-bottom:16px;">
           <label style="display:block; font-weight:600; margin-bottom:8px;">Cliente</label>
-          <select id="citaMecanico" onchange="asignarMecanico()" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
-            <option value="">-- Sin asignar --</option>
-          </select>
-          <div id="mecanicoLoading" style="font-size:12px; color:#999; margin-top:4px;"></div>
-        </div>
-
-        <div style="margin-bottom:16px;">
-          <label style="display:block; font-weight:600; margin-bottom:8px;">Observaciones del Cliente</label>
-          <div id="citaObservaciones" style="background:#f5f5f5; padding:10px; border-radius:4px; min-height:50px;"></div>
+          <div id="citaCliente" style="background:#f5f5f5; padding:10px; border-radius:4px; min-height:38px;"></div>
         </div>
 
         <div style="display:flex; gap:10px;">
@@ -244,5 +235,35 @@
       </form>
     </div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+  <script>
+    // Instancia global de Notyf
+    window.toast = new Notyf({
+        duration: 3500,
+        position: {
+            x: 'right',
+            y: 'top',
+        },
+        dismissible: true
+    });
+</script>
+<script>
+    @if(session('success'))
+    toast.success("{{ session('success') }}");
+    @endif
+
+    @if(session('error'))
+    toast.error("{{ session('error') }}");
+    @endif
+
+    @if(session('warning'))
+    toast.warning("{{ session('warning') }}");
+    @endif
+
+    @if(session('info'))
+    toast.info("{{ session('info') }}");
+    @endif
+</script>
+
 </body>
 </html>

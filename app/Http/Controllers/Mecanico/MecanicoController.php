@@ -16,22 +16,28 @@ class MecanicoController extends Controller
 
         // Base query builder function para evitar problemas con clones
         $getBaseQuery = function() use ($mecanico) {
-            $q = Cita::with(['cliente', 'vehiculo', 'servicios', 'mecanico']);
+            // eager-load mecanico->user to ensure mechanic name is available without extra queries
+            $q = Cita::with(['cliente.user', 'vehiculo', 'servicios', 'mecanico.user']);
             if ($mecanico) {
                 $q->where('mecanico_id', $mecanico->id);
             }
             return $q;
         };
 
-        // Citas de hoy (TODAS las citas, ordenadas con las de hoy primero)
+        // Política actual: el mecánico ve citas confirmadas y en proceso
+        $visibleStatuses = ['confirmada', 'en_proceso'];
+
+        // Citas de hoy (solo pendientes y en_proceso), ordenadas con las de hoy primero
         $citasHoy = $getBaseQuery()
+            ->whereIn('estatus', $visibleStatuses)
             ->orderByRaw("DATE(fecha) = CURDATE() DESC")
             ->orderBy('fecha', 'asc')
             ->get();
 
-        // Citas de la semana (próximos 7 días incluyendo hoy)
+        // Citas de la semana (próximos 7 días incluyendo hoy) — sólo pendientes y en_proceso
         $citasSemana = $getBaseQuery()
             ->whereBetween('fecha', [today(), today()->addDays(6)])
+            ->whereIn('estatus', $visibleStatuses)
             ->orderBy('fecha', 'asc')
             ->get();
 
@@ -40,6 +46,7 @@ class MecanicoController extends Controller
         if ($request->filled('fecha')) {
             $citasFiltradas = $getBaseQuery()
                 ->whereDate('fecha', $request->fecha)
+                ->whereIn('estatus', $visibleStatuses)
                 ->orderBy('hora_inicio', 'asc')
                 ->get();
         }
@@ -67,8 +74,17 @@ class MecanicoController extends Controller
      */
     public function updateEstatus(Request $request, $id)
     {
+        // Evitar que un mecánico marque la cita como 'cancelada' desde este endpoint
+        $estatus = $request->input('estatus');
+        if ($estatus === 'cancelada') {
+            return response()->json([
+                'success' => false,
+                'message' => 'No autorizado: los mecánicos no pueden cancelar citas'
+            ], 403);
+        }
+
         $validated = $request->validate([
-            'estatus' => 'required|in:pendiente,confirmada,en_proceso,completada,cancelada',
+            'estatus' => 'required|in:pendiente,confirmada,en_proceso,completada',
         ]);
 
         $cita = Cita::findOrFail($id);
