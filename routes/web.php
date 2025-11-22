@@ -116,7 +116,7 @@ Route::middleware(['auth', 'role:3'])
         Route::get('/', [RecepcionDashboardController::class, 'index'])
             ->name('dashboard');
 
-        // (Opcional) Endpoint JSON para recargar citas por fecha vía AJAX
+        // Endpoint JSON para recargar citas por fecha vía AJAX
         Route::get('/citas-por-fecha', [RecepcionDashboardController::class, 'citasPorFecha'])
             ->name('citas.fecha');
     });

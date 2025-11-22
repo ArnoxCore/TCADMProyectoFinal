@@ -82,7 +82,6 @@
                             id="searchFecha"
                             name="fecha"
                             value="{{ $fecha }}"
-                            onchange="document.getElementById('formFiltros').submit();"
                         >
                     </div>
 
@@ -152,12 +151,17 @@
                                             —
                                         @endif
                                     </td>
-                                    <td>{{ $cita->servicio->nombre ?? '—' }}</td>
+                                    <td>
+                                        @php
+                                            $nombresServicios = $cita->servicios->pluck('nombre')->implode(', ');
+                                        @endphp
+                                        {{ $nombresServicios ?: '—' }}
+                                    </td>
                                     <td>{{ optional($cita->mecanico->user)->name ?? 'Sin asignar' }}</td>
                                     <td>
                                         @php
                                             $estatus = $cita->estatus; // pendiente, confirmada, en_proceso, completada, cancelada
-                                            $label = ucfirst(str_replace('_', ' ', $estatus));
+                                            $label = $cita->estatus_texto ?? ucfirst(str_replace('_', ' ', $estatus));
                                         @endphp
                                         <span class="badge badge-{{ $estatus }}">{{ $label }}</span>
                                     </td>

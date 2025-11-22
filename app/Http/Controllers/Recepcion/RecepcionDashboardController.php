@@ -12,27 +12,35 @@ class RecepcionDashboardController extends Controller
 {
     public function index(Request $request)
     {
-        // Fecha que se está viendo (por default hoy)
-        $fecha = $request->input('fecha', Carbon::today()->toDateString());
+        // Fecha que se está viendo (si no viene, usamos HOY en zona de México)
+        $fecha = $request->input('fecha');
 
-        // Citas de ese día con sus relaciones
-        $citasQuery = Cita::with(['cliente.user', 'vehiculo', 'servicio', 'mecanico.user'])
+        if (!$fecha) {
+            $fecha = Carbon::now('America/Mexico_City')->toDateString();
+        }
+
+        // Citas de ese día con todas las relaciones necesarias
+        $citasQuery = Cita::with([
+            'cliente.user',
+            'vehiculo',
+            'servicios',       // <- aquí va la relación MANY-TO-MANY real
+            'mecanico.user'
+        ])
             ->whereDate('fecha', $fecha);
 
         $citas = (clone $citasQuery)
             ->orderBy('hora_inicio')
             ->get();
 
-        // Métricas para los KPIs
+        // KPIs (por fecha seleccionada)
         $stats = [
-            'total' => (clone $citasQuery)->count(),
-            'pending' => (clone $citasQuery)->where('estatus', 'pendiente')->count(),
+            'total'     => (clone $citasQuery)->count(),
+            'pending'   => (clone $citasQuery)->where('estatus', 'pendiente')->count(),
             'completed' => (clone $citasQuery)->where('estatus', 'completada')->count(),
-            // de inicio igualamos filtradas = total; si luego metemos filtros de servidor se ajusta
-            'filtered' => (clone $citasQuery)->count(),
+            'filtered'  => (clone $citasQuery)->count(), // el front luego lo ajusta
         ];
 
-        // Mecánicos activos para el filtro
+        // Mecánicos activos para el combo
         $mecanicos = Mecanico::with('user')
             ->where('activo', true)
             ->get();
@@ -40,19 +48,56 @@ class RecepcionDashboardController extends Controller
         return view('recepcion.dashboard', compact('citas', 'mecanicos', 'fecha', 'stats'));
     }
 
-    // recargar citas vía AJAX al cambiar la fecha
+    // Endpoint JSON para AJAX (fecha opcional)
     public function citasPorFecha(Request $request)
     {
-        $fecha = $request->input('fecha');
+        $fecha = $request->input('fecha'); // puede venir null / "" / "2025-11-25"
 
-        $citas = Cita::with(['cliente.user', 'vehiculo', 'servicio', 'mecanico.user'])
-            ->whereDate('fecha', $fecha)
+        $query = Cita::with([
+            'cliente.user',
+            'vehiculo',
+            'servicios',
+            'mecanico.user'
+        ]);
+
+        // Si hay fecha, filtramos; si viene vacía, traemos TODAS
+        if (!empty($fecha)) {
+            $query->whereDate('fecha', $fecha);
+        }
+
+        $citas = $query
+            ->orderBy('fecha')
             ->orderBy('hora_inicio')
             ->get();
 
+        $data = $citas->map(function ($cita) {
+            $vehiculo = $cita->vehiculo
+                ? trim(($cita->vehiculo->marca ?? '') . ' ' . ($cita->vehiculo->modelo ?? '') . ' ' . ($cita->vehiculo->anio ?? ''))
+                : '—';
+
+            $servicios = $cita->servicios
+                ? $cita->servicios->pluck('nombre')->implode(', ')
+                : null;
+
+            $estatus = $cita->estatus;
+
+            return [
+                'fecha'    => $cita->fecha?->format('Y-m-d'),
+                'hora'     => $cita->hora_inicio ? Carbon::parse($cita->hora_inicio)->format('H:i') : null,
+                'cliente'  => $cita->cliente->user->name ?? '—',
+                'vehiculo' => $vehiculo ?: '—',
+                'servicio' => $servicios ?: '—',
+                'mecanico' => optional(optional($cita->mecanico)->user)->name ?? 'Sin asignar',
+                'estatus'  => [
+                    'value' => $estatus, // pendiente / confirmada / ...
+                    'label' => $cita->estatus_texto ?? ucfirst(str_replace('_', ' ', $estatus)),
+                ],
+            ];
+        });
+
         return response()->json([
             'success' => true,
-            'data' => $citas,
+            'data'    => $data,
         ]);
     }
 }

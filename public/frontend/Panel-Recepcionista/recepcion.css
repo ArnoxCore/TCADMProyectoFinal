@@ -46,9 +46,13 @@ body {
     justify-content: center;
 }
 
+.brand-logo.green {
+    background-color: #13b30e;
+}
+
 .brand-logo-img {
-    width: 100%;
-    height: 100%;
+    width: 25px;
+    height: 25px;
     object-fit: contain;
 }
 
