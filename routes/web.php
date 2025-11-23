@@ -142,6 +142,15 @@ Route::middleware(['auth', 'role:4'])
         Route::get('/servicios', [AdminController::class, 'servicios'])
             ->name('servicios');
 
+        Route::post('/servicios', [AdminController::class, 'storeServicio'])
+            ->name('servicios.store');
+
+        Route::put('/servicios/{servicio}', [AdminController::class, 'updateServicio'])
+            ->name('servicios.update');
+
+        Route::delete('/servicios/{servicio}', [AdminController::class, 'destroyServicio'])
+            ->name('servicios.destroy');
+
         Route::get('/reportes', [AdminController::class, 'reportes'])
             ->name('reportes');
 
