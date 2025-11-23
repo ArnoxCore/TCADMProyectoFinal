@@ -1,5 +1,4 @@
-{{-- resources/views/recepcion/dashboard.blade.php --}}
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -9,7 +8,7 @@
     {{-- CSRF para peticiones AJAX --}}
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    {{-- CSS del panel de recepción (nuevo) --}}
+    {{-- CSS del panel de recepción --}}
     <link rel="stylesheet" href="{{ asset('frontend/Panel-Recepcionista/recepcion.css') }}">
 
     <!-- ====== FAVICON / PWA ====== -->
@@ -179,6 +178,7 @@
                                     >
                                         Confirmar
                                     </button>
+
                                     <button
                                         type="button"
                                         class="btn-accion btn-cancelar"
@@ -186,6 +186,7 @@
                                     >
                                         Cancelar
                                     </button>
+
                                 @elseif ($cita->estatus === 'confirmada')
                                     <button
                                         type="button"
@@ -194,6 +195,9 @@
                                     >
                                         Cancelar
                                     </button>
+
+                                @else
+                                    <span class="acciones-placeholder">—</span>
                                 @endif
                             </td>
                         </tr>
@@ -205,6 +209,13 @@
                     </tbody>
                 </table>
             </div>
+
+            {{-- Paginación Laravel --}}
+            @if($citas instanceof \Illuminate\Pagination\LengthAwarePaginator && $citas->hasPages())
+                <div class="tabla-pagination">
+                    {!! $citas->withQueryString()->links() !!}
+                </div>
+            @endif
         </section>
     </main>
 </div>

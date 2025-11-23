@@ -36,16 +36,18 @@ class RecepcionDashboardController extends Controller
             'mecanico.user'
         ])->whereDate('fecha', $fecha);
 
+        // Paginacion
         $citas = (clone $citasQuery)
             ->orderBy('hora_inicio')
-            ->get();
+            ->paginate(5);
 
         // KPIs (por fecha seleccionada)
         $stats = [
             'total'     => (clone $citasQuery)->count(),
             'pending'   => (clone $citasQuery)->where('estatus', 'pendiente')->count(),
             'completed' => (clone $citasQuery)->where('estatus', 'completada')->count(),
-            'filtered'  => (clone $citasQuery)->count(), // el front luego lo ajusta
+            // filtered = total de citas para esa fecha (antes de filtros front)
+            'filtered'  => $citas->total(),
         ];
 
         // Mecánicos activos para el combo de filtros

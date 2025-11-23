@@ -359,6 +359,8 @@ body {
     display: flex;
     gap: 0.4rem;
     align-items: center;
+    font-size: 14px;
+    min-width: 110px;
 }
 
 .btn-accion {
@@ -383,4 +385,68 @@ body {
 .btn-accion.btn-cancelar {
     border-color: var(--danger);
     color: var(--danger);
+}
+
+.acciones-placeholder {
+    flex: 1;
+    text-align: center;
+    font-size: 1.05rem;
+    color: var(--muted);
+}
+
+td.acciones:empty::before {
+    content: "—";
+    color: var(--muted);
+    font-size: 1.05rem;
+}
+
+/* ===== PAGINACIÓN TABLA ===== */
+
+.tabla-pagination {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Laravel genera un <nav role="navigation"> con enlaces / spans */
+.tabla-pagination nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    font-size: 13px;
+}
+
+/* Estilos base para enlaces y spans de la paginación */
+.tabla-pagination a,
+.tabla-pagination span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--white);
+    color: var(--text);
+    text-decoration: none;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.tabla-pagination a:hover {
+    background: #f3f4f6;
+}
+
+/* Página actual: Laravel marca el span con aria-current="page" */
+.tabla-pagination span[aria-current="page"] {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
+/* Botones deshabilitados: aria-disabled="true" */
+.tabla-pagination span[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: default;
 }

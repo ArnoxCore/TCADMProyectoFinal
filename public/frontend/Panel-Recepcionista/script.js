@@ -152,6 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             json.data.forEach(cita => {
                 const tr = document.createElement("tr");
+                const acciones = accionesHtmlDesdeJson(cita) || "";
 
                 tr.innerHTML = `
                     <td>${cita.fecha || ""}</td>
@@ -165,10 +166,14 @@ document.addEventListener("DOMContentLoaded", () => {
                             ${cita.estatus.label}
                         </span>
                     </td>
-                    <td class="acciones">
-                        ${accionesHtmlDesdeJson(cita)}
-                    </td>
+                    <td class="acciones">${acciones}</td>
                 `;
+
+                // si no hay acciones, mandar vacio
+                if (!acciones) {
+                    const tdAcciones = tr.querySelector("td.acciones");
+                    tdAcciones.textContent = "";
+                }
 
                 tableBody.appendChild(tr);
             });
