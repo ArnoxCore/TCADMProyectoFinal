@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             RolesTableSeeder::class,
             ServiciosTableSeeder::class,
             ClienteTestSeeder::class,
+            MecanicosSeeder::class,
         ]);
     }
 }

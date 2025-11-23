@@ -351,3 +351,36 @@ body {
         font-size: 13px;
     }
 }
+
+/* ===== ACCIONES EN LA TABLA ===== */
+
+.acciones {
+    white-space: nowrap;
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+.btn-accion {
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    padding: 0.25rem 0.6rem;
+    font-size: 12px;
+    background: var(--white);
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.btn-accion:hover {
+    background: #f3f4f6;
+}
+
+.btn-accion.btn-confirmar {
+    border-color: var(--success);
+    color: var(--success);
+}
+
+.btn-accion.btn-cancelar {
+    border-color: var(--danger);
+    color: var(--danger);
+}
