@@ -147,13 +147,14 @@
                         <th>Vehículo</th>
                         <th>Servicio</th>
                         <th>Mecánico</th>
+                        <th>Asistencia</th>
                         <th>Estatus</th>
                         <th>Acciones</th>
                     </tr>
                     </thead>
                     <tbody id="tableBody">
                     @forelse($citas as $cita)
-                        <tr>
+                        <tr data-cita-id="{{ $cita->id }}">
                             <td>{{ \Carbon\Carbon::parse($cita->fecha)->format('Y-m-d') }}</td>
                             <td>{{ \Carbon\Carbon::parse($cita->hora_inicio)->format('H:i') }}</td>
                             <td>{{ $cita->cliente->user->name ?? '—' }}</td>
@@ -174,6 +175,14 @@
                             </td>
                             <td>{{ $cita->mecanico?->user?->name ?? 'Sin asignar' }}</td>
                             <td>
+                                <div class="attendance-state">
+                                    <span>{{ $cita->attendance_label }}</span>
+                                    @if($cita->attendance_secondary)
+                                        <small>{{ $cita->attendance_secondary }}</small>
+                                    @endif
+                                </div>
+                            </td>
+                            <td>
                                 @php
                                     $estatus = $cita->estatus; // pendiente, confirmada, en_proceso, completada, cancelada
                                     $label = $cita->estatus_texto ?? ucfirst(str_replace('_', ' ', $estatus));
@@ -181,41 +190,80 @@
                                 <span class="badge badge-{{ $estatus }}">{{ $label }}</span>
                             </td>
                             <td class="acciones">
-                                @if ($cita->estatus === 'pendiente')
+                                <div class="acciones-group">
+                                @php
+                                    $canCheckIn = $cita->canCheckIn();
+                                    $canStart = $cita->canStartService();
+                                    $canNoShow = $cita->canMarkNoShow();
+                                    $canCancel = $cita->canCancelDesdeRecepcion();
+                                @endphp
+
+                                @if ($canCheckIn)
                                     <button
                                         type="button"
-                                        class="btn-accion btn-confirmar"
+                                        class="btn-accion btn-icon btn-checkin"
                                         data-cita-id="{{ $cita->id }}"
-                                        data-fecha="{{ $cita->fecha->format('Y-m-d') }}"
+                                        title="Registrar llegada"
+                                        aria-label="Registrar llegada"
                                     >
-                                        Confirmar
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M5 12l4 4 10-10" />
+                                        </svg>
                                     </button>
+                                @endif
 
+                                @if ($canStart)
                                     <button
                                         type="button"
-                                        class="btn-accion btn-cancelar"
+                                        class="btn-accion btn-icon btn-start"
                                         data-cita-id="{{ $cita->id }}"
+                                        title="Iniciar servicio"
+                                        aria-label="Iniciar servicio"
                                     >
-                                        Cancelar
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M8 5v14l10-7z" />
+                                        </svg>
                                     </button>
+                                @endif
 
-                                @elseif ($cita->estatus === 'confirmada')
+                                @if ($canNoShow)
                                     <button
                                         type="button"
-                                        class="btn-accion btn-cancelar"
+                                        class="btn-accion btn-icon btn-no-show"
                                         data-cita-id="{{ $cita->id }}"
+                                        title="Marcar inasistencia"
+                                        aria-label="Marcar inasistencia"
                                     >
-                                        Cancelar
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <circle cx="12" cy="12" r="9" />
+                                            <path d="M6 6l12 12" />
+                                        </svg>
                                     </button>
+                                @endif
 
-                                @else
+                                @if ($canCancel)
+                                    <button
+                                        type="button"
+                                        class="btn-accion btn-icon btn-cancelar"
+                                        data-cita-id="{{ $cita->id }}"
+                                        title="Cancelar cita"
+                                        aria-label="Cancelar cita"
+                                    >
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M6 6l12 12M18 6l-12 12" />
+                                        </svg>
+                                    </button>
+                                @endif
+
+                                @if (! $canCheckIn && ! $canStart && ! $canNoShow && ! $canCancel)
                                     <span class="acciones-placeholder">—</span>
                                 @endif
+                                </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8">No hay citas para esta fecha.</td>
+                            <td colspan="9">No hay citas para esta fecha.</td>
                         </tr>
                     @endforelse
                     </tbody>
@@ -253,9 +301,10 @@
 <script>
     window.APP_ROUTES = {
         citasPorFecha: "{{ route('recepcion.citas.fecha') }}",
-        mecanicosDisponibles: "{{ route('recepcion.citas.mecanicos-disponibles', ':id') }}",
-        asignarConfirmar: "{{ route('recepcion.citas.asignar-confirmar', ':id') }}",
-        cancelarCita: "{{ route('recepcion.citas.cancelar', ':id') }}",
+        cancelarCita: "{{ route('recepcion.citas.cancelar', ['cita' => '__ID__']) }}",
+        checkIn: "{{ route('recepcion.citas.check-in', ['cita' => '__ID__']) }}",
+        startService: "{{ route('recepcion.citas.start-service', ['cita' => '__ID__']) }}",
+        noShow: "{{ route('recepcion.citas.no-show', ['cita' => '__ID__']) }}",
     };
 </script>
 

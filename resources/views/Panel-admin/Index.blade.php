@@ -8,6 +8,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ asset('frontend/Panel-admin/admin.css') }}" />
+
+  <!-- ====== FAVICON / PWA ====== -->
+    <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('frontend/icons/favicon-96x96.png') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('frontend/icons/favicon.svg') }}">
+    <link rel="shortcut icon" href="{{ asset('frontend/icons/favicon.ico') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('frontend/icons/apple-touch-icon.png') }}">
+    <meta name="apple-mobile-web-app-title" content="TCADM">
+    <link rel="manifest" href="{{ asset('frontend/icons/site.webmanifest') }}">
+    
 </head>
 <body data-page="index">
   <header class="header">

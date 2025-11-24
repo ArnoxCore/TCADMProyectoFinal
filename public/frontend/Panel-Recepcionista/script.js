@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function buildRoute(template, id) {
         if (!template) return "";
-        return template.replace(':id', id);
+        return template.replace('__ID__', id).replace(':id', id);
     }
 
     let rows = [];
@@ -39,15 +39,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const cells = row.children;
 
             // Fila "No hay citas..." -> la dejamos visible y no la contamos
-            if (cells.length < 8) {
+            if (cells.length < 9) {
                 row.style.display = "";
                 return;
             }
 
-            // [Fecha, Hora, Cliente, Vehículo, Servicio, Mecánico, Estatus, Acciones]
+            // [Fecha, Hora, Cliente, Vehículo, Servicio, Mecánico, Asistencia, Estatus, Acciones]
             const colCliente  = cells[2];
             const colMecanico = cells[5];
-            const colEstatus  = cells[6];
+            const colEstatus  = cells[7];
 
             const clienteTexto  = colCliente.textContent.toLowerCase();
             const mecanicoTexto = colMecanico.textContent.trim();
@@ -80,122 +80,190 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ========= Handlers de acciones: Confirmar / Cancelar =========
+    // ========= Handlers de acciones: asistencia =========
 
-    async function manejarConfirmarCita(citaId, row) {
-        if (!citaId) return;
+    function updateStatusCell(cell, estatus) {
+        if (!cell || !estatus) return;
+        cell.innerHTML = `
+            <span class="badge badge-${estatus.value}">
+                ${estatus.label}
+            </span>
+        `;
+    }
 
-        const mecanicosUrl = buildRoute(ROUTES.mecanicosDisponibles, citaId);
+    function updateAttendanceCell(cell, attendance) {
+        if (!cell) return;
+
+        const label = attendance?.label || "Pendiente";
+        const secondary = attendance?.secondary;
+
+        let html = `<div class="attendance-state"><span>${label}</span>`;
+        if (secondary) {
+            html += `<small>${secondary}</small>`;
+        }
+        html += "</div>";
+
+        cell.innerHTML = html;
+    }
+
+    function renderActionsCell(row, actions, citaIdOverride) {
+        const td = row?.children?.[8];
+        if (!td) return;
+
+        const citaId = citaIdOverride || row?.dataset?.citaId || "";
+        const buttons = [];
+
+        if (actions?.can_check_in) {
+            buttons.push(`
+                <button type="button" class="btn-accion btn-checkin" data-cita-id="${citaId}">
+                    Registrar llegada
+                </button>
+            `);
+        }
+
+        if (actions?.can_start) {
+            buttons.push(`
+                <button type="button" class="btn-accion btn-start" data-cita-id="${citaId}">
+                    Iniciar servicio
+                </button>
+            `);
+        }
+
+        if (actions?.can_mark_no_show) {
+            buttons.push(`
+                <button type="button" class="btn-accion btn-no-show" data-cita-id="${citaId}">
+                    No asistió
+                </button>
+            `);
+        }
+
+        if (actions?.can_cancel) {
+            buttons.push(`
+                <button type="button" class="btn-accion btn-cancelar" data-cita-id="${citaId}">
+                    Cancelar
+                </button>
+            `);
+        }
+
+        td.innerHTML = buttons.length
+            ? `<div class="acciones-group">${buttons.join("")}</div>`
+            : '<div class="acciones-group"><span class="acciones-placeholder">—</span></div>';
+    }
+
+    function applyActionPayload(row, payload) {
+        if (!row || !payload) return;
+        const cells = row.children;
+        updateAttendanceCell(cells[6], payload.attendance);
+        updateStatusCell(cells[7], payload.estatus);
+        renderActionsCell(row, payload.actions);
+    }
+
+    async function sendPatchAction(url) {
+        if (!url) return null;
 
         try {
-            const resp = await fetch(mecanicosUrl);
-            if (!resp.ok) {
-                console.error("Error al cargar mecánicos:", resp.status);
-                Swal.fire("Error", "No se pudieron cargar los mecánicos.", "error");
-                return;
-            }
-
-            const json = await resp.json();
-            if (!json.success) {
-                console.error("Respuesta mecánicos no exitosa:", json);
-                Swal.fire("Error", "No se pudieron cargar los mecánicos.", "error");
-                return;
-            }
-
-            const lista = json.data || [];
-
-            if (lista.length === 0) {
-                Swal.fire(
-                    "Sin disponibilidad",
-                    "Ningún mecánico tiene cupo para esa fecha.",
-                    "warning"
-                );
-                return;
-            }
-
-            const inputOptions = {};
-            lista.forEach(m => {
-                inputOptions[m.id] = `${m.nombre} (${m.citas_vigentes}/${m.max_citas})`;
-            });
-
-            const { value: mecanicoId } = await Swal.fire({
-                title: "Asignar mecánico",
-                text: "Selecciona un mecánico para confirmar la cita.",
-                input: "select",
-                inputOptions,
-                inputPlaceholder: "Selecciona un mecánico",
-                showCancelButton: true,
-                confirmButtonText: "Confirmar cita",
-                cancelButtonText: "Cancelar",
-                preConfirm: (value) => {
-                    if (!value) {
-                        Swal.showValidationMessage("Debes seleccionar un mecánico");
-                    }
-                    return value;
-                }
-            });
-
-            if (!mecanicoId) {
-                // Usuario canceló
-                return;
-            }
-
-            const url = buildRoute(ROUTES.asignarConfirmar, citaId);
-
-            const respConfirm = await fetch(url, {
+            const resp = await fetch(url, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
                     "Accept": "application/json",
                     "X-CSRF-TOKEN": csrfToken,
                 },
-                body: JSON.stringify({ mecanico_id: mecanicoId }),
+                body: JSON.stringify({}),
             });
 
-            if (!respConfirm.ok) {
-                const errorText = await respConfirm.text();
-                console.error("Error HTTP al confirmar cita:", respConfirm.status, errorText);
-                Swal.fire("Error", "No se pudo confirmar la cita.", "error");
-                return;
+            const data = await resp.json();
+
+            if (!resp.ok || !data.success) {
+                const message = data?.message || "No se pudo completar la acción.";
+                Swal.fire("Error", message, "error");
+                return null;
             }
 
-            const jsonConfirm = await respConfirm.json();
-
-            if (!jsonConfirm.success) {
-                Swal.fire("Error", jsonConfirm.message || "No se pudo confirmar la cita.", "error");
-                return;
-            }
-
-            // Actualizar fila: mecánico + badge + acciones
-            const cells = row.children;
-            const tdMecanico = cells[5];
-            const tdEstatus  = cells[6];
-            const tdAcciones = cells[7];
-
-            tdMecanico.textContent = jsonConfirm.mecanico || "Sin asignar";
-
-            tdEstatus.innerHTML = `
-                <span class="badge badge-${jsonConfirm.estatus.value}">
-                    ${jsonConfirm.estatus.label}
-                </span>
-            `;
-
-            tdAcciones.innerHTML = `
-                <button
-                    type="button"
-                    class="btn-accion btn-cancelar"
-                    data-cita-id="${citaId}"
-                >
-                    Cancelar
-                </button>
-            `;
-
-            Swal.fire("Listo", jsonConfirm.message || "Cita confirmada.", "success");
-            actualizarRows();
-        } catch (e) {
-            console.error("Error confirmando cita:", e);
-            Swal.fire("Error", "Ocurrió un error al confirmar la cita.", "error");
+            return data;
+        } catch (error) {
+            console.error("Error en la acción", error);
+            Swal.fire("Error", "Ocurrió un error al procesar la acción.", "error");
+            return null;
         }
+    }
+
+    async function manejarCheckIn(citaId, row) {
+        if (!citaId) return;
+
+        const confirm = await Swal.fire({
+            title: "Registrar llegada",
+            text: "¿Registrar el check-in del cliente?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Sí, registrar",
+            cancelButtonText: "No",
+        });
+
+        if (!confirm.isConfirmed) {
+            return;
+        }
+
+        const url = buildRoute(ROUTES.checkIn, citaId);
+        const data = await sendPatchAction(url);
+
+        if (!data) return;
+
+        applyActionPayload(row, data);
+        Swal.fire("Listo", data.message || "Asistencia registrada.", "success");
+        actualizarRows();
+    }
+
+    async function manejarInicioServicio(citaId, row) {
+        if (!citaId) return;
+
+        const confirm = await Swal.fire({
+            title: "Iniciar servicio",
+            text: "¿Registrar la hora de inicio?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Sí, iniciar",
+            cancelButtonText: "No",
+        });
+
+        if (!confirm.isConfirmed) {
+            return;
+        }
+
+        const url = buildRoute(ROUTES.startService, citaId);
+        const data = await sendPatchAction(url);
+
+        if (!data) return;
+
+        applyActionPayload(row, data);
+        Swal.fire("Registrado", data.message || "Inicio registrado.", "success");
+        actualizarRows();
+    }
+
+    async function manejarNoShow(citaId, row) {
+        if (!citaId) return;
+
+        const confirm = await Swal.fire({
+            title: "Marcar inasistencia",
+            text: "¿Confirmas que el cliente no asistió?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, marcar",
+            cancelButtonText: "No",
+        });
+
+        if (!confirm.isConfirmed) {
+            return;
+        }
+
+        const url = buildRoute(ROUTES.noShow, citaId);
+        const data = await sendPatchAction(url);
+
+        if (!data) return;
+
+        applyActionPayload(row, data);
+        Swal.fire("Actualizado", data.message || "Se registró la inasistencia.", "success");
+        actualizarRows();
     }
 
     async function manejarCancelarCita(citaId, row) {
@@ -215,50 +283,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const url = buildRoute(ROUTES.cancelarCita, citaId);
+        const data = await sendPatchAction(url);
 
-        try {
-            const resp = await fetch(url, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                    "X-CSRF-TOKEN": csrfToken,
-                },
-                body: JSON.stringify({}),
-            });
+        if (!data) return;
 
-            if (!resp.ok) {
-                const errorText = await resp.text();
-                console.error("Error HTTP al cancelar cita:", resp.status, errorText);
-                Swal.fire("Error", "No se pudo cancelar la cita.", "error");
-                return;
-            }
-
-            const jsonCancel = await resp.json();
-
-            if (!jsonCancel.success) {
-                Swal.fire("Error", jsonCancel.message || "No se pudo cancelar la cita.", "error");
-                return;
-            }
-
-            const cells = row.children;
-            const tdEstatus  = cells[6];
-            const tdAcciones = cells[7];
-
-            tdEstatus.innerHTML = `
-                <span class="badge badge-${jsonCancel.estatus.value}">
-                    ${jsonCancel.estatus.label}
-                </span>
-            `;
-
-            tdAcciones.innerHTML = "";
-
-            Swal.fire("Cancelada", jsonCancel.message || "La cita fue cancelada.", "success");
-            actualizarRows();
-        } catch (e) {
-            console.error("Error cancelando cita:", e);
-            Swal.fire("Error", "Ocurrió un error al cancelar la cita.", "error");
-        }
+        applyActionPayload(row, data);
+        Swal.fire("Cancelada", data.message || "La cita fue cancelada.", "success");
+        actualizarRows();
     }
 
     // ====== Cambio de fecha -> recargar con paginación de Laravel ======
@@ -290,20 +321,39 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Delegación de eventos para botones Confirmar / Cancelar
+    // Delegación de eventos para botones de asistencia
     document.addEventListener("click", (event) => {
         const target = event.target;
 
-        if (target.classList.contains("btn-confirmar")) {
-            const row = target.closest("tr");
-            const citaId = target.getAttribute("data-cita-id");
-            manejarConfirmarCita(citaId, row);
+        const btnCancel = target.closest(".btn-cancelar");
+        if (btnCancel) {
+            const row = btnCancel.closest("tr");
+            const citaId = btnCancel.getAttribute("data-cita-id");
+            manejarCancelarCita(citaId, row);
+            return;
         }
 
-        if (target.classList.contains("btn-cancelar")) {
-            const row = target.closest("tr");
-            const citaId = target.getAttribute("data-cita-id");
-            manejarCancelarCita(citaId, row);
+        const btnCheckIn = target.closest(".btn-checkin");
+        if (btnCheckIn) {
+            const row = btnCheckIn.closest("tr");
+            const citaId = btnCheckIn.getAttribute("data-cita-id");
+            manejarCheckIn(citaId, row);
+            return;
+        }
+
+        const btnStart = target.closest(".btn-start");
+        if (btnStart) {
+            const row = btnStart.closest("tr");
+            const citaId = btnStart.getAttribute("data-cita-id");
+            manejarInicioServicio(citaId, row);
+            return;
+        }
+
+        const btnNoShow = target.closest(".btn-no-show");
+        if (btnNoShow) {
+            const row = btnNoShow.closest("tr");
+            const citaId = btnNoShow.getAttribute("data-cita-id");
+            manejarNoShow(citaId, row);
         }
     });
 

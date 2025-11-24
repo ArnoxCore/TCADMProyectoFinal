@@ -129,17 +129,21 @@ Route::middleware(['auth', 'role:3'])
         Route::get('/citas-por-fecha', [RecepcionDashboardController::class, 'citasPorFecha'])
             ->name('citas.fecha');
 
-        // Mecánicos disponibles para una cita (AJAX)
-        Route::get('/citas/{cita}/mecanicos-disponibles', [RecepcionDashboardController::class, 'mecanicosDisponibles'])
-            ->name('citas.mecanicos-disponibles');
-
-        // Asignar mecánico + confirmar cita (AJAX)
-        Route::patch('/citas/{cita}/asignar-confirmar', [RecepcionDashboardController::class, 'asignarYConfirmar'])
-            ->name('citas.asignar-confirmar');
-
         // Cancelar cita desde recepción (AJAX)
         Route::patch('/citas/{cita}/cancelar', [RecepcionDashboardController::class, 'cancelar'])
             ->name('citas.cancelar');
+
+        // Registrar asistencia del cliente (AJAX)
+        Route::patch('/citas/{cita}/check-in', [RecepcionDashboardController::class, 'registrarCheckIn'])
+            ->name('citas.check-in');
+
+        // Marcar inicio del servicio (AJAX)
+        Route::patch('/citas/{cita}/inicio-servicio', [RecepcionDashboardController::class, 'iniciarServicio'])
+            ->name('citas.start-service');
+
+        // Marcar inasistencia (AJAX)
+        Route::patch('/citas/{cita}/no-show', [RecepcionDashboardController::class, 'marcarNoShow'])
+            ->name('citas.no-show');
     });
 
 // ======================================================

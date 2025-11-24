@@ -10,15 +10,7 @@ use Illuminate\Http\Request;
 
 class RecepcionDashboardController extends Controller
 {
-    // 🔹 Límite y estatus que cuentan como "ocupación" del mecánico
-    private const MAX_CITAS_POR_DIA = 4;
-
-    private const ESTATUS_OCUPACION = [
-        'pendiente',
-        'confirmada',
-        'en_proceso',
-        'completada',
-    ];
+    private const LOCAL_TZ = 'America/Mexico_City';
 
     public function index(Request $request)
     {
@@ -30,7 +22,7 @@ class RecepcionDashboardController extends Controller
 
         // Si NO pidió "ver todas" y NO mandó fecha, usamos hoy
         if (! $showAll && ! $fecha) {
-            $fecha = Carbon::now('America/Mexico_City')->toDateString();
+            $fecha = Carbon::now(self::LOCAL_TZ)->toDateString();
         }
 
         $citasQuery = Cita::with([
@@ -112,6 +104,14 @@ class RecepcionDashboardController extends Controller
                     'value' => $estatus,
                     'label' => $cita->estatus_texto ?? ucfirst(str_replace('_', ' ', $estatus)),
                 ],
+                'attendance' => [
+                    'label'     => $cita->attendance_label,
+                    'secondary' => $cita->attendance_secondary,
+                    'check_in'  => $cita->formattedCheckIn(),
+                    'inicio'    => $cita->formattedInicioReal(),
+                    'asistio'   => $cita->asistio,
+                ],
+                'actions' => $this->actionsPayload($cita),
             ];
         });
 
@@ -121,98 +121,117 @@ class RecepcionDashboardController extends Controller
         ]);
     }
 
-    // ========= AJAX: mecánicos disponibles para una cita =========
-    public function mecanicosDisponibles(Cita $cita)
+    // ========= AJAX: registrar check-in =========
+    public function registrarCheckIn(Request $request, Cita $cita)
     {
-        $fecha = $cita->fecha;
-
-        $mecanicos = Mecanico::with('user')
-            ->where('activo', true)
-            ->withCount(['citas as citas_vigentes' => function ($q) use ($fecha) {
-                $q->whereDate('fecha', $fecha)
-                    ->whereIn('estatus', self::ESTATUS_OCUPACION);
-            }])
-            ->having('citas_vigentes', '<', self::MAX_CITAS_POR_DIA)
-            ->get();
-
-        $data = $mecanicos->map(function ($mecanico) {
-            return [
-                'id'             => $mecanico->id,
-                'nombre'         => $mecanico->user?->name,
-                'citas_vigentes' => $mecanico->citas_vigentes,
-                'max_citas'      => self::MAX_CITAS_POR_DIA,
-            ];
-        });
-
-        return response()->json([
-            'success' => true,
-            'data'    => $data,
-        ]);
-    }
-
-    // ========= AJAX: asignar mecánico + confirmar cita =========
-    public function asignarYConfirmar(Request $request, Cita $cita)
-    {
-        $request->validate([
-            'mecanico_id' => 'required|exists:mecanicos,id',
-        ]);
-
-        $mecanicoId = (int) $request->input('mecanico_id');
-        $fecha      = $cita->fecha;
-
-        // Contar citas del mecánico ese día (ocupación)
-        $citasDelDia = Cita::where('mecanico_id', $mecanicoId)
-            ->whereDate('fecha', $fecha)
-            ->whereIn('estatus', self::ESTATUS_OCUPACION)
-            // si la cita ya tenía ese mecánico, no la contamos doble
-            ->when($cita->mecanico_id === $mecanicoId, function ($q) use ($cita) {
-                $q->where('id', '!=', $cita->id);
-            })
-            ->count();
-
-        if ($citasDelDia >= self::MAX_CITAS_POR_DIA) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Este mecánico ya no tiene disponibilidad para esa fecha.',
-            ], 422);
+        if (! $cita->canCheckIn()) {
+            return $this->attendanceError('Esta cita ya cuenta con registro de asistencia o fue cancelada.');
         }
 
-        // Asignar mecánico y confirmar
-        $cita->mecanico_id = $mecanicoId;
-        $cita->estatus     = 'confirmada';
+        $cita->check_in_at = Carbon::now(self::LOCAL_TZ);
+        $cita->asistio = true;
         $cita->save();
 
-        $estatus = $cita->estatus;
-        $label   = $cita->estatus_texto ?? ucfirst(str_replace('_', ' ', $estatus));
+        return $this->attendanceSuccess($cita, 'Asistencia registrada correctamente.');
+    }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Cita confirmada y mecánico asignado correctamente.',
-            'estatus' => [
-                'value' => $estatus,
-                'label' => $label,
-            ],
-            'mecanico' => $cita->mecanico?->user?->name ?? 'Sin asignar',
-        ]);
+    // ========= AJAX: registrar inicio del servicio =========
+    public function iniciarServicio(Request $request, Cita $cita)
+    {
+        if (! $cita->canStartService()) {
+            return $this->attendanceError('Registra primero la llegada del cliente para poder iniciar el servicio.');
+        }
+
+        $cita->inicio_real_at = Carbon::now(self::LOCAL_TZ);
+
+        if (in_array($cita->estatus, ['pendiente', 'confirmada'])) {
+            $cita->estatus = 'en_proceso';
+        }
+
+        $cita->save();
+
+        return $this->attendanceSuccess($cita, 'Inicio del servicio registrado.');
+    }
+
+    // ========= AJAX: marcar inasistencia =========
+    public function marcarNoShow(Request $request, Cita $cita)
+    {
+        if (! $cita->canMarkNoShow()) {
+            return $this->attendanceError('No es posible marcar inasistencia para esta cita.');
+        }
+
+        $cita->asistio = false;
+        $cita->check_in_at = null;
+        $cita->inicio_real_at = null;
+        $cita->estatus = 'cancelada';
+        $cita->save();
+
+        return $this->attendanceSuccess($cita, 'La cita se marcó como inasistencia.');
     }
 
     // ========= AJAX: cancelar cita desde recepción =========
     public function cancelar(Request $request, Cita $cita)
     {
-        // Luego si quieres bloqueamos por fecha, por ahora libre
+        if (! $cita->canCancelDesdeRecepcion()) {
+            return $this->attendanceError('Este estado ya no permite cancelar la cita.');
+        }
+
         $cita->estatus = 'cancelada';
+        $cita->check_in_at = null;
+        $cita->inicio_real_at = null;
+        $cita->asistio = null;
         $cita->save();
 
-        $estatus = $cita->estatus;
-        $label   = $cita->estatus_texto ?? ucfirst(str_replace('_', ' ', $estatus));
+        return $this->attendanceSuccess($cita, 'La cita fue cancelada desde recepción.');
+    }
 
+    private function attendanceSuccess(Cita $cita, string $message)
+    {
         return response()->json([
-            'success' => true,
-            'message' => 'La cita fue cancelada desde recepción.',
-            'estatus' => [
-                'value' => $estatus,
-                'label' => $label,
-            ],
+            'success'    => true,
+            'message'    => $message,
+            'estatus'    => $this->estatusPayload($cita),
+            'attendance' => $this->attendancePayload($cita),
+            'actions'    => $this->actionsPayload($cita),
         ]);
+    }
+
+    private function attendanceError(string $message, int $status = 422)
+    {
+        return response()->json([
+            'success' => false,
+            'message' => $message,
+        ], $status);
+    }
+
+    private function estatusPayload(Cita $cita): array
+    {
+        $estatus = $cita->estatus;
+
+        return [
+            'value' => $estatus,
+            'label' => $cita->estatus_texto ?? ucfirst(str_replace('_', ' ', $estatus)),
+        ];
+    }
+
+    private function attendancePayload(Cita $cita): array
+    {
+        return [
+            'label'          => $cita->attendance_label,
+            'secondary'      => $cita->attendance_secondary,
+            'asistio'        => $cita->asistio,
+            'check_in_at'    => $cita->formattedCheckIn(),
+            'inicio_real_at' => $cita->formattedInicioReal(),
+        ];
+    }
+
+    private function actionsPayload(Cita $cita): array
+    {
+        return [
+            'can_check_in'    => $cita->canCheckIn(),
+            'can_start'       => $cita->canStartService(),
+            'can_mark_no_show'=> $cita->canMarkNoShow(),
+            'can_cancel'      => $cita->canCancelDesdeRecepcion(),
+        ];
     }
 }

@@ -13,9 +13,11 @@ use Illuminate\Support\Carbon;
 class Cita extends Model {
     use HasFactory, SoftDeletes;
 
+    public const LOCAL_TIMEZONE = 'America/Mexico_City';
+
     protected $fillable = [
         'cliente_id','vehiculo_id','mecanico_id','fecha','hora_inicio','hora_fin',
-        'estatus','observaciones_cliente','precio_final'
+        'estatus','observaciones_cliente','precio_final','check_in_at','inicio_real_at','asistio'
     ];
 
     protected $casts = [
@@ -61,6 +63,65 @@ class Cita extends Model {
 
     public function observaciones(): HasMany {
         return $this->hasMany(ObservacionServicio::class);
+    }
+
+    public function formattedCheckIn(string $format = 'H:i'): ?string
+    {
+        return $this->formatAttendanceTime($this->check_in_at, $format);
+    }
+
+    public function formattedInicioReal(string $format = 'H:i'): ?string
+    {
+        return $this->formatAttendanceTime($this->inicio_real_at, $format);
+    }
+
+    public function getAttendanceLabelAttribute(): string
+    {
+        if ($this->asistio === true) {
+            return $this->formattedCheckIn()
+                ? 'Check-in: '.$this->formattedCheckIn()
+                : 'Asistencia registrada';
+        }
+
+        if ($this->asistio === false) {
+            return 'No asistió';
+        }
+
+        return 'Pendiente';
+    }
+
+    public function getAttendanceSecondaryAttribute(): ?string
+    {
+        return $this->formattedInicioReal()
+            ? 'Inicio: '.$this->formattedInicioReal()
+            : null;
+    }
+
+    public function canCheckIn(): bool
+    {
+        return $this->asistio === null && $this->estatus !== 'cancelada';
+    }
+
+    public function canStartService(): bool
+    {
+        return $this->asistio === true && $this->inicio_real_at === null;
+    }
+
+    public function canMarkNoShow(): bool
+    {
+        return $this->asistio === null && $this->estatus !== 'cancelada';
+    }
+
+    public function canCancelDesdeRecepcion(): bool
+    {
+        return in_array($this->estatus, ['pendiente', 'confirmada']);
+    }
+
+    protected function formatAttendanceTime(?Carbon $value, string $format = 'H:i'): ?string
+    {
+        return $value
+            ? $value->copy()->timezone(self::LOCAL_TIMEZONE)->format($format)
+            : null;
     }
 
     /**
