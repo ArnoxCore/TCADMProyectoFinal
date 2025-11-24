@@ -175,8 +175,20 @@ Route::middleware(['auth', 'role:4'])
         Route::get('/estadisticas', [AdminController::class, 'estadisticas'])
             ->name('estadisticas');
 
+        Route::get('/personal', [AdminController::class, 'personal'])
+            ->name('personal');
+
         Route::patch('/citas/{cita}/asignar', [AdminController::class, 'assignCita'])
             ->name('citas.asignar');
+
+        Route::post('/personal', [AdminController::class, 'storePersonal'])
+            ->name('personal.store');
+
+        Route::put('/personal/{user}', [AdminController::class, 'updatePersonal'])
+            ->name('personal.update');
+
+        Route::delete('/personal/{user}', [AdminController::class, 'destroyPersonal'])
+            ->name('personal.destroy');
     });
 
 Route::get('/api/car-image', [CarsXEController::class, 'getImage']);

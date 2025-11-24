@@ -11,7 +11,7 @@ return new class extends Migration {
             $table->foreignId('cliente_id')->constrained('clientes')->cascadeOnUpdate()->restrictOnDelete();
             $table->foreignId('vehiculo_id')->constrained('vehiculos')->cascadeOnUpdate()->restrictOnDelete();
             $table->foreignId('mecanico_id')->nullable()
-                  ->constrained('mecan  icos')->cascadeOnUpdate()->nullOnDelete();
+                ->constrained('mecanicos')->cascadeOnUpdate()->nullOnDelete();
 
             $table->date('fecha');
             $table->time('hora_inicio');

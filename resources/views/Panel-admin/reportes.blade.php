@@ -24,12 +24,13 @@
         <div class="brand-logo" aria-hidden="true"></div>
         <div>
           <div class="brand-title">Panel de Administración</div>
-          <div class="brand-sub">Bienvenido, Admin</div>
+          <div class="brand-sub">Bienvenido, {{ Auth::user()->name ?? 'Admin' }}</div>
         </div>
       </div>
       <nav class="nav">
         <a href="{{ route('admin.dashboard') }}" data-nav="index">Asignar Mecánicos</a>
         <a href="{{ route('admin.servicios') }}" data-nav="servicios">Servicios</a>
+        <a href="{{ route('admin.personal') }}" data-nav="personal">Gestión de Personal</a>
         <a href="{{ route('admin.reportes') }}" data-nav="reportes">Reportes</a>
         <a href="{{ route('admin.estadisticas') }}" data-nav="estadisticas">Estadísticas</a>
         <form method="POST" action="{{ route('logout') }}">
@@ -41,20 +42,75 @@
   </header>
 
   <main class="main">
+    @php
+      $inicio = $periodoSeleccionado['inicio'] ?? now()->startOfMonth()->toDateString();
+      $fin = $periodoSeleccionado['fin'] ?? now()->endOfMonth()->toDateString();
+      $labels = collect($chartData['labels'] ?? []);
+      $hasData = $labels->count() > 0;
+    @endphp
+
+    <section class="section">
+      <form method="GET" class="card" style="padding:16px; display:grid; gap:12px;">
+        <div class="head" style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="title">Filtrar periodo</div>
+          <button type="submit" class="button primary" style="padding:6px 14px;">Actualizar</button>
+        </div>
+        <div class="grid-2">
+          <label class="label">Desde
+            <input type="date" name="desde" class="input" value="{{ request('desde', $inicio) }}">
+          </label>
+          <label class="label">Hasta
+            <input type="date" name="hasta" class="input" value="{{ request('hasta', $fin) }}">
+          </label>
+        </div>
+      </form>
+    </section>
+
     <section class="card chart-card">
       <div class="head">
         <div>
-          <div class="title">Servicios Más Solicitados (mes)</div>
-          <p class="section-desc">Gráfica pendiente — aún sin datos cargados</p>
+          <div class="title">Servicios más solicitados</div>
+          <p class="section-desc">
+            @if($hasData)
+              Período {{ \Illuminate\Support\Carbon::parse($inicio)->format('d/m/Y') }} – {{ \Illuminate\Support\Carbon::parse($fin)->format('d/m/Y') }}
+            @else
+              Aún no hay citas con servicios en este rango.
+            @endif
+          </p>
         </div>
       </div>
       <div class="body">
         <div class="canvas-wrap">
-          <!-- Canvas vacío para que el backend o JS lo llenen -->
-          <canvas id="servicesBarChart"></canvas>
+          <canvas id="servicesBarChart" data-chart='@json($chartData ?? [])'></canvas>
         </div>
       </div>
     </section>
+
+    @if($hasData)
+      <section class="cards-3">
+        <article class="card">
+          <div class="head"><span class="title">Servicio Top</span></div>
+          <div class="body">
+            <div class="kpi">{{ $topService->nombre ?? 'N/D' }}</div>
+            <div class="sub">{{ $topService->total ?? 0 }} solicitudes</div>
+          </div>
+        </article>
+        <article class="card">
+          <div class="head"><span class="title">Total de servicios</span></div>
+          <div class="body">
+            <div class="kpi">{{ number_format($totalSolicitudes ?? 0) }}</div>
+            <div class="sub">Citas registradas en el periodo</div>
+          </div>
+        </article>
+        <article class="card">
+          <div class="head"><span class="title">Servicios mostrados</span></div>
+          <div class="body">
+            <div class="kpi">{{ $labels->count() }}</div>
+            <div class="sub">Hasta 8 servicios con más demanda</div>
+          </div>
+        </article>
+      </section>
+    @endif
   </main>
 
   <!-- Librería y scripts listos, pero sin inicializar -->

@@ -10,10 +10,17 @@ use App\Models\Mecanico;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
     private const ESTATUS_ACTIVOS = ['pendiente', 'confirmada', 'en_proceso'];
+    private const PERSONAL_ROLES = [
+        4 => ['label' => 'Administradores', 'slug' => 'admins'],
+        2 => ['label' => 'Mecánicos', 'slug' => 'mecanicos'],
+        3 => ['label' => 'Recepcionistas', 'slug' => 'recepcionistas'],
+    ];
 
     /**
      * Display the administrator dashboard panel.
@@ -52,12 +59,30 @@ class AdminController extends Controller
             ->filter(fn ($mecanico) => ($mecanico->citas_activas_count ?? 0) < 4)
             ->values();
 
+
         return view('Panel-admin.Index', [
             'citasPendientes' => $citasPendientes,
             'mecanicosDisponibles' => $mecanicosDisponibles,
             'totalCitas' => $totalCitas,
             'tasaCompletadas' => $tasaCompletadas,
             'porAsignar' => $porConfirmar,
+        ]);
+    }
+
+    /**
+     * Show staff management panel.
+     */
+    public function personal(Request $request)
+    {
+        $personalTotals = $this->getPersonalTotals();
+        $personalList = User::whereIn('role_id', array_keys(self::PERSONAL_ROLES))
+            ->orderBy('name')
+            ->simplePaginate(5);
+
+        return view('Panel-admin.Gestion', [
+            'personalTotals' => $personalTotals,
+            'personalList' => $personalList,
+            'personalRoles' => self::PERSONAL_ROLES,
         ]);
     }
 
@@ -135,7 +160,48 @@ class AdminController extends Controller
      */
     public function reportes(Request $request)
     {
-        return view('Panel-admin.reportes');
+        $rangeStart = $request->filled('desde')
+            ? Carbon::parse($request->input('desde'))->startOfDay()
+            : Carbon::now()->startOfMonth();
+        $rangeEnd = $request->filled('hasta')
+            ? Carbon::parse($request->input('hasta'))->endOfDay()
+            : Carbon::now()->endOfMonth();
+
+        if ($rangeStart->greaterThan($rangeEnd)) {
+            [$rangeStart, $rangeEnd] = [$rangeEnd, $rangeStart];
+        }
+
+        $estatusValidos = ['confirmada', 'en_proceso', 'completada'];
+
+        $serviciosMasSolicitados = DB::table('servicios')
+            ->join('citas_servicios', 'servicios.id', '=', 'citas_servicios.servicio_id')
+            ->join('citas', 'citas_servicios.cita_id', '=', 'citas.id')
+            ->whereBetween('citas.fecha', [$rangeStart->toDateString(), $rangeEnd->toDateString()])
+            ->whereIn('citas.estatus', $estatusValidos)
+            ->whereNull('citas.deleted_at')
+            ->groupBy('servicios.id', 'servicios.nombre')
+            ->select('servicios.nombre', DB::raw('COUNT(citas_servicios.id) as total'))
+            ->orderByDesc('total')
+            ->limit(8)
+            ->get();
+
+        $chartData = [
+            'labels' => $serviciosMasSolicitados->pluck('nombre'),
+            'totals' => $serviciosMasSolicitados->pluck('total')->map(fn ($value) => (int) $value),
+        ];
+
+        $topService = $serviciosMasSolicitados->first();
+        $totalSolicitudes = $serviciosMasSolicitados->sum('total');
+
+        return view('Panel-admin.reportes', [
+            'chartData' => $chartData,
+            'topService' => $topService,
+            'totalSolicitudes' => $totalSolicitudes,
+            'periodoSeleccionado' => [
+                'inicio' => $rangeStart->toDateString(),
+                'fin' => $rangeEnd->toDateString(),
+            ],
+        ]);
     }
 
     /**
@@ -274,6 +340,107 @@ class AdminController extends Controller
 
         return redirect()->route('admin.dashboard')
             ->with('success', 'Cita asignada y confirmada correctamente.');
+    }
+
+    /**
+     * Store a new staff member (admin, mecánico o recepcionista).
+     */
+    public function storePersonal(Request $request)
+    {
+        $allowedRoles = array_keys(self::PERSONAL_ROLES);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'phone' => 'nullable|string|max:20',
+            'role_id' => ['required', Rule::in($allowedRoles)],
+            'password' => 'required|string|min:8',
+        ]);
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?: null,
+            'role_id' => $validated['role_id'],
+            'password' => $validated['password'],
+        ]);
+
+        if ((int) $user->role_id === 2) {
+            $this->ensureMechanicProfilesExist();
+        }
+
+        return redirect()->route('admin.personal')
+            ->with('success', 'Personal registrado correctamente.');
+    }
+
+    /**
+     * Update an existing staff account.
+     */
+    public function updatePersonal(Request $request, User $user)
+    {
+        if (! array_key_exists($user->role_id, self::PERSONAL_ROLES)) {
+            abort(404);
+        }
+
+        $allowedRoles = array_keys(self::PERSONAL_ROLES);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'phone' => 'nullable|string|max:20',
+            'role_id' => ['required', Rule::in($allowedRoles)],
+            'password' => 'nullable|string|min:8',
+        ]);
+
+        $payload = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?: null,
+            'role_id' => $validated['role_id'],
+        ];
+
+        if (! empty($validated['password'])) {
+            $payload['password'] = $validated['password'];
+        }
+
+        $user->update($payload);
+
+        if ((int) $user->role_id === 2) {
+            $this->ensureMechanicProfilesExist();
+        }
+
+        return redirect()->route('admin.personal')
+            ->with('success', 'Datos del personal actualizados correctamente.');
+    }
+
+    /**
+     * Delete a staff account.
+     */
+    public function destroyPersonal(User $user)
+    {
+        if (! array_key_exists($user->role_id, self::PERSONAL_ROLES)) {
+            abort(404);
+        }
+
+        $user->delete();
+
+        return redirect()->route('admin.personal')
+            ->with('success', 'Personal eliminado correctamente.');
+    }
+
+    /**
+     * Build personal totals keyed by slug.
+     */
+    private function getPersonalTotals(): array
+    {
+        $personalTotals = [];
+
+        foreach (self::PERSONAL_ROLES as $roleId => $meta) {
+            $slug = $meta['slug'];
+            $personalTotals[$slug] = User::where('role_id', $roleId)->count();
+        }
+
+        return $personalTotals;
     }
 
     /**

@@ -32,6 +32,7 @@
       <nav class="nav">
         <a href="{{ route('admin.dashboard') }}" data-nav="index">Asignar Mecánicos</a>
         <a href="{{ route('admin.servicios') }}" data-nav="servicios">Servicios</a>
+        <a href="{{ route('admin.personal') }}" data-nav="personal">Gestión de Personal</a>
         <a href="{{ route('admin.reportes') }}" data-nav="reportes">Reportes</a>
         <a href="{{ route('admin.estadisticas') }}" data-nav="estadisticas">Estadísticas</a>
         <form method="POST" action="{{ route('logout') }}">

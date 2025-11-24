@@ -26,23 +26,41 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Charts: solo inicializa si existe el canvas
-  if (document.getElementById("servicesBarChart") && window.Chart) {
-    const ctx = document.getElementById("servicesBarChart").getContext("2d");
+  const servicesCanvas = document.getElementById("servicesBarChart");
+  if (servicesCanvas && window.Chart) {
+    const ctx = servicesCanvas.getContext("2d");
+    let dataset = null;
+    if (servicesCanvas.dataset.chart) {
+      try {
+        dataset = JSON.parse(servicesCanvas.dataset.chart);
+      } catch (e) {
+        console.warn("No se pudo parsear data-chart para servicesBarChart", e);
+      }
+    }
+
+    const defaultLabels = [
+      "Cambio de aceite",
+      "Alineación y balanceo",
+      "Revisión de frenos",
+      "Mantenimiento general",
+      "Cambio de neumáticos",
+      "Diagnóstico electrónico",
+      "Cambio de batería"
+    ];
+    const defaultTotals = [12, 9, 7, 10, 6, 5, 4];
+    const labels = dataset?.labels ?? defaultLabels;
+    const totals = dataset?.totals ?? defaultTotals;
+
     new Chart(ctx, {
       type: "bar",
       data: {
-        labels: [
-          "Cambio de aceite",
-          "Alineación y balanceo",
-          "Revisión de frenos",
-          "Mantenimiento general",
-          "Cambio de neumáticos",
-          "Diagnóstico electrónico",
-          "Cambio de batería"
-        ],
+        labels,
         datasets: [{
           label: "Número de citas",
-          data: [12, 9, 7, 10, 6, 5, 4],
+          data: totals,
+          backgroundColor: "#93c5fd",
+          borderColor: "#3b82f6",
+          borderWidth: 1
         }]
       },
       options: {
@@ -53,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
           tooltip: { enabled: true }
         },
         scales: {
-          y: { beginAtZero: true }
+          y: { beginAtZero: true, ticks: { precision: 0 } }
         }
       }
     });
