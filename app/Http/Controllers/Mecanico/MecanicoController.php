@@ -11,8 +11,18 @@ class MecanicoController extends Controller
 {
     public function dashboard(Request $request)
     {
-        // Obtener el mecánico del usuario autenticado (si existe)
-        $mecanico = auth()->check() ? Mecanico::where('user_id', auth()->id())->first() : null;
+        // Obtener o crear el perfil de mecánico usando el usuario autenticado
+        $mecanico = null;
+        if (auth()->check()) {
+            $mecanico = Mecanico::firstOrCreate(
+                ['user_id' => auth()->id()],
+                [
+                    'numero_empleado' => 'MECH-' . str_pad((string) auth()->id(), 4, '0', STR_PAD_LEFT),
+                    'especialidad' => null,
+                    'activo' => true,
+                ]
+            );
+        }
 
         // Base query builder function para evitar problemas con clones
         $getBaseQuery = function() use ($mecanico) {

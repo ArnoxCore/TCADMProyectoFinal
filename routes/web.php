@@ -156,6 +156,9 @@ Route::middleware(['auth', 'role:4'])
 
         Route::get('/estadisticas', [AdminController::class, 'estadisticas'])
             ->name('estadisticas');
+
+        Route::patch('/citas/{cita}/asignar', [AdminController::class, 'assignCita'])
+            ->name('citas.asignar');
     });
 
 Route::get('/api/car-image', [CarsXEController::class, 'getImage']);

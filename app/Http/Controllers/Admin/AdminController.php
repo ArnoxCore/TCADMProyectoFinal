@@ -5,15 +5,58 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Servicio;
+use App\Models\Cita;
+use App\Models\Mecanico;
+use App\Models\User;
 
 class AdminController extends Controller
 {
+    private const ESTATUS_ACTIVOS = ['pendiente', 'confirmada', 'en_proceso'];
+
     /**
      * Display the administrator dashboard panel.
      */
     public function dashboard(Request $request)
     {
-        return view('Panel-admin.Index');
+        $this->ensureMechanicProfilesExist();
+
+        $totalCitas = Cita::count();
+        $completadas = Cita::where('estatus', 'completada')->count();
+        $porConfirmar = Cita::where('estatus', 'pendiente')->count();
+
+        $tasaCompletadas = $totalCitas > 0
+            ? round(($completadas / $totalCitas) * 100, 1)
+            : 0;
+
+        $citasPendientes = Cita::with([
+                'cliente.user:id,name',
+                'vehiculo:id,marca,modelo,placa',
+                'servicios:id,nombre',
+                'mecanico.user:id,name'
+            ])
+            ->where('estatus', 'pendiente')
+            ->orderBy('fecha')
+            ->orderBy('hora_inicio')
+            ->get();
+
+        $mecanicosDisponibles = Mecanico::with('user:id,name')
+            ->where('activo', true)
+            ->withCount(['citas as citas_activas_count' => function ($query) {
+                $query->whereNull('deleted_at')
+                    ->whereIn('estatus', self::ESTATUS_ACTIVOS);
+            }])
+            ->orderBy('numero_empleado')
+            ->get()
+            ->filter(fn ($mecanico) => ($mecanico->citas_activas_count ?? 0) < 4)
+            ->values();
+
+        return view('Panel-admin.Index', [
+            'citasPendientes' => $citasPendientes,
+            'mecanicosDisponibles' => $mecanicosDisponibles,
+            'totalCitas' => $totalCitas,
+            'tasaCompletadas' => $tasaCompletadas,
+            'porAsignar' => $porConfirmar,
+        ]);
     }
 
     /**
@@ -99,5 +142,58 @@ class AdminController extends Controller
     public function estadisticas(Request $request)
     {
         return view('Panel-admin.estadisticas');
+    }
+
+    /**
+     * Assign a mechanic to a pending appointment and confirm it.
+     */
+    public function assignCita(Request $request, Cita $cita)
+    {
+        $validated = $request->validate([
+            'mecanico_id' => 'required|exists:mecanicos,id',
+        ]);
+
+        if ($cita->estatus === 'cancelada') {
+            return redirect()->route('admin.dashboard')
+                ->with('error', 'No puedes asignar una cita cancelada.');
+        }
+
+        $mecanico = Mecanico::withCount(['citas as citas_activas_count' => function ($query) {
+                $query->whereNull('deleted_at')
+                    ->whereIn('estatus', self::ESTATUS_ACTIVOS);
+            }])
+            ->findOrFail($validated['mecanico_id']);
+
+        if ($cita->mecanico_id !== $mecanico->id && ($mecanico->citas_activas_count ?? 0) >= 4) {
+            return redirect()->route('admin.dashboard')
+                ->with('error', 'Este mecánico ya alcanzó el máximo de citas activas.');
+        }
+
+        $cita->update([
+            'mecanico_id' => $validated['mecanico_id'],
+            'estatus' => 'confirmada',
+        ]);
+
+        return redirect()->route('admin.dashboard')
+            ->with('success', 'Cita asignada y confirmada correctamente.');
+    }
+
+    /**
+     * Create mechanic profiles for every user with role 2 if missing.
+     */
+    private function ensureMechanicProfilesExist(): void
+    {
+        $existing = Mecanico::pluck('user_id')->all();
+
+        User::where('role_id', 2)
+            ->whereNotIn('id', $existing)
+            ->each(function (User $user) {
+                Mecanico::create([
+                    'user_id' => $user->id,
+                    'numero_empleado' => 'MECH-' . str_pad((string) $user->id, 4, '0', STR_PAD_LEFT),
+                    'especialidad' => null,
+                    'activo' => true,
+                ]);
+            });
     }
 }
