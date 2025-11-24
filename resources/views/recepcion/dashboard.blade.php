@@ -222,10 +222,27 @@
                 </table>
             </div>
 
-            {{-- Paginación Laravel --}}
-            @if($citas instanceof \Illuminate\Pagination\LengthAwarePaginator && $citas->hasPages())
+            {{-- Paginación Laravel: SOLO "Anterior" y "Siguiente" --}}
+            @if($citas->hasPages())
+                @php
+                    // Mantener todos los parámetros de la URL (fecha, show_all, etc.) menos "page"
+                    $paginated = $citas->appends(request()->except('page'));
+                @endphp
+
                 <div class="tabla-pagination">
-                    {!! $citas->withQueryString()->links() !!}
+                    {{-- Anterior --}}
+                    @if ($paginated->onFirstPage())
+                        <span aria-disabled="true">« Anterior</span>
+                    @else
+                        <a href="{{ $paginated->previousPageUrl() }}">« Anterior</a>
+                    @endif
+
+                    {{-- Siguiente --}}
+                    @if ($paginated->hasMorePages())
+                        <a href="{{ $paginated->nextPageUrl() }}">Siguiente »</a>
+                    @else
+                        <span aria-disabled="true">Siguiente »</span>
+                    @endif
                 </div>
             @endif
         </section>

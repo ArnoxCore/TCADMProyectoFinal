@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 class RecepcionDashboardController extends Controller
 {
     // 🔹 Límite y estatus que cuentan como "ocupación" del mecánico
-    private const MAX_CITAS_POR_DIA = 3;
+    private const MAX_CITAS_POR_DIA = 4;
 
     private const ESTATUS_OCUPACION = [
         'pendiente',
