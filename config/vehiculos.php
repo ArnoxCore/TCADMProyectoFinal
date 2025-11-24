@@ -1,0 +1,136 @@
+<?php
+
+$yearsCompact = range(2016, 2025);
+$yearsSedan = range(2014, 2025);
+$yearsSUV = range(2013, 2025);
+$yearsPickup = range(2012, 2025);
+
+return [
+    'catalogo' => [
+        'AUDI' => [
+            'A1' => $yearsCompact,
+            'A3' => $yearsCompact,
+            'A4' => $yearsSedan,
+            'Q3' => $yearsSUV,
+            'Q5' => $yearsSUV,
+            'Q7' => $yearsSUV,
+        ],
+        'BMW' => [
+            'SERIE 1' => $yearsCompact,
+            'SERIE 3' => $yearsSedan,
+            'SERIE 5' => $yearsSedan,
+            'M3' => $yearsSedan,
+            'X1' => $yearsSUV,
+            'X3' => $yearsSUV,
+            'X5' => $yearsSUV,
+        ],
+        'CHEVROLET' => [
+            'AVEO' => $yearsCompact,
+            'ONIX' => $yearsCompact,
+            'SPARK' => $yearsCompact,
+            'MALIBU' => $yearsSedan,
+            'EQUINOX' => $yearsSUV,
+            'TAHOE' => $yearsSUV,
+            'SILVERADO' => $yearsPickup,
+        ],
+        'DODGE' => [
+            'ATTITUDE' => $yearsCompact,
+            'JOURNEY' => $yearsSUV,
+            'DURANGO' => $yearsSUV,
+            'RAM 1500' => $yearsPickup,
+            'CHARGER' => $yearsSedan,
+        ],
+        'FORD' => [
+            'FIESTA' => $yearsCompact,
+            'FOCUS' => $yearsSedan,
+            'FUSION' => $yearsSedan,
+            'MUSTANG' => $yearsSedan,
+            'ESCAPE' => $yearsSUV,
+            'EXPLORER' => $yearsSUV,
+            'F-150' => $yearsPickup,
+            'RANGER' => $yearsPickup,
+        ],
+        'HONDA' => [
+            'CITY' => $yearsCompact,
+            'CIVIC' => $yearsSedan,
+            'ACCORD' => $yearsSedan,
+            'FIT' => $yearsCompact,
+            'HR-V' => $yearsSUV,
+            'CR-V' => $yearsSUV,
+        ],
+        'HYUNDAI' => [
+            'GRAND I10' => $yearsCompact,
+            'ACCENT' => $yearsCompact,
+            'ELANTRA' => $yearsSedan,
+            'TUCSON' => $yearsSUV,
+            'SANTA FE' => $yearsSUV,
+            'CRETA' => $yearsSUV,
+        ],
+        'JEEP' => [
+            'RENEGADE' => $yearsSUV,
+            'COMPASS' => $yearsSUV,
+            'CHEROKEE' => $yearsSUV,
+            'WRANGLER' => $yearsSUV,
+            'GLADIATOR' => $yearsPickup,
+        ],
+        'KIA' => [
+            'RIO' => $yearsCompact,
+            'FORTE' => $yearsSedan,
+            'SOUL' => $yearsCompact,
+            'SPORTAGE' => $yearsSUV,
+            'SORENTO' => $yearsSUV,
+            'SELTOS' => $yearsSUV,
+        ],
+        'MAZDA' => [
+            'MAZDA2' => $yearsCompact,
+            'MAZDA3' => $yearsSedan,
+            'MAZDA6' => $yearsSedan,
+            'CX-3' => $yearsSUV,
+            'CX-5' => $yearsSUV,
+            'CX-9' => $yearsSUV,
+        ],
+        'MERCEDES-BENZ' => [
+            'CLASE A' => $yearsCompact,
+            'CLASE C' => $yearsSedan,
+            'CLASE E' => $yearsSedan,
+            'GLA' => $yearsSUV,
+            'GLC' => $yearsSUV,
+            'GLE' => $yearsSUV,
+        ],
+        'NISSAN' => [
+            'MARCH' => $yearsCompact,
+            'VERSA' => $yearsCompact,
+            'SENTRA' => $yearsSedan,
+            'ALTIMA' => $yearsSedan,
+            'KICKS' => $yearsSUV,
+            'X-TRAIL' => $yearsSUV,
+            'FRONTIER' => $yearsPickup,
+        ],
+        'TESLA' => [
+            'MODEL 3' => $yearsSedan,
+            'MODEL Y' => $yearsSUV,
+            'MODEL S' => $yearsSedan,
+            'MODEL X' => $yearsSUV,
+            'CYBERTRUCK' => range(2024, 2025),
+        ],
+        'TOYOTA' => [
+            'YARIS' => $yearsCompact,
+            'COROLLA' => $yearsSedan,
+            'CAMRY' => $yearsSedan,
+            'PRIUS' => $yearsSedan,
+            'RAV4' => $yearsSUV,
+            'HIGHLANDER' => $yearsSUV,
+            'HILUX' => $yearsPickup,
+        ],
+        'VOLKSWAGEN' => [
+            'VENTO' => $yearsCompact,
+            'JETTA' => $yearsSedan,
+            'GOLF' => $yearsCompact,
+            'POLO' => $yearsCompact,
+            'TIGUAN' => $yearsSUV,
+            'TAOS' => $yearsSUV,
+            'T-CROSS' => $yearsSUV,
+        ],
+    ],
+];
+

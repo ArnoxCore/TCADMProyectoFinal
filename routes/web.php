@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\CarsXEController;
+use App\Http\Controllers\Api\VehicleCatalogController;
 // Controladores del módulo Cliente
 use App\Http\Controllers\Cliente\CitaController;
 use App\Http\Controllers\Cliente\DashboardController;
@@ -84,6 +85,9 @@ Route::middleware(['auth', 'role:1'])
             Route::get('/{id}/editar', [VehiculoController::class, 'edit'])->name('editar');
 
             Route::put('/{id}', [VehiculoController::class, 'update'])->name('update');
+
+            Route::get('/catalogo/marcas/{make}/modelos', [VehicleCatalogController::class, 'modelos'])
+                ->name('catalogo.modelos');
         });
 
         // ------------------------ P E R F I L ------------------------

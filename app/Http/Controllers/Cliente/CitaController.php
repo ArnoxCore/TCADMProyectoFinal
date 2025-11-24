@@ -127,9 +127,17 @@ class CitaController extends Controller
             'fecha'       => $request->fecha,
             'hora_inicio' => $horaInicio->format('H:i:s'),
             'hora_fin'    => $horaFin->format('H:i:s'),
+            'mecanico_id' => null,
+            'estatus'     => 'pendiente',
+            'check_in_at' => null,
+            'inicio_real_at' => null,
+            'asistio'     => null,
         ]);
 
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Cita reprogramada. En breve se confirmará la nueva fecha.',
+        ]);
     }
 
     /**

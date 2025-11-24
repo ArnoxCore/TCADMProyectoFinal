@@ -9,23 +9,41 @@
             @csrf
 
             <div class="perfil-grid">
+                @php
+                    $marcaSeleccionada = old('marca');
+                @endphp
 
                 {{-- MARCA --}}
                 <label class="perfil-label">
                     <span>Marca</span>
-                    <input type="text" name="marca" id="marca" placeholder="AUDI" required>
+                    <select name="marca" id="marca" required>
+                        <option value="">Selecciona una marca</option>
+                        @foreach($marcas as $marca)
+                            <option
+                                value="{{ $marca->nombre }}"
+                                data-make-id="{{ $marca->id }}"
+                                {{ $marcaSeleccionada === $marca->nombre ? 'selected' : '' }}
+                            >
+                                {{ $marca->nombre }}
+                            </option>
+                        @endforeach
+                    </select>
                 </label>
 
                 {{-- MODELO --}}
                 <label class="perfil-label">
                     <span>Modelo</span>
-                    <input type="text" name="modelo" id="modelo" placeholder="RS3" required>
+                    <select name="modelo" id="modelo" {{ $marcaSeleccionada ? '' : 'disabled' }} required>
+                        <option value="">Selecciona un modelo</option>
+                    </select>
                 </label>
 
                 {{-- AÑO --}}
                 <label class="perfil-label">
                     <span>Año</span>
-                    <input type="number" name="ano" id="ano" min="1900" max="2100" placeholder="2025" required>
+                    <select name="ano" id="ano" {{ old('modelo') ? '' : 'disabled' }} required>
+                        <option value="">Selecciona un año</option>
+                    </select>
                 </label>
 
                 {{-- PLACA --}}
@@ -86,6 +104,16 @@
             </div>
 
         </form>
+
+        <script>
+            window.CATALOGO_ENDPOINTS = {
+                modelos: "{{ route('cliente.vehiculos.catalogo.modelos', ['make' => '__MAKE__']) }}"
+            };
+            window.CATALOGO_OLD = {
+                modelo: "{{ old('modelo') }}",
+                ano: "{{ old('ano') }}"
+            };
+        </script>
 
     </section>
 

@@ -12,8 +12,10 @@
                 <label>
                     Fecha
                     <input
-                        type="date"
+                        type="text"
                         id="editFechaCita"
+                        placeholder="YYYY-MM-DD"
+                        autocomplete="off"
                     >
                 </label>
 

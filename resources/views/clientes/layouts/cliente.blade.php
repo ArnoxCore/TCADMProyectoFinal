@@ -14,6 +14,7 @@
 
     <!-- CSS del Cliente -->
     <link rel="stylesheet" href="{{ asset('frontend/Panel-cliente/cliente.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('frontend/icons/favicon-96x96.png') }}">
@@ -35,8 +36,11 @@
     @yield('content')
 </main>
 
-<!-- NOTYF JS -->
+<!-- JS CDN -->
 <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     // Instancia global de Notyf
