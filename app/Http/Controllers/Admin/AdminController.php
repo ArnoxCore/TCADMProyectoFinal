@@ -338,6 +338,8 @@ class AdminController extends Controller
             'estatus' => 'confirmada',
         ]);
 
+        $cita->loadMissing('cliente.user', 'vehiculo', 'servicios');
+
         return redirect()->route('admin.dashboard')
             ->with('success', 'Cita asignada y confirmada correctamente.');
     }
@@ -461,4 +463,5 @@ class AdminController extends Controller
                 ]);
             });
     }
+
 }
