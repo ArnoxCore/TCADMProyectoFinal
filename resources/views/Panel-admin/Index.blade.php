@@ -97,7 +97,7 @@
           <div>Hora</div>
           <div>Cliente</div>
           <div>Servicio</div>
-          <div>Mecánico</div>
+          <div>Vehículo</div>
           <div>Estatus</div>
           <div class="text-right">Acciones</div>
         </header>
@@ -123,7 +123,7 @@
             <div>{{ $horaTexto }}</div>
             <div>{{ $clienteNombre }}</div>
             <div>{{ $serviciosTexto }}</div>
-            <div class="muted">{{ $mecanicoNombre }}</div>
+            <div class="muted">{{ $vehiculoTexto }}</div>
             <div><span class="{{ $badgeClass }}">{{ ucfirst($cita->estatus) }}</span></div>
             <div class="text-right">
               <button type="button"
