@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Cliente;
 use Exception;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class PerfilController extends Controller
 {
@@ -20,9 +22,18 @@ class PerfilController extends Controller
 
     public function update(Request $request)
     {
+        $user = auth()->user();
+
         // Validación
-        $request->validate([
+        $validated = $request->validate([
             'name'   => 'required|string|max:255',
+            'email'  => [
+                'required',
+                'string',
+                'max:255',
+                'email:dns',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
             'phone'  => 'required|string|max:20',
             'direccion' => 'nullable|string|max:255',
 
@@ -36,6 +47,9 @@ class PerfilController extends Controller
             'fecha_nacimiento' => 'nullable|date',
 
         ], [
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'Ingresa un correo electrónico válido.',
+            'email.unique' => 'Ese correo ya está en uso.',
             'rfc.regex' => 'El RFC no cumple con el formato oficial del SAT.',
             'rfc.max'   => 'El RFC no puede tener más de 13 caracteres.',
             'name.required' => 'El nombre es obligatorio.',
@@ -43,22 +57,23 @@ class PerfilController extends Controller
         ]);
 
         try {
+            DB::transaction(function () use ($user, $validated) {
+                $cliente = Cliente::where('user_id', $user->id)->firstOrFail();
 
-            $user = auth()->user();
-            $cliente = Cliente::where('user_id', $user->id)->firstOrFail();
+                // Actualizar tabla users
+                $user->update([
+                    'name'  => $validated['name'],
+                    'email' => trim($validated['email']),
+                    'phone' => $validated['phone'],
+                ]);
 
-            // Actualizar tabla users
-            $user->update([
-                'name'  => $request->name,
-                'phone' => $request->phone,
-            ]);
-
-            // Actualizar tabla clientes
-            $cliente->update([
-                'direccion' => $request->direccion,
-                'rfc'       => $request->rfc,
-                'fecha_nacimiento' => $request->fecha_nacimiento ?? null,
-            ]);
+                // Actualizar tabla clientes
+                $cliente->update([
+                    'direccion' => $validated['direccion'] ?? null,
+                    'rfc'       => $validated['rfc'] ?? null,
+                    'fecha_nacimiento' => $validated['fecha_nacimiento'] ?? null,
+                ]);
+            });
 
             return redirect()
                 ->route('cliente.perfil')

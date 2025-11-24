@@ -19,7 +19,7 @@
 
                 <label class="perfil-label">
                     <span>Correo Electrónico</span>
-                    <input type="email" value="{{ old('email', $user->email) }}" disabled>
+                    <input type="email" name="email" value="{{ old('email', $user->email) }}" required autocomplete="email">
                 </label>
 
                 <label class="perfil-label">

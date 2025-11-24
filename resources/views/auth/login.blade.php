@@ -69,9 +69,9 @@
                     <input type="password" id="password" name="password" placeholder="Ingresa tu Contraseña" required>
                 </div>
 
-                {{-- <div class="auth-extra">
+                <div class="auth-extra">
                     <a href="{{ route('password.request') }}">¿Olvidaste tu contraseña?</a>
-                </div> --}}
+                </div>
 
                 <button class="auth-button" type="submit">Iniciar Sesión</button>
             </form>
