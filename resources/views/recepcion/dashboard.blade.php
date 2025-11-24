@@ -47,7 +47,9 @@
             <article class="kpi-card">
                 <h3>Total de citas del día</h3>
                 <div class="kpi">{{ $stats['total'] ?? 0 }}</div>
-                <div class="sub">{{ $fecha }}</div>
+                <div class="sub">
+                    {{ !empty($showAll) && $showAll ? 'Todas las fechas' : ($fecha ?? '') }}
+                </div>
             </article>
 
             <article class="kpi-card">
@@ -71,7 +73,11 @@
 
         {{-- FILTROS --}}
         <section class="filtros">
-            <form method="GET" action="{{ route('recepcion.dashboard') }}" id="formFiltros" class="filtros-grid">
+            <form method="GET"
+                  action="{{ route('recepcion.dashboard') }}"
+                  id="formFiltros"
+                  class="filtros-grid">
+
                 <div class="campo">
                     <label for="searchCliente">Buscar cliente</label>
                     <input type="text" id="searchCliente" placeholder="Nombre del cliente">
@@ -83,7 +89,7 @@
                         type="date"
                         id="searchFecha"
                         name="fecha"
-                        value="{{ $fecha }}"
+                        value="{{ $fecha ?? '' }}"
                     >
                 </div>
 
@@ -115,6 +121,12 @@
                     <label>&nbsp;</label>
                     <button type="button" id="btnClear">Limpiar filtros</button>
                 </div>
+
+                {{-- Modo "ver todas" o "solo por fecha" --}}
+                <input type="hidden"
+                       name="show_all"
+                       id="show_all"
+                       value="{{ !empty($showAll) && $showAll ? 1 : 0 }}">
             </form>
         </section>
 

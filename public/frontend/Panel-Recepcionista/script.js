@@ -7,6 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const tableBody       = document.getElementById("tableBody");
     const kpiFiltrados    = document.getElementById("kpiFiltrados");
     const labelResultados = document.getElementById("labelResultados");
+    const formFiltros     = document.getElementById("formFiltros");
+    const inputShowAll    = document.getElementById("show_all");
 
     const csrfToken = document
         .querySelector('meta[name="csrf-token"]')
@@ -78,113 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function accionesHtmlDesdeJson(cita) {
-        const estatus = cita.estatus?.value || "";
-        let html = "";
-
-        if (estatus === "pendiente") {
-            html += `
-                <button
-                    type="button"
-                    class="btn-accion btn-confirmar"
-                    data-cita-id="${cita.id}"
-                    data-fecha="${cita.fecha || ""}"
-                >
-                    Confirmar
-                </button>
-                <button
-                    type="button"
-                    class="btn-accion btn-cancelar"
-                    data-cita-id="${cita.id}"
-                >
-                    Cancelar
-                </button>
-            `;
-        } else if (estatus === "confirmada") {
-            html += `
-                <button
-                    type="button"
-                    class="btn-accion btn-cancelar"
-                    data-cita-id="${cita.id}"
-                >
-                    Cancelar
-                </button>
-            `;
-        }
-
-        return html;
-    }
-
-    // ====== Cargar citas (fecha opcional) ======
-    async function cargarCitas(fecha) {
-        const params = new URLSearchParams();
-        if (fecha) {
-            params.append("fecha", fecha);
-        }
-
-        const baseUrl = ROUTES.citasPorFecha || "/recepcion/citas-por-fecha";
-        const url = `${baseUrl}?${params.toString()}`;
-
-        try {
-            const response = await fetch(url);
-
-            if (!response.ok) {
-                console.error("Error HTTP al cargar citas:", response.status);
-                return;
-            }
-
-            const json = await response.json();
-
-            if (!json.success) {
-                console.error("Respuesta no exitosa:", json);
-                return;
-            }
-
-            tableBody.innerHTML = "";
-
-            if (!json.data || json.data.length === 0) {
-                const tr = document.createElement("tr");
-                tr.innerHTML = `<td colspan="8">No hay citas para esta fecha.</td>`;
-                tableBody.appendChild(tr);
-                actualizarRows();
-                return;
-            }
-
-            json.data.forEach(cita => {
-                const tr = document.createElement("tr");
-                const acciones = accionesHtmlDesdeJson(cita) || "";
-
-                tr.innerHTML = `
-                    <td>${cita.fecha || ""}</td>
-                    <td>${cita.hora || ""}</td>
-                    <td>${cita.cliente || "—"}</td>
-                    <td>${cita.vehiculo || "—"}</td>
-                    <td>${cita.servicio || "—"}</td>
-                    <td>${cita.mecanico || "Sin asignar"}</td>
-                    <td>
-                        <span class="badge badge-${cita.estatus.value}">
-                            ${cita.estatus.label}
-                        </span>
-                    </td>
-                    <td class="acciones">${acciones}</td>
-                `;
-
-                // si no hay acciones, mandar vacio
-                if (!acciones) {
-                    const tdAcciones = tr.querySelector("td.acciones");
-                    tdAcciones.textContent = "";
-                }
-
-                tableBody.appendChild(tr);
-            });
-
-            actualizarRows();
-        } catch (error) {
-            console.error("Error cargando citas:", error);
-        }
-    }
-
-    // ====== Handlers de acciones: Confirmar / Cancelar ======
+    // ========= Handlers de acciones: Confirmar / Cancelar =========
 
     async function manejarConfirmarCita(citaId, row) {
         if (!citaId) return;
@@ -365,34 +261,32 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ====== Cambio de fecha -> recargar (si la borras, trae TODAS) ======
-    if (searchFecha) {
+    // ====== Cambio de fecha -> recargar con paginación de Laravel ======
+    if (searchFecha && formFiltros) {
         searchFecha.addEventListener("change", () => {
-            const value = searchFecha.value || "";
-            cargarCitas(value);
+            if (inputShowAll) inputShowAll.value = "0"; // modo "solo esa fecha"
+            formFiltros.submit();
         });
     }
 
-    // Filtros en vivo (cliente, mecánico, estatus)
+    // Filtros en vivo (cliente, mecánico, estatus) - solo front
     [searchCliente, searchMecanico, searchEstatus].forEach(input => {
         if (!input) return;
         input.addEventListener("input", aplicarFiltros);
         input.addEventListener("change", aplicarFiltros);
     });
 
-    // Limpiar filtros
-    if (btnClear) {
+    // Limpiar filtros -> ver TODAS las citas (sin fecha, con paginación)
+    if (btnClear && formFiltros) {
         btnClear.addEventListener("click", () => {
             if (searchCliente)  searchCliente.value = "";
             if (searchMecanico) searchMecanico.value = "";
             if (searchEstatus)  searchEstatus.value = "";
+            if (searchFecha)    searchFecha.value = "";
 
-            if (searchFecha) {
-                searchFecha.value = "";
-                cargarCitas("");
-            }
+            if (inputShowAll) inputShowAll.value = "1"; // modo "ver todas"
 
-            aplicarFiltros();
+            formFiltros.submit();
         });
     }
 
@@ -413,6 +307,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Inicial: usar las filas que pintó Blade para la fecha por defecto
+    // Inicial: usar las filas que pintó Blade para la página actual
     actualizarRows();
 });

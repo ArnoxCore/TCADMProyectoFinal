@@ -22,10 +22,14 @@ class RecepcionDashboardController extends Controller
 
     public function index(Request $request)
     {
-        // Fecha que se está viendo
+        // ¿Quiere ver todas las citas sin filtrar por fecha?
+        $showAll = $request->boolean('show_all');
+
+        // Fecha que se está viendo (puede venir null)
         $fecha = $request->input('fecha');
 
-        if (!$fecha) {
+        // Si NO pidió "ver todas" y NO mandó fecha, usamos hoy
+        if (! $showAll && ! $fecha) {
             $fecha = Carbon::now('America/Mexico_City')->toDateString();
         }
 
@@ -34,20 +38,26 @@ class RecepcionDashboardController extends Controller
             'vehiculo',
             'servicios',
             'mecanico.user'
-        ])->whereDate('fecha', $fecha);
+        ]);
 
-        // Paginacion
+        // Solo filtramos por fecha si NO está en modo "ver todas"
+        if (! $showAll && $fecha) {
+            $citasQuery->whereDate('fecha', $fecha);
+        }
+
+        // Paginación (5 por página)
         $citas = (clone $citasQuery)
             ->orderBy('hora_inicio')
             ->paginate(5);
 
-        // KPIs (por fecha seleccionada)
+        // KPIs (según filtros del servidor)
+        $statsBase = clone $citasQuery;
+
         $stats = [
-            'total'     => (clone $citasQuery)->count(),
-            'pending'   => (clone $citasQuery)->where('estatus', 'pendiente')->count(),
-            'completed' => (clone $citasQuery)->where('estatus', 'completada')->count(),
-            // filtered = total de citas para esa fecha (antes de filtros front)
-            'filtered'  => $citas->total(),
+            'total'     => (clone $statsBase)->count(),
+            'pending'   => (clone $statsBase)->where('estatus', 'pendiente')->count(),
+            'completed' => (clone $statsBase)->where('estatus', 'completada')->count(),
+            'filtered'  => $citas->total(), // total según filtros (para esa vista)
         ];
 
         // Mecánicos activos para el combo de filtros
@@ -55,7 +65,7 @@ class RecepcionDashboardController extends Controller
             ->where('activo', true)
             ->get();
 
-        return view('recepcion.dashboard', compact('citas', 'mecanicos', 'fecha', 'stats'));
+        return view('recepcion.dashboard', compact('citas', 'mecanicos', 'fecha', 'stats', 'showAll'));
     }
 
     // ========= AJAX: listado de citas (para el filtro de fecha) =========
