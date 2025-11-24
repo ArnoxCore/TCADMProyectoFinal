@@ -8,6 +8,7 @@ use App\Models\Servicio;
 use App\Models\Cita;
 use App\Models\Mecanico;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 
 class AdminController extends Controller
 {
@@ -37,7 +38,7 @@ class AdminController extends Controller
             ->where('estatus', 'pendiente')
             ->orderBy('fecha')
             ->orderBy('hora_inicio')
-            ->get();
+            ->simplePaginate(6);
 
         $mecanicosDisponibles = Mecanico::with('user:id,name')
             ->where('activo', true)
@@ -64,7 +65,7 @@ class AdminController extends Controller
      */
     public function servicios(Request $request)
     {
-        $servicios = Servicio::orderBy('nombre')->paginate(10);
+        $servicios = Servicio::orderBy('nombre')->simplePaginate(5);
 
         return view('Panel-admin.servicios', compact('servicios'));
     }
@@ -141,7 +142,43 @@ class AdminController extends Controller
      */
     public function estadisticas(Request $request)
     {
-        return view('Panel-admin.estadisticas');
+        $statusOrder = [
+            'pendiente' => 'Pendiente',
+            'confirmada' => 'Confirmada',
+            'en_proceso' => 'En proceso',
+            'completada' => 'Completada',
+            'cancelada' => 'Cancelada',
+        ];
+
+        $statusCounts = Cita::selectRaw('estatus, COUNT(*) as total')
+            ->groupBy('estatus')
+            ->pluck('total', 'estatus');
+
+        $chartData = [
+            'labels' => array_values($statusOrder),
+            'totals' => array_map(fn ($key) => (int) ($statusCounts[$key] ?? 0), array_keys($statusOrder)),
+        ];
+
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+
+        $monthCounts = Cita::whereBetween('fecha', [$startOfMonth, $endOfMonth])
+            ->selectRaw('estatus, COUNT(*) as total')
+            ->groupBy('estatus')
+            ->pluck('total', 'estatus');
+
+        $resumenMes = [
+            'total' => $monthCounts->sum(),
+            'completadas' => (int) ($monthCounts['completada'] ?? 0),
+            'pendientes' => (int) ($monthCounts['pendiente'] ?? 0),
+            'confirmadas' => (int) ($monthCounts['confirmada'] ?? 0),
+            'canceladas' => (int) ($monthCounts['cancelada'] ?? 0),
+        ];
+
+        return view('Panel-admin.estadisticas', [
+            'chartData' => $chartData,
+            'resumenMes' => $resumenMes,
+        ]);
     }
 
     /**

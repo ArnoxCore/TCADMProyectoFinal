@@ -146,6 +146,12 @@
           </div>
         @endforelse
       </div>
+
+      @if(method_exists($citasPendientes, 'hasPages') && $citasPendientes->hasPages())
+        <div style="margin-top:16px; display:flex; justify-content:center;">
+          {{ $citasPendientes->withQueryString()->links() }}
+        </div>
+      @endif
     </section>
   </main>
 

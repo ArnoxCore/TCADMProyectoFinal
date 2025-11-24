@@ -16,7 +16,7 @@
         <div class="brand-logo" aria-hidden="true"></div>
         <div>
           <div class="brand-title">Panel de Administración</div>
-          <div class="brand-sub">Bienvenido, Admin</div>
+          <div class="brand-sub">Bienvenido, {{ Auth::user()->name ?? 'Admin' }}</div>
         </div>
       </div>
       <nav class="nav">
@@ -38,7 +38,7 @@
         <div class="head"><div class="title">Distribución de Estatus</div></div>
         <div class="body">
           <div class="canvas-wrap">
-            <canvas id="statusPieChart"></canvas>
+            <canvas id="statusPieChart" data-chart='@json($chartData ?? [])'></canvas>
           </div>
         </div>
       </article>
@@ -48,15 +48,23 @@
         <div class="body">
           <div class="row" style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:8px 0">
             <span class="muted">Total de Citas</span>
-            <strong>5</strong>
+            <strong>{{ number_format($resumenMes['total'] ?? 0) }}</strong>
           </div>
           <div class="row" style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:8px 0">
             <span class="muted">Citas Completadas</span>
-            <strong style="color:var(--success)">2</strong>
+            <strong style="color:var(--success)">{{ number_format($resumenMes['completadas'] ?? 0) }}</strong>
           </div>
           <div class="row" style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:8px 0">
             <span class="muted">Citas Pendientes</span>
-            <strong style="color:var(--warning)">2</strong>
+            <strong style="color:var(--warning)">{{ number_format($resumenMes['pendientes'] ?? 0) }}</strong>
+          </div>
+          <div class="row" style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:8px 0">
+            <span class="muted">Citas Confirmadas</span>
+            <strong style="color:var(--info)">{{ number_format($resumenMes['confirmadas'] ?? 0) }}</strong>
+          </div>
+          <div class="row" style="display:flex;justify-content:space-between;padding:8px 0">
+            <span class="muted">Citas Canceladas</span>
+            <strong style="color:var(--danger)">{{ number_format($resumenMes['canceladas'] ?? 0) }}</strong>
           </div>
         </div>
       </article>

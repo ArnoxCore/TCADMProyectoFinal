@@ -59,21 +59,40 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  if (document.getElementById("statusPieChart") && window.Chart) {
-    const ctx = document.getElementById("statusPieChart").getContext("2d");
+  const statusCanvas = document.getElementById("statusPieChart");
+  if (statusCanvas && window.Chart) {
+    const ctx = statusCanvas.getContext("2d");
+    let dataset = null;
+    if (statusCanvas.dataset.chart) {
+      try {
+        dataset = JSON.parse(statusCanvas.dataset.chart);
+      } catch (e) {
+        console.warn("No se pudo parsear data-chart para statusPieChart", e);
+      }
+    }
+
+    const defaultLabels = ["Pendiente", "Confirmada", "En proceso", "Completada", "Cancelada"];
+    const defaultTotals = [40, 20, 15, 20, 5];
+    const labels = dataset?.labels ?? defaultLabels;
+    const totals = dataset?.totals ?? defaultTotals;
+    const colors = ["#3b82f6", "#ec4899", "#f97316", "#10b981", "#facc15"];
+
     new Chart(ctx, {
       type: "doughnut",
       data: {
-        labels: ["Pendiente", "Confirmada", "Completada", "Cancelada"],
+        labels,
         datasets: [{
-          data: [40, 20, 40, 0],
+          data: totals,
+          backgroundColor: colors,
+          borderWidth: 0,
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: "bottom" }
+          legend: { position: "bottom" },
+          tooltip: { enabled: true }
         },
         cutout: "55%"
       }
