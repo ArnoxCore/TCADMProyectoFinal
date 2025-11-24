@@ -33,9 +33,78 @@
   </header>
 
   <main class="main">
+    @php
+      $inicio = $periodoSeleccionado['inicio'] ?? now()->startOfMonth()->toDateString();
+      $fin = $periodoSeleccionado['fin'] ?? now()->endOfMonth()->toDateString();
+      $metrics = $attendanceMetrics ?? [];
+    @endphp
+
+    <section class="section">
+      <form method="GET" class="card" style="padding:16px; display:grid; gap:12px;">
+        <div class="head" style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="title">Filtrar periodo</div>
+          <button type="submit" class="button primary" style="padding:6px 14px;">Aplicar</button>
+        </div>
+        <div class="grid-2">
+          <label class="label">Desde
+            <input type="date" name="desde" class="input" value="{{ request('desde', $inicio) }}" />
+          </label>
+          <label class="label">Hasta
+            <input type="date" name="hasta" class="input" value="{{ request('hasta', $fin) }}" />
+          </label>
+        </div>
+        <label class="label">Tolerancia de puntualidad (min)
+          <input type="number" min="1" name="tolerancia" class="input" value="{{ request('tolerancia', $metrics['tolerancia'] ?? 10) }}" />
+        </label>
+      </form>
+    </section>
+
+    <section class="cards-3">
+      <article class="card">
+        <div class="head"><span class="title">Asistencia</span></div>
+        <div class="body">
+          @if($metrics['camposDisponibles'] ?? false)
+            <div class="kpi">{{ number_format($metrics['asistenciaPorc'] ?? 0, 1) }}%</div>
+            <div class="sub">{{ $metrics['asistieron'] ?? 0 }} de {{ $metrics['total'] ?? 0 }} citas asistieron</div>
+          @else
+            <div class="kpi" style="color:var(--muted)">N/D</div>
+            <div class="sub">Aún no se agregan los campos de asistencia</div>
+          @endif
+        </div>
+      </article>
+      <article class="card">
+        <div class="head"><span class="title">Puntualidad</span></div>
+        <div class="body">
+          @if(($metrics['camposDisponibles'] ?? false) && !is_null($metrics['puntualidadPorc'] ?? null))
+            <div class="kpi">{{ number_format($metrics['puntualidadPorc'], 1) }}%</div>
+            <div class="sub">{{ $metrics['registradasPuntualidad'] }} citas con hora registrada · tolerancia {{ $metrics['tolerancia'] ?? 10 }} min</div>
+          @elseif($metrics['camposDisponibles'] ?? false)
+            <div class="kpi" style="color:var(--muted)">—</div>
+            <div class="sub">Aún no hay citas con horario real registrado</div>
+          @else
+            <div class="kpi" style="color:var(--muted)">N/D</div>
+            <div class="sub">La migración de puntualidad no se ha aplicado</div>
+          @endif
+        </div>
+      </article>
+      <article class="card">
+        <div class="head"><span class="title">No shows / Retraso</span></div>
+        <div class="body">
+          @if($metrics['camposDisponibles'] ?? false)
+            <div class="kpi" style="color:var(--danger)">{{ $metrics['noShows'] ?? 0 }}</div>
+            <div class="sub">Citas sin asistencia en el periodo</div>
+            <div style="margin-top:12px;font-size:13px;color:var(--muted);">Promedio retraso: <strong>{{ number_format($metrics['promedioRetraso'] ?? 0, 1) }} min</strong></div>
+          @else
+            <div class="kpi" style="color:var(--muted)">N/D</div>
+            <div class="sub">Esperando campos de asistencia/puntualidad</div>
+          @endif
+        </div>
+      </article>
+    </section>
+
     <section class="grid-2">
       <article class="card chart-card">
-        <div class="head"><div class="title">Distribución de Estatus</div></div>
+        <div class="head"><div class="title">Distribución de Estatus</div><span class="small muted">{{ \Illuminate\Support\Carbon::parse($inicio)->format('d/m/Y') }} - {{ \Illuminate\Support\Carbon::parse($fin)->format('d/m/Y') }}</span></div>
         <div class="body">
           <div class="canvas-wrap">
             <canvas id="statusPieChart" data-chart='@json($chartData ?? [])'></canvas>
@@ -44,27 +113,27 @@
       </article>
 
       <article class="card">
-        <div class="head"><div class="title">Resumen general del mes</div></div>
+        <div class="head"><div class="title">Resumen del periodo</div></div>
         <div class="body">
           <div class="row" style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:8px 0">
             <span class="muted">Total de Citas</span>
-            <strong>{{ number_format($resumenMes['total'] ?? 0) }}</strong>
+            <strong>{{ number_format($resumenPeriodo['total'] ?? 0) }}</strong>
           </div>
           <div class="row" style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:8px 0">
             <span class="muted">Citas Completadas</span>
-            <strong style="color:var(--success)">{{ number_format($resumenMes['completadas'] ?? 0) }}</strong>
+            <strong style="color:var(--success)">{{ number_format($resumenPeriodo['completadas'] ?? 0) }}</strong>
           </div>
           <div class="row" style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:8px 0">
             <span class="muted">Citas Pendientes</span>
-            <strong style="color:var(--warning)">{{ number_format($resumenMes['pendientes'] ?? 0) }}</strong>
+            <strong style="color:var(--warning)">{{ number_format($resumenPeriodo['pendientes'] ?? 0) }}</strong>
           </div>
           <div class="row" style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:8px 0">
             <span class="muted">Citas Confirmadas</span>
-            <strong style="color:var(--info)">{{ number_format($resumenMes['confirmadas'] ?? 0) }}</strong>
+            <strong style="color:var(--info)">{{ number_format($resumenPeriodo['confirmadas'] ?? 0) }}</strong>
           </div>
           <div class="row" style="display:flex;justify-content:space-between;padding:8px 0">
             <span class="muted">Citas Canceladas</span>
-            <strong style="color:var(--danger)">{{ number_format($resumenMes['canceladas'] ?? 0) }}</strong>
+            <strong style="color:var(--danger)">{{ number_format($resumenPeriodo['canceladas'] ?? 0) }}</strong>
           </div>
         </div>
       </article>

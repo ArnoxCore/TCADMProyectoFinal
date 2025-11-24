@@ -9,6 +9,7 @@ use App\Models\Cita;
 use App\Models\Mecanico;
 use App\Models\User;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 class AdminController extends Controller
 {
@@ -150,7 +151,26 @@ class AdminController extends Controller
             'cancelada' => 'Cancelada',
         ];
 
-        $statusCounts = Cita::selectRaw('estatus, COUNT(*) as total')
+        $rangeStart = $request->filled('desde')
+            ? Carbon::parse($request->input('desde'))->startOfDay()
+            : Carbon::now()->startOfMonth();
+        $rangeEnd = $request->filled('hasta')
+            ? Carbon::parse($request->input('hasta'))->endOfDay()
+            : Carbon::now()->endOfMonth();
+
+        if ($rangeStart->greaterThan($rangeEnd)) {
+            [$rangeStart, $rangeEnd] = [$rangeEnd, $rangeStart];
+        }
+
+        $gracia = (int) $request->input('tolerancia', 10);
+        $gracia = $gracia > 0 ? $gracia : 10;
+
+        $baseQuery = Cita::whereBetween('fecha', [$rangeStart->toDateString(), $rangeEnd->toDateString()]);
+
+        $totalRango = (clone $baseQuery)->count();
+
+        $statusCounts = (clone $baseQuery)
+            ->selectRaw('estatus, COUNT(*) as total')
             ->groupBy('estatus')
             ->pluck('total', 'estatus');
 
@@ -159,25 +179,66 @@ class AdminController extends Controller
             'totals' => array_map(fn ($key) => (int) ($statusCounts[$key] ?? 0), array_keys($statusOrder)),
         ];
 
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
-
-        $monthCounts = Cita::whereBetween('fecha', [$startOfMonth, $endOfMonth])
-            ->selectRaw('estatus, COUNT(*) as total')
-            ->groupBy('estatus')
-            ->pluck('total', 'estatus');
-
-        $resumenMes = [
-            'total' => $monthCounts->sum(),
-            'completadas' => (int) ($monthCounts['completada'] ?? 0),
-            'pendientes' => (int) ($monthCounts['pendiente'] ?? 0),
-            'confirmadas' => (int) ($monthCounts['confirmada'] ?? 0),
-            'canceladas' => (int) ($monthCounts['cancelada'] ?? 0),
+        $resumenPeriodo = [
+            'total' => $totalRango,
+            'completadas' => (int) ($statusCounts['completada'] ?? 0),
+            'pendientes' => (int) ($statusCounts['pendiente'] ?? 0),
+            'confirmadas' => (int) ($statusCounts['confirmada'] ?? 0),
+            'canceladas' => (int) ($statusCounts['cancelada'] ?? 0),
         ];
+
+        $attendanceMetrics = [
+            'tolerancia' => $gracia,
+            'total' => $totalRango,
+            'asistieron' => null,
+            'noShows' => null,
+            'asistenciaPorc' => null,
+            'registradasPuntualidad' => null,
+            'puntualidadPorc' => null,
+            'promedioRetraso' => null,
+            'camposDisponibles' => false,
+        ];
+
+        $hasAttendanceColumns = Schema::hasColumn('citas', 'asistio')
+            && Schema::hasColumn('citas', 'inicio_real_at')
+            && Schema::hasColumn('citas', 'check_in_at');
+
+        if ($hasAttendanceColumns) {
+            $asistieron = (clone $baseQuery)->where('asistio', true)->count();
+            $noShows = (clone $baseQuery)->where('asistio', false)->count();
+
+            $registradasPuntualidad = (clone $baseQuery)->whereNotNull('inicio_real_at')->count();
+            $puntuales = (clone $baseQuery)
+                ->whereNotNull('inicio_real_at')
+                ->whereRaw("TIMESTAMPDIFF(MINUTE, CONCAT(fecha, ' ', hora_inicio), inicio_real_at) <= ?", [$gracia])
+                ->count();
+
+            $promedioRetraso = (clone $baseQuery)
+                ->whereNotNull('inicio_real_at')
+                ->selectRaw("AVG(GREATEST(TIMESTAMPDIFF(MINUTE, CONCAT(fecha, ' ', hora_inicio), inicio_real_at), 0)) as retraso")
+                ->value('retraso') ?? 0;
+
+            $attendanceMetrics = [
+                'tolerancia' => $gracia,
+                'total' => $totalRango,
+                'asistieron' => $asistieron,
+                'noShows' => $noShows,
+                'asistenciaPorc' => $totalRango ? round(($asistieron / max($totalRango, 1)) * 100, 1) : 0,
+                'registradasPuntualidad' => $registradasPuntualidad,
+                'puntualidadPorc' => $registradasPuntualidad ? round(($puntuales / $registradasPuntualidad) * 100, 1) : null,
+                'promedioRetraso' => round($promedioRetraso, 1),
+                'camposDisponibles' => true,
+            ];
+        }
 
         return view('Panel-admin.estadisticas', [
             'chartData' => $chartData,
-            'resumenMes' => $resumenMes,
+            'resumenPeriodo' => $resumenPeriodo,
+            'attendanceMetrics' => $attendanceMetrics,
+            'periodoSeleccionado' => [
+                'inicio' => $rangeStart->toDateString(),
+                'fin' => $rangeEnd->toDateString(),
+            ],
         ]);
     }
 
