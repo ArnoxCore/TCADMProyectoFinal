@@ -99,6 +99,133 @@ document.addEventListener("DOMContentLoaded", () => {
     const vinInput = document.getElementById("vin-input");
     const vinStatus = document.getElementById("vin-status");
     const buscarBtn = document.getElementById("buscar-vin-btn");
+    const marcaSelect = document.getElementById("marca");
+    const modeloSelect = document.getElementById("modelo");
+    const anoSelect = document.getElementById("ano");
+    const catalogoEndpoint = window.CATALOGO_ENDPOINTS?.modelos || null;
+    const oldCatalog = window.CATALOGO_OLD || {};
+    const modelosCache = new Map();
+
+    function resetSelect(select, placeholder) {
+        if (!select) return;
+        select.innerHTML = `<option value="">${placeholder}</option>`;
+        select.value = "";
+        select.disabled = true;
+    }
+
+    function getSelectedMakeId() {
+        if (!marcaSelect) return null;
+        const option = marcaSelect.options[marcaSelect.selectedIndex];
+        return option ? option.getAttribute("data-make-id") : null;
+    }
+
+    async function obtenerModelos(marcaId) {
+        if (!catalogoEndpoint || !marcaId) return [];
+        if (modelosCache.has(marcaId)) {
+            return modelosCache.get(marcaId);
+        }
+
+        const url = catalogoEndpoint.replace("__MAKE__", marcaId);
+        try {
+            const res = await fetch(url, {
+                headers: { "Accept": "application/json" }
+            });
+            if (!res.ok) {
+                throw new Error(`Error HTTP ${res.status}`);
+            }
+            const data = await res.json();
+            const modelos = data.modelos || [];
+            modelosCache.set(marcaId, modelos);
+            return modelos;
+        } catch (error) {
+            console.error("Error obteniendo modelos", error);
+            toast?.error?.("No se pudieron cargar los modelos para la marca seleccionada.");
+            return [];
+        }
+    }
+
+    async function popularModelos(marcaId, modeloPreseleccionado = null, anoPreseleccionado = null) {
+        if (!modeloSelect) return;
+        resetSelect(modeloSelect, "Selecciona un modelo");
+        resetSelect(anoSelect, "Selecciona un año");
+
+        const modelos = await obtenerModelos(marcaId);
+        if (!modelos.length) {
+            return;
+        }
+
+        modelos.forEach((modelo) => {
+            const option = document.createElement("option");
+            option.value = modelo.nombre;
+            option.textContent = modelo.nombre;
+            option.dataset.years = JSON.stringify(modelo.years || []);
+            modeloSelect.appendChild(option);
+        });
+
+        modeloSelect.disabled = false;
+
+        if (modeloPreseleccionado) {
+            const option = Array.from(modeloSelect.options).find(opt => opt.value === modeloPreseleccionado);
+            if (option) {
+                modeloSelect.value = modeloPreseleccionado;
+                popularAnosDesdeOption(option, anoPreseleccionado);
+            }
+        }
+    }
+
+    function popularAnosDesdeOption(option, anoPreseleccionado = null) {
+        if (!anoSelect || !option) return;
+        resetSelect(anoSelect, "Selecciona un año");
+
+        let anos = [];
+        try {
+            anos = JSON.parse(option.dataset.years || "[]");
+        } catch (error) {
+            console.warn("No se pudieron parsear los años del modelo", error);
+        }
+
+        if (!Array.isArray(anos) || !anos.length) return;
+
+        anos.forEach((ano) => {
+            const opt = document.createElement("option");
+            opt.value = ano;
+            opt.textContent = ano;
+            anoSelect.appendChild(opt);
+        });
+
+        anoSelect.disabled = false;
+        if (anoPreseleccionado && anos.includes(Number(anoPreseleccionado))) {
+            anoSelect.value = anoPreseleccionado;
+        }
+    }
+
+    marcaSelect?.addEventListener("change", async () => {
+        const makeId = getSelectedMakeId();
+        if (!makeId) {
+            resetSelect(modeloSelect, "Selecciona un modelo");
+            resetSelect(anoSelect, "Selecciona un año");
+            return;
+        }
+        await popularModelos(makeId);
+    });
+
+    modeloSelect?.addEventListener("change", () => {
+        const option = modeloSelect.options[modeloSelect.selectedIndex];
+        if (!option) {
+            resetSelect(anoSelect, "Selecciona un año");
+            return;
+        }
+        popularAnosDesdeOption(option);
+    });
+
+    (async function inicializarCatalogo() {
+        if (!marcaSelect || !marcaSelect.value) {
+            return;
+        }
+        const makeId = getSelectedMakeId();
+        if (!makeId) return;
+        await popularModelos(makeId, oldCatalog?.modelo || null, oldCatalog?.ano || null);
+    })();
 
     async function buscarVin() {
         const vin = vinInput.value.toUpperCase().trim();
@@ -124,17 +251,48 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            const marcaEl  = document.getElementById("marca");
-            const modeloEl = document.getElementById("modelo");
-            const anoEl    = document.getElementById("ano");
+                const marcaDetectada = info.Make?.toUpperCase();
+                const modeloDetectado = info.Model?.toUpperCase();
+                const anoDetectado = Number(info.ModelYear);
 
-            if (marcaEl)  marcaEl.value  = info.Make.toUpperCase();
-            if (modeloEl) modeloEl.value = info.Model.toUpperCase();
-            if (anoEl)    anoEl.value    = info.ModelYear;
+                const marcaOption = Array.from(marcaSelect?.options || []).find(
+                    (opt) => opt.value === marcaDetectada
+                );
 
-            vinStatus.style.color = "#16a34a";
-            vinStatus.textContent = `Vehículo identificado: ${info.Make} ${info.Model} ${info.ModelYear}`;
-            toast.success(`Vehículo identificado: ${info.Make} ${info.Model} ${info.ModelYear}`);
+                if (!marcaOption) {
+                    vinStatus.style.color = "#d97706";
+                    vinStatus.textContent = "La marca detectada no está en el catálogo disponible.";
+                    toast.warning("La marca detectada no está en el catálogo. Selecciona una opción manualmente.");
+                    return;
+                }
+
+                marcaSelect.value = marcaDetectada;
+                const makeId = marcaOption.getAttribute("data-make-id");
+                await popularModelos(makeId, modeloDetectado, anoDetectado);
+
+                const modeloOption = Array.from(modeloSelect?.options || []).find(
+                    (opt) => opt.value === modeloDetectado
+                );
+
+                if (!modeloOption) {
+                    vinStatus.style.color = "#d97706";
+                    vinStatus.textContent = "Modelo detectado fuera del catálogo. Selecciona una opción disponible.";
+                    toast.warning("El modelo detectado no está en el catálogo. Selecciona uno disponible.");
+                    return;
+                }
+
+                popularAnosDesdeOption(modeloOption, anoDetectado);
+
+                if (!anoSelect.value) {
+                    vinStatus.style.color = "#d97706";
+                    vinStatus.textContent = "Año detectado fuera del catálogo. Selecciona uno disponible.";
+                    toast.warning("El año detectado no está en el catálogo. Selecciona uno disponible.");
+                    return;
+                }
+
+                vinStatus.style.color = "#16a34a";
+                vinStatus.textContent = `Vehículo identificado: ${info.Make} ${info.Model} ${info.ModelYear}`;
+                toast.success(`Vehículo identificado: ${info.Make} ${info.Model} ${info.ModelYear}`);
 
         } catch (err) {
             console.error(err);
@@ -156,8 +314,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    mayus("marca");
-    mayus("modelo");
     mayus("color");
 
     // ==========================================================
@@ -257,28 +413,70 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // =========================================================
-    // FUNCIÓN GENERAL PARA LIMITAR DATEPICKERS
+    // DATEPICKERS (Flatpickr + fallback)
     // =========================================================
-    function limitarFechas(input) {
-        const hoy = new Date();
-        const yyyy = hoy.getFullYear();
-        const mm = String(hoy.getMonth() + 1).padStart(2, "0");
-        const dd = String(hoy.getDate()).padStart(2, "0");
+    const TIMEZONE = "America/Mexico_City";
 
+    function getTodayInTimezone() {
+        return new Date(new Date().toLocaleString("en-US", { timeZone: TIMEZONE }));
+    }
+
+    function getRange(days = 7) {
+        const today = getTodayInTimezone();
+        const max = new Date(today.getTime());
+        max.setDate(today.getDate() + days);
+        return { today, max };
+    }
+
+    function aplicarFlatpickr(input) {
+        if (!input) return null;
+
+        const { today, max } = getRange();
+
+        if (window.flatpickr) {
+            if (input._flatpickr) {
+                input._flatpickr.set("minDate", today);
+                input._flatpickr.set("maxDate", max);
+                return input._flatpickr;
+            }
+
+            return flatpickr(input, {
+                locale: (flatpickr.l10ns && flatpickr.l10ns.es) ? flatpickr.l10ns.es : undefined,
+                dateFormat: "Y-m-d",
+                minDate: today,
+                maxDate: max,
+                disable: [
+                    function(date) {
+                        return date.getDay() === 0; // domingos
+                    }
+                ],
+                allowInput: true,
+                defaultDate: input.value || null
+            });
+        }
+
+        limitarFechasFallback(input, today, max);
+        return null;
+    }
+
+    function limitarFechasFallback(input, today, max) {
+        if (!input) return;
+
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, "0");
+        const dd = String(today.getDate()).padStart(2, "0");
         input.min = `${yyyy}-${mm}-${dd}`;
-
-        const max = new Date();
-        max.setDate(hoy.getDate() + 7);
 
         const yyyy2 = max.getFullYear();
         const mm2 = String(max.getMonth() + 1).padStart(2, "0");
         const dd2 = String(max.getDate()).padStart(2, "0");
-
         input.max = `${yyyy2}-${mm2}-${dd2}`;
 
         input.addEventListener("change", () => {
-            const d = new Date(input.value);
-            if (d.getDay() === 0) {
+            if (!input.value) return;
+
+            const seleccion = new Date(`${input.value}T00:00:00`);
+            if (seleccion.getUTCDay() === 0) {
                 toast.error("No se pueden agendar citas los domingos.");
                 input.value = "";
             }
@@ -286,7 +484,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const fechaCrear = document.getElementById("fechaCita");
-    if (fechaCrear) limitarFechas(fechaCrear);
+    const pickerCrear = aplicarFlatpickr(fechaCrear);
 
     // =========================================================
     // MODAL EDITAR CITA
@@ -300,12 +498,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let citaEditId = null;
 
-    if (fechaEditar) limitarFechas(fechaEditar);
+    const pickerEditar = aplicarFlatpickr(fechaEditar);
 
     document.querySelectorAll(".btn-modificar-cita").forEach(btn => {
         btn.addEventListener("click", () => {
             citaEditId = btn.dataset.citaId;
-            fechaEditar.value = btn.dataset.fecha;
+            if (pickerEditar) {
+                pickerEditar.setDate(btn.dataset.fecha, true);
+            } else if (fechaEditar) {
+                fechaEditar.value = btn.dataset.fecha;
+            }
             horaEditar.value = btn.dataset.hora;
             modalEditar.classList.add("active");
         });
@@ -364,7 +566,26 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            const confirmar = confirm("¿Seguro que quieres cancelar esta cita?");
+            let confirmar = true;
+
+            if (window.Swal) {
+                const result = await Swal.fire({
+                    title: "Cancelar cita",
+                    text: "¿Seguro que deseas cancelar esta cita?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, cancelar",
+                    cancelButtonText: "No, volver",
+                    reverseButtons: true,
+                    focusCancel: true,
+                    confirmButtonColor: "#dc2626",
+                    cancelButtonColor: "#94a3b8",
+                });
+                confirmar = result.isConfirmed;
+            } else {
+                confirmar = confirm("¿Seguro que quieres cancelar esta cita?");
+            }
+
             if (!confirmar) return;
 
             try {

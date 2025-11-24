@@ -14,7 +14,6 @@ class MecanicosSeeder extends Seeder
      */
     public function run(): void
     {
-        // 👇 Ajusta este rol_id si tus mecánicos usan otro
         $ROL_MECANICO = 2;
 
         $mecanicosData = [

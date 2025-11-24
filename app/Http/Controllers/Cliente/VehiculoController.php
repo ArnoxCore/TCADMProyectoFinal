@@ -5,7 +5,11 @@ namespace App\Http\Controllers\Cliente;
 use App\Http\Controllers\Controller;
 use App\Models\Vehiculo;
 use App\Models\Cliente;
+use App\Models\VehicleMake;
+use App\Models\VehicleModel;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
 
 class VehiculoController extends Controller
 {
@@ -21,15 +25,17 @@ class VehiculoController extends Controller
 
     public function create()
     {
-        return view('clientes.vehiculos.crear');
+        $marcas = VehicleMake::orderBy('nombre')->get();
+
+        return view('clientes.vehiculos.crear', compact('marcas'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'marca'        => 'required|string|max:100',
-            'modelo'       => 'required|string|max:100',
-            'ano'          => 'required|integer|min:1900|max:2100',
+        $validator = Validator::make($request->all(), [
+            'marca'        => ['required', 'string', 'max:100', Rule::exists('vehicle_makes', 'nombre')],
+            'modelo'       => ['required', 'string', 'max:150'],
+            'ano'          => ['required', 'integer', 'min:1900', 'max:2100'],
             'placa'        => 'required|string|max:20|unique:vehiculos,placa|regex:/^[A-Z]{3}-\d{3}-[A-Z0-9]{1,2}$/',
             'vin'          => 'required|string|size:17|regex:/^[A-HJ-NPR-Z0-9]{17}$/',
             'color'        => 'required|string|max:50',
@@ -37,6 +43,32 @@ class VehiculoController extends Controller
         ], [
             'placa.regex' => 'El formato de la placa es inválido. Ejemplo: ABC-123-A',
         ]);
+
+        $validator->after(function ($validator) use ($request) {
+            $marca = VehicleMake::where('nombre', $request->input('marca'))->first();
+            if (! $marca) {
+                return;
+            }
+
+            $modelo = $marca->modelos()
+                ->where('nombre', $request->input('modelo'))
+                ->first();
+
+            if (! $modelo) {
+                $validator->errors()->add('modelo', 'El modelo seleccionado no pertenece a la marca.');
+                return;
+            }
+
+            $existeAno = $modelo->years()
+                ->where('year', (int) $request->input('ano'))
+                ->exists();
+
+            if (! $existeAno) {
+                $validator->errors()->add('ano', 'El año seleccionado no está disponible para el modelo elegido.');
+            }
+        });
+
+        $validator->validate();
 
         $user = auth()->user();
         $cliente = Cliente::where('user_id', $user->id)->firstOrFail();

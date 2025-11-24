@@ -38,7 +38,7 @@
 
             <div class="row">
                 <label>Fecha
-                    <input type="date" id="fechaCita">
+                    <input type="text" id="fechaCita" placeholder="YYYY-MM-DD" autocomplete="off">
                 </label>
 
                 <label>Hora
