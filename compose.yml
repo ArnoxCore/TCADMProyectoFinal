@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  mysqlserver:
+    image: mysql:8.0
+    container_name: mysqlserver
+    environment:
+      MYSQL_ROOT_PASSWORD: axion2025
+      MYSQL_DATABASE: tallerdb
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: axion2025
+      TZ: America/Mexico_City
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:

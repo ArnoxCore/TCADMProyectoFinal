@@ -1,0 +1,68 @@
+<div class="modal-backdrop" id="modal">
+    <div class="modal">
+        <div class="m-head">
+            <div class="m-title">Agendar Nueva Cita</div>
+            <button id="closeModal" class="modal-close">×</button>
+        </div>
+
+        <div class="m-body">
+
+            <label>Servicio
+                <select name="servicio" id="servicio" required>
+                    <option value="">Selecciona un servicio</option>
+                    {{-- Servicios dinámicos vendrán del backend --}}
+                    @if(isset($servicios))
+                        @foreach($servicios as $servicio)
+                            <option value="{{ $servicio->id }}">
+                                {{ $servicio->nombre }} - ${{ number_format($servicio->precio_base, 2) }}
+                            </option>
+                        @endforeach
+                    @endif
+                </select>
+            </label>
+
+            <label>Vehículo
+                <select name="vehiculo_id" id="vehiculo_id" required>
+                    <option value="">Selecciona un vehículo</option>
+
+                    {{-- Meter vehiculos reales con backend --}}
+                    @if(isset($vehiculos))
+                        @foreach($vehiculos as $vehiculo)
+                            <option value="{{ $vehiculo->id }}">
+                                {{ $vehiculo->marca }} {{ $vehiculo->modelo }} ({{ $vehiculo->placa }})
+                            </option>
+                        @endforeach
+                    @endif
+                </select>
+            </label>
+
+            <div class="row">
+                <label>Fecha
+                    <input type="text" id="fechaCita" placeholder="YYYY-MM-DD" autocomplete="off">
+                </label>
+
+                <label>Hora
+                    <select id="hora">
+                        <option value="">Selecciona hora</option>
+                        <option value="08:00">08:00 AM</option>
+                        <option value="09:00">09:00 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="12:00">12:00 PM</option>
+                        <option value="13:00">1:00 PM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="15:00">3:00 PM</option>
+                        <option value="16:00">4:00 PM</option>
+                        <option value="17:00">5:00 PM</option>
+                    </select>
+                </label>
+            </div>
+
+        </div>
+
+        <div class="m-footer">
+            <button id="cancelModal" class="button ghost">Cancelar</button>
+            <button id="agendar-btn" class="button primary">Agendar</button>
+        </div>
+    </div>
+</div>
