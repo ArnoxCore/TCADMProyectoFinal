@@ -99,17 +99,21 @@ class Cita extends Model {
 
     public function canCheckIn(): bool
     {
-        return $this->asistio === null && $this->estatus !== 'cancelada';
+        return $this->asistio === null
+            && ! in_array($this->estatus, ['cancelada', 'completada']);
     }
 
     public function canStartService(): bool
     {
-        return $this->asistio === true && $this->inicio_real_at === null;
+        return $this->asistio === true
+            && $this->inicio_real_at === null
+            && ! in_array($this->estatus, ['cancelada', 'completada']);
     }
 
     public function canMarkNoShow(): bool
     {
-        return $this->asistio === null && $this->estatus !== 'cancelada';
+        return $this->asistio === null
+            && ! in_array($this->estatus, ['cancelada', 'completada']);
     }
 
     public function canCancelDesdeRecepcion(): bool
