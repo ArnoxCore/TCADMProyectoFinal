@@ -8,6 +8,7 @@ use App\Http\Controllers\Cliente\PerfilController;
 use App\Http\Controllers\Cliente\VehiculoController;
 use App\Http\Controllers\Recepcion\RecepcionDashboardController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -99,9 +100,17 @@ Route::middleware(['auth', 'role:2'])
     ->prefix('mecanico')
     ->name('mecanico.')
     ->group(function () {
-        Route::get('/', function () {
-            return 'Panel del mecánico (en construcción)';
-        })->name('dashboard');
+        Route::get('/', [App\Http\Controllers\Mecanico\MecanicoController::class, 'dashboard'])
+            ->name('dashboard');
+
+        Route::patch('/citas/{id}/estatus', [App\Http\Controllers\Mecanico\MecanicoController::class, 'updateEstatus'])
+            ->name('citas.updateEstatus');
+
+        Route::patch('/citas/{id}/mecanico', [App\Http\Controllers\Mecanico\MecanicoController::class, 'assignMecanico'])
+            ->name('citas.assignMecanico');
+
+        Route::get('/mecanicos-list', [App\Http\Controllers\Mecanico\MecanicoController::class, 'getMecanicosList'])
+            ->name('mecanicos.list');
     });
 
 // ======================================================
@@ -141,9 +150,29 @@ Route::middleware(['auth', 'role:4'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::get('/', function () {
-            return 'Panel del administrador (en construcción)';
-        })->name('dashboard');
+        Route::get('/', [AdminController::class, 'dashboard'])
+            ->name('dashboard');
+
+        Route::get('/servicios', [AdminController::class, 'servicios'])
+            ->name('servicios');
+
+        Route::post('/servicios', [AdminController::class, 'storeServicio'])
+            ->name('servicios.store');
+
+        Route::put('/servicios/{servicio}', [AdminController::class, 'updateServicio'])
+            ->name('servicios.update');
+
+        Route::delete('/servicios/{servicio}', [AdminController::class, 'destroyServicio'])
+            ->name('servicios.destroy');
+
+        Route::get('/reportes', [AdminController::class, 'reportes'])
+            ->name('reportes');
+
+        Route::get('/estadisticas', [AdminController::class, 'estadisticas'])
+            ->name('estadisticas');
+
+        Route::patch('/citas/{cita}/asignar', [AdminController::class, 'assignCita'])
+            ->name('citas.asignar');
     });
 
 Route::get('/api/car-image', [CarsXEController::class, 'getImage']);

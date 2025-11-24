@@ -1,0 +1,104 @@
+[33mcommit af593d5b807f6def885123cd5edd71280983321b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32maaron[m[33m, [m[1;31morigin/develop[m[33m, [m[1;31morigin/aaron[m[33m, [m[1;32mdevelop[m[33m)[m
+Author: Aaron Emmanuel Aguilar Monroy <Aaron250804@gmail.com>
+Date:   Sat Nov 22 23:53:39 2025 -0600
+
+    fix: Ordenamiento de carpetas de panel de mecanico y admin
+
+[33mcommit e8fc623eb6f52a25157331ee2d8814bdbaf7defb[m
+Author: Aaron Emmanuel Aguilar Monroy <Aaron250804@gmail.com>
+Date:   Sat Nov 22 16:57:21 2025 -0600
+
+    feat: Vistas de panel de admin listas
+
+[33mcommit bb99067405265baa289f6f7ab0f418ef289475f9[m
+Author: Aaron Emmanuel Aguilar Monroy <Aaron250804@gmail.com>
+Date:   Sat Nov 22 01:03:58 2025 -0600
+
+    feat: Avance del panel de mecanicos
+
+[33mcommit d4f3d1e81f22a5618ead592d468abf16027336e3[m
+Author: Aaron Emmanuel Aguilar Monroy <Aaron250804@gmail.com>
+Date:   Fri Nov 21 22:31:13 2025 -0600
+
+    feat: Avance de panel de mecanico
+
+[33mcommit 101cef607afa8a06e624b7874cef3ad44d2a9baa[m
+Author: Angel Espinoza <im4nkex.dev@gmail.com>
+Date:   Thu Nov 20 13:06:30 2025 -0600
+
+    fix: cliente.js y otros archivos restaurando el flujo del panel de cliente
+
+[33mcommit 09ef512fbc0a82b32dd758769b652053acfc5f6f[m
+Author: Angel Espinoza <im4nkex.dev@gmail.com>
+Date:   Wed Nov 19 14:34:57 2025 -0600
+
+    fix: Arreglo de bugs y botones del panel de cliente
+
+[33mcommit 2555531c0490bb28f9936c9b227e7b0f446e6458[m
+Author: Angel Espinoza <im4nkex.dev@gmail.com>
+Date:   Wed Nov 19 03:00:06 2025 -0600
+
+    feat: Panel de Cliente Operativo y rehecho
+
+[33mcommit 1c9a93ffea1773d33a8afa12195531bac4bee11e[m
+Author: Angel Espinoza <im4nkex.dev@gmail.com>
+Date:   Fri Nov 14 01:02:49 2025 -0600
+
+    refactor: Arreglo de las rutas del web.php a espera de adaptacion del panel de cliente y auth
+
+[33mcommit 4c4e398b961f76975e7ad716222be9b5f05ab32e[m
+Merge: e26eb39 0bdcd21
+Author: Angel Espinoza <im4nkex.dev@gmail.com>
+Date:   Fri Nov 14 00:58:51 2025 -0600
+
+    feat: Union de codigo de Panel de clientes y login
+
+[33mcommit 0bdcd2129886444ff6cceb5faabbdfd3516960c1[m
+Author: Aaron Emmanuel Aguilar Monroy <Aaron250804@gmail.com>
+Date:   Wed Nov 12 17:57:24 2025 -0600
+
+    feat: Panel de clientes esperando a union con login
+
+[33mcommit e26eb39200f597100512ac857ef546e435c6a39f[m
+Author: Angel Espinoza <im4nkex.dev@gmail.com>
+Date:   Wed Nov 12 17:05:09 2025 -0600
+
+    feat: Logica de inicio de sesión, registro de clientes y landing page agregadas y funcionando
+
+[33mcommit 2f1659e01461019e77878db0339f1402a7b1932f[m[33m ([m[1;31morigin/diego[m[33m, [m[1;31morigin/angel[m[33m)[m
+Author: DiegoCardona224 <diegocardona224@gmail.com>
+Date:   Mon Nov 10 12:49:18 2025 -0600
+
+    feat: subida de la base de datos y contenedor de docker
+
+[33mcommit 977b6086a415bbb0b8401af0bcde53102da92949[m
+Author: Ángel Preciado <122109994+ArnoxCore@users.noreply.github.com>
+Date:   Thu Oct 16 13:44:12 2025 -0600
+
+    Remove unnecessary formatting from team section
+
+[33mcommit 6bcca0663f68b646488479b7a21e57a297f37c5d[m
+Author: Ángel Preciado <122109994+ArnoxCore@users.noreply.github.com>
+Date:   Thu Oct 16 13:43:11 2025 -0600
+
+    Revise team members and workflow in README
+    
+    Updated team member details and project workflow description in README.
+
+[33mcommit c1b050b17faa52c53ffe61c666b605ed8f123432[m
+Author: Angel Espinoza <im4nkex.dev@gmail.com>
+Date:   Thu Oct 16 13:27:43 2025 -0600
+
+    docs: Ajuste del README.md del proyecto
+
+[33mcommit 84e96fcc030262fafa99b3543b0d7544d01ac214[m
+Author: Angel Espinoza <im4nkex.dev@gmail.com>
+Date:   Thu Oct 16 12:56:30 2025 -0600
+
+    feat: Configuracion inicial de proyecto de laravel (SIN ARCHIVOS DOCKER AUN)
+
+[33mcommit 182a69985bcbf074dba593c586a55c9a9be43e00[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m
+Author: Ángel Preciado <122109994+ArnoxCore@users.noreply.github.com>
+Date:   Sat Oct 11 21:06:18 2025 -0600
+
+    Initial commit
