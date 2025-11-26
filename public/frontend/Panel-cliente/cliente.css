@@ -464,6 +464,7 @@ body {
     background: #f3f4f6;
     font-size: 14px;
     transition: .15s ease;
+    box-sizing: border-box;
 }
 
 .perfil-label input:focus,

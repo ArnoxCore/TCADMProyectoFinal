@@ -458,33 +458,85 @@ document.addEventListener("DOMContentLoaded", () => {
     mayus("color");
 
     // ==========================================================
-    //   VALIDACIÓN DE PLACA
+    //   VALIDACIÓN DE PLACA (SEGMENTADA)
     // ==========================================================
-    const placaInput = document.getElementById("placa");
+    const placaHiddenInput = document.getElementById("placa");
+    const placaSegmentInputs = placaHiddenInput
+        ? Array.from(document.querySelectorAll("input[data-placa-segment]"))
+        : [];
 
-    if (placaInput) {
-        placaInput.addEventListener("input", () => {
-            placaInput.value = placaInput.value.toUpperCase();
+    if (placaHiddenInput && placaSegmentInputs.length === 3) {
+        const regexCompleto = /^[A-Z]{3}-\d{3}-[A-Z0-9]$/;
+
+        const normalizadores = {
+            prefix: value => value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 3),
+            numbers: value => value.replace(/[^0-9]/g, "").slice(0, 3),
+            suffix: value => value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 1),
+        };
+
+        function actualizarSegmento(input) {
+            const tipo = input.dataset.placaSegment;
+            const normalizador = normalizadores[tipo];
+            if (!normalizador) return;
+            input.value = normalizador(input.value || "");
+        }
+
+        function componerPlaca() {
+            const valores = placaSegmentInputs.map(input => {
+                actualizarSegmento(input);
+                return input.value;
+            });
+
+            const completa =
+                valores[0].length === 3 && valores[1].length === 3 && valores[2].length === 1
+                    ? `${valores[0]}-${valores[1]}-${valores[2]}`
+                    : "";
+
+            placaHiddenInput.value = completa;
+            return completa;
+        }
+
+        function validarPlaca(mostrarToast = false) {
+            const valor = componerPlaca();
+            if (!valor) {
+                return false;
+            }
+            const esValida = regexCompleto.test(valor);
+            if (!esValida && mostrarToast) {
+                toast?.error?.("Formato inválido: ABC-123-A");
+            }
+            return esValida;
+        }
+
+        placaSegmentInputs.forEach((input, index) => {
+            input.addEventListener("input", () => {
+                actualizarSegmento(input);
+                componerPlaca();
+                if (input.value.length === input.maxLength) {
+                    placaSegmentInputs[index + 1]?.focus();
+                }
+            });
+
+            input.addEventListener("blur", () => {
+                actualizarSegmento(input);
+                validarPlaca(true);
+            });
         });
 
-        placaInput.addEventListener("keyup", () => {
-            let raw = placaInput.value.replace(/[^A-Z0-9]/g, "");
+        if (placaHiddenInput.value) {
+            const partes = placaHiddenInput.value.split("-");
+            placaSegmentInputs.forEach((input, idx) => {
+                if (partes[idx]) {
+                    input.value = normalizadores[input.dataset.placaSegment](partes[idx]);
+                }
+            });
+            componerPlaca();
+        }
 
-            if (raw.length >= 3 && raw.length <= 6) {
-                raw = raw.replace(/^([A-Z]{3})(\d{1,3})$/, "$1-$2");
-            }
-
-            if (raw.length > 6) {
-                raw = raw.replace(/^([A-Z]{3})(\d{3})([A-Z0-9]{1,2})$/, "$1-$2-$3");
-            }
-
-            placaInput.value = raw;
-        });
-
-        placaInput.addEventListener("blur", () => {
-            const regex = /^[A-Z]{3}-\d{3}-[A-Z0-9]{1,2}$/;
-            if (!regex.test(placaInput.value)) {
-                toast.error("Formato inválido: ABC-123-A");
+        const placaForm = placaHiddenInput.closest("form");
+        placaForm?.addEventListener("submit", (event) => {
+            if (!validarPlaca(true)) {
+                event.preventDefault();
             }
         });
     }

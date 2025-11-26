@@ -35,7 +35,7 @@ class VehiculoController extends Controller
             'marca'        => ['required', 'string', 'max:100', Rule::exists('vehicle_makes', 'nombre')],
             'modelo'       => ['required', 'string', 'max:150'],
             'ano'          => ['required', 'integer', 'min:1900', 'max:2100'],
-            'placa'        => 'required|string|max:20|unique:vehiculos,placa|regex:/^[A-Z]{3}-\d{3}-[A-Z0-9]{1,2}$/',
+            'placa'        => 'required|string|max:20|unique:vehiculos,placa|regex:/^[A-Z]{3}-\d{3}-[A-Z0-9]$/',
             'vin'          => ['required', 'string', 'size:17', 'regex:/^[A-HJ-NPR-Z0-9]{17}$/', Rule::unique('vehiculos', 'vin')],
             'color'        => 'required|string|max:50',
             'kilometraje'  => 'required|integer|min:0',
@@ -116,7 +116,7 @@ class VehiculoController extends Controller
             'marca'  => ['required', 'string', 'max:100', Rule::exists('vehicle_makes', 'nombre')],
             'modelo' => ['required', 'string', 'max:150'],
             'ano'   => ['required', 'integer', 'min:1900', 'max:2100'],
-            'placa'  => 'required|string|max:20|unique:vehiculos,placa,' . $id,
+            'placa'  => 'required|string|max:20|unique:vehiculos,placa,' . $id . '|regex:/^[A-Z]{3}-\d{3}-[A-Z0-9]$/',
             'vin'    => ['required', 'string', 'size:17', 'regex:/^[A-HJ-NPR-Z0-9]{17}$/', Rule::unique('vehiculos', 'vin')->ignore($id)],
             'color'  => 'nullable|string|max:50',
             'kilometraje' => 'nullable|integer|min:0',
@@ -126,6 +126,7 @@ class VehiculoController extends Controller
             'vin_detected_ano' => 'nullable|integer|min:1900|max:2100',
         ], [
             'vin.unique' => 'Este VIN ya está registrado en la plataforma.',
+            'placa.regex' => 'El formato de la placa es inválido. Ejemplo: ABC-123-A',
         ]);
 
         $validator->after(function ($validator) use ($request) {

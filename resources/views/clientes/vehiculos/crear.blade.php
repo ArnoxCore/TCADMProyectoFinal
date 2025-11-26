@@ -51,9 +51,47 @@
                 </label>
 
                 {{-- PLACA --}}
+                @php
+                    $placaValor = old('placa');
+                    $placaPartes = ['', '', ''];
+                    if ($placaValor) {
+                        $partes = explode('-', strtoupper($placaValor));
+                        $placaPartes[0] = $partes[0] ?? '';
+                        $placaPartes[1] = $partes[1] ?? '';
+                        $placaPartes[2] = $partes[2] ?? '';
+                    }
+                @endphp
                 <label class="perfil-label">
                     <span>Placa</span>
-                    <input type="text" name="placa" id="placa" placeholder="AAA-123-A" required>
+                    <input type="hidden" name="placa" id="placa" value="{{ $placaValor ?? '' }}">
+                    <div class="placa-inputs" style="display:flex; align-items:center; gap:0.35rem;">
+                        <input type="text"
+                               class="placa-block"
+                               data-placa-segment="prefix"
+                               maxlength="3"
+                               inputmode="text"
+                               placeholder="ABC"
+                               value="{{ $placaPartes[0] }}"
+                               required>
+                        <span style="font-weight:600; color:#94a3b8;">-</span>
+                        <input type="text"
+                               class="placa-block"
+                               data-placa-segment="numbers"
+                               maxlength="3"
+                               inputmode="numeric"
+                               placeholder="123"
+                               value="{{ $placaPartes[1] }}"
+                               required>
+                        <span style="font-weight:600; color:#94a3b8;">-</span>
+                        <input type="text"
+                               class="placa-block"
+                               data-placa-segment="suffix"
+                               maxlength="1"
+                               inputmode="text"
+                               placeholder="A"
+                               value="{{ $placaPartes[2] }}"
+                               required>
+                    </div>
                 </label>
 
                 {{-- VIN + BOTÓN --}}
