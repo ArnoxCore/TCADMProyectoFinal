@@ -179,10 +179,9 @@ body {
 }
 
 .appointment header {
-    display: flex;
+    
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.75rem;
 }
 
 /* Header apilado SOLO para las citas del dashboard / Mis Citas */
