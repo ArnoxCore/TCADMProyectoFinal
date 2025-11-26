@@ -102,9 +102,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const marcaSelect = document.getElementById("marca");
     const modeloSelect = document.getElementById("modelo");
     const anoSelect = document.getElementById("ano");
+    const vinHiddenVerified = document.getElementById("vinVerificado");
+    const vinDetectedMarcaInput = document.getElementById("vinDetectedMarca");
+    const vinDetectedModeloInput = document.getElementById("vinDetectedModelo");
+    const vinDetectedAnoInput = document.getElementById("vinDetectedAno");
     const catalogoEndpoint = window.CATALOGO_ENDPOINTS?.modelos || null;
     const oldCatalog = window.CATALOGO_OLD || {};
     const modelosCache = new Map();
+    let vinDetected = null;
+    let vinVerified = vinHiddenVerified ? vinHiddenVerified.value === "1" : false;
+    let suppressVinChangePrompt = false;
+    let vinWarningOpen = false;
 
     function resetSelect(select, placeholder) {
         if (!select) return;
@@ -117,6 +125,132 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!marcaSelect) return null;
         const option = marcaSelect.options[marcaSelect.selectedIndex];
         return option ? option.getAttribute("data-make-id") : null;
+    }
+
+    function findMakeOptionByName(name) {
+        if (!marcaSelect || !name) return null;
+        const upper = name.toUpperCase();
+        return Array.from(marcaSelect.options).find(opt => opt.value === upper);
+    }
+
+    function updateVinVerificationState(isVerified) {
+        vinVerified = Boolean(isVerified);
+        if (vinHiddenVerified) {
+            vinHiddenVerified.value = vinVerified ? "1" : "0";
+        }
+    }
+
+    function setVinDetectedData(data) {
+        vinDetected = data;
+        if (vinDetectedMarcaInput) {
+            vinDetectedMarcaInput.value = data?.marca || "";
+        }
+        if (vinDetectedModeloInput) {
+            vinDetectedModeloInput.value = data?.modelo || "";
+        }
+        if (vinDetectedAnoInput) {
+            vinDetectedAnoInput.value = data?.ano ? String(data.ano) : "";
+        }
+    }
+
+    function clearVinVerification() {
+        updateVinVerificationState(false);
+        setVinDetectedData(null);
+    }
+
+    async function restoreDetectedVehicleSelection() {
+        if (!vinDetected || !marcaSelect) {
+            return;
+        }
+
+        suppressVinChangePrompt = true;
+        try {
+            if (vinDetected.marca) {
+                marcaSelect.value = vinDetected.marca;
+            }
+            const makeOption = vinDetected.makeId
+                ? Array.from(marcaSelect.options).find(opt => opt.getAttribute("data-make-id") === vinDetected.makeId)
+                : findMakeOptionByName(vinDetected.marca);
+            const makeId = makeOption ? makeOption.getAttribute("data-make-id") : getSelectedMakeId();
+            if (makeId) {
+                await popularModelos(makeId, vinDetected.modelo, vinDetected.ano);
+            }
+        } finally {
+            suppressVinChangePrompt = false;
+        }
+    }
+
+    async function recordVinDetection({ marca, modelo, ano, makeId }) {
+        setVinDetectedData({ marca, modelo, ano, makeId });
+        updateVinVerificationState(true);
+        await restoreDetectedVehicleSelection();
+    }
+
+    function handleManualVehicleChange() {
+        if (!vinVerified || !vinDetected || vinWarningOpen || suppressVinChangePrompt) {
+            return;
+        }
+
+        const current = {
+            marca: marcaSelect?.value || null,
+            modelo: modeloSelect?.value || null,
+            ano: anoSelect?.value || null,
+        };
+
+        if (
+            current.marca === (vinDetected.marca || null) &&
+            current.modelo === (vinDetected.modelo || null) &&
+            current.ano === String(vinDetected.ano ?? "")
+        ) {
+            return;
+        }
+
+        if (!window.Swal) {
+            updateVinVerificationState(false);
+            return;
+        }
+
+        vinWarningOpen = true;
+        const detectedLabel = `${vinDetected.marca || ''} ${vinDetected.modelo || ''} ${vinDetected.ano || ''}`.trim();
+
+        window.Swal.fire({
+            title: "Datos distintos al VIN",
+            text: detectedLabel
+                ? `El VIN detectado corresponde a ${detectedLabel}. ¿Deseas mantener los datos manuales?`
+                : "El VIN fue verificado previamente. ¿Deseas mantener los datos manuales?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, continuar",
+            cancelButtonText: "Volver al VIN",
+        }).then(async (result) => {
+            vinWarningOpen = false;
+            if (result.isConfirmed) {
+                updateVinVerificationState(false);
+                toast?.info?.("Se guardará el vehículo sin verificación automática del VIN.");
+            } else {
+                await restoreDetectedVehicleSelection();
+            }
+        });
+    }
+
+    if (marcaSelect) {
+        marcaSelect.addEventListener("change", handleManualVehicleChange);
+    }
+    if (modeloSelect) {
+        modeloSelect.addEventListener("change", handleManualVehicleChange);
+    }
+    if (anoSelect) {
+        anoSelect.addEventListener("change", handleManualVehicleChange);
+    }
+
+    if (vinDetectedMarcaInput?.value) {
+        const option = findMakeOptionByName(vinDetectedMarcaInput.value);
+        setVinDetectedData({
+            marca: vinDetectedMarcaInput.value,
+            modelo: vinDetectedModeloInput?.value || null,
+            ano: vinDetectedAnoInput?.value || null,
+            makeId: option ? option.getAttribute("data-make-id") : null,
+        });
     }
 
     async function obtenerModelos(marcaId) {
@@ -246,6 +380,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const info = data.Results[0];
 
             if (!info.Make || !info.Model || !info.ModelYear) {
+                clearVinVerification();
                 vinStatus.style.color = "#d97706";
                 vinStatus.textContent = "VIN no disponible en la base de EE.UU.";
                 return;
@@ -260,21 +395,26 @@ document.addEventListener("DOMContentLoaded", () => {
                 );
 
                 if (!marcaOption) {
+                    clearVinVerification();
                     vinStatus.style.color = "#d97706";
                     vinStatus.textContent = "La marca detectada no está en el catálogo disponible.";
                     toast.warning("La marca detectada no está en el catálogo. Selecciona una opción manualmente.");
                     return;
                 }
 
-                marcaSelect.value = marcaDetectada;
-                const makeId = marcaOption.getAttribute("data-make-id");
-                await popularModelos(makeId, modeloDetectado, anoDetectado);
+                await recordVinDetection({
+                    marca: marcaDetectada,
+                    modelo: modeloDetectado,
+                    ano: anoDetectado,
+                    makeId: marcaOption.getAttribute("data-make-id"),
+                });
 
                 const modeloOption = Array.from(modeloSelect?.options || []).find(
                     (opt) => opt.value === modeloDetectado
                 );
 
                 if (!modeloOption) {
+                    clearVinVerification();
                     vinStatus.style.color = "#d97706";
                     vinStatus.textContent = "Modelo detectado fuera del catálogo. Selecciona una opción disponible.";
                     toast.warning("El modelo detectado no está en el catálogo. Selecciona uno disponible.");
@@ -284,6 +424,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 popularAnosDesdeOption(modeloOption, anoDetectado);
 
                 if (!anoSelect.value) {
+                    clearVinVerification();
                     vinStatus.style.color = "#d97706";
                     vinStatus.textContent = "Año detectado fuera del catálogo. Selecciona uno disponible.";
                     toast.warning("El año detectado no está en el catálogo. Selecciona uno disponible.");

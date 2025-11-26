@@ -10,39 +10,51 @@
               class="perfil-form">
             @csrf
             @method('PUT')
+             <input type="hidden" name="vin_verificado" id="vinVerificado"
+                 value="{{ old('vin_verificado', $vehiculo->vin_verificado ? 1 : 0) }}">
+             <input type="hidden" name="vin_detected_marca" id="vinDetectedMarca"
+                 value="{{ old('vin_detected_marca', $vehiculo->vin_detected_marca) }}">
+             <input type="hidden" name="vin_detected_modelo" id="vinDetectedModelo"
+                 value="{{ old('vin_detected_modelo', $vehiculo->vin_detected_modelo) }}">
+             <input type="hidden" name="vin_detected_ano" id="vinDetectedAno"
+                 value="{{ old('vin_detected_ano', $vehiculo->vin_detected_ano) }}">
 
             <div class="perfil-grid">
+                @php
+                    $marcaSeleccionada = old('marca', $vehiculo->marca);
+                @endphp
 
                 {{-- MARCA --}}
                 <label class="perfil-label">
                     <span>Marca</span>
-                    <input type="text"
-                           name="marca"
-                           id="marca"
-                           value="{{ old('marca', $vehiculo->marca) }}"
-                           required>
+                    <select name="marca" id="marca" required>
+                        <option value="">Selecciona una marca</option>
+                        @foreach($marcas as $marca)
+                            <option
+                                value="{{ $marca->nombre }}"
+                                data-make-id="{{ $marca->id }}"
+                                {{ $marcaSeleccionada === $marca->nombre ? 'selected' : '' }}
+                            >
+                                {{ $marca->nombre }}
+                            </option>
+                        @endforeach
+                    </select>
                 </label>
 
                 {{-- MODELO --}}
                 <label class="perfil-label">
                     <span>Modelo</span>
-                    <input type="text"
-                           name="modelo"
-                           id="modelo"
-                           value="{{ old('modelo', $vehiculo->modelo) }}"
-                           required>
+                    <select name="modelo" id="modelo" {{ $marcaSeleccionada ? '' : 'disabled' }} required>
+                        <option value="">Selecciona un modelo</option>
+                    </select>
                 </label>
 
                 {{-- AÑO --}}
                 <label class="perfil-label">
                     <span>Año</span>
-                    <input type="number"
-                           name="ano"
-                           id="ano"
-                           min="1900"
-                           max="2100"
-                           value="{{ old('ano', $vehiculo->ano) }}"
-                           required>
+                    <select name="ano" id="ano" {{ old('modelo', $vehiculo->modelo) ? '' : 'disabled' }} required>
+                        <option value="">Selecciona un año</option>
+                    </select>
                 </label>
 
                 {{-- PLACA --}}
@@ -90,19 +102,19 @@
                 {{-- COLOR --}}
                 <label class="perfil-label">
                     <span>Color</span>
-                    <input type="text"
-                           name="color"
-                           id="color"
-                           value="{{ old('color', $vehiculo->color) }}">
+                          <input type="text"
+                              name="color"
+                              id="color"
+                              value="{{ old('color', $vehiculo->color) }}">
                 </label>
 
                 {{-- KILOMETRAJE --}}
                 <label class="perfil-label">
                     <span>Kilometraje</span>
-                    <input type="number"
-                           name="kilometraje"
-                           min="0"
-                           value="{{ old('kilometraje', $vehiculo->kilometraje) }}">
+                          <input type="number"
+                              name="kilometraje"
+                              min="0"
+                              value="{{ old('kilometraje', $vehiculo->kilometraje) }}">
                 </label>
 
             </div>
@@ -115,6 +127,16 @@
             </div>
 
         </form>
+
+        <script>
+            window.CATALOGO_ENDPOINTS = {
+                modelos: "{{ route('cliente.vehiculos.catalogo.modelos', ['make' => '__MAKE__']) }}"
+            };
+            window.CATALOGO_OLD = {
+                modelo: "{{ old('modelo', $vehiculo->modelo) }}",
+                ano: "{{ old('ano', $vehiculo->ano) }}"
+            };
+        </script>
 
     </section>
 

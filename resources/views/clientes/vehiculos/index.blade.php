@@ -23,7 +23,14 @@
                     <div class="car-info">
                         <header>
                             <h3>{{ $vehiculo->marca }} {{ $vehiculo->modelo }}</h3>
-                            <span class="badge info">{{ $vehiculo->placa }}</span>
+                            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                                <span class="badge info">{{ $vehiculo->placa }}</span>
+                                @if($vehiculo->vin_verificado)
+                                    <span class="badge success" title="VIN confirmado con VPIC">VIN verificado</span>
+                                @else
+                                    <span class="badge warning" title="VIN capturado manualmente">VIN no verificado</span>
+                                @endif
+                            </div>
                         </header>
 
                         <ul class="appointment-info">

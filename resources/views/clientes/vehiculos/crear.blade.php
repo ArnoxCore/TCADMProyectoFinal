@@ -7,6 +7,10 @@
 
         <form action="{{ route('cliente.vehiculos.store') }}" method="POST" class="perfil-form">
             @csrf
+            <input type="hidden" name="vin_verificado" id="vinVerificado" value="{{ old('vin_verificado', 0) }}">
+            <input type="hidden" name="vin_detected_marca" id="vinDetectedMarca" value="{{ old('vin_detected_marca') }}">
+            <input type="hidden" name="vin_detected_modelo" id="vinDetectedModelo" value="{{ old('vin_detected_modelo') }}">
+            <input type="hidden" name="vin_detected_ano" id="vinDetectedAno" value="{{ old('vin_detected_ano') }}">
 
             <div class="perfil-grid">
                 @php
