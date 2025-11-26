@@ -9,6 +9,10 @@ class CitaObserver
 {
     public function updated(Cita $cita): void
     {
+        if (app()->runningInConsole() && ! app()->runningUnitTests()) {
+            return;
+        }
+
         if (! $this->estatusConfirmadoRecien($cita)) {
             return;
         }

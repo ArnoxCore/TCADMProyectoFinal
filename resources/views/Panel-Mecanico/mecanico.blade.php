@@ -12,6 +12,7 @@
 
 </head>
 <body data-page="mecanico">
+@php use App\Models\Cita as CitaModel; @endphp
   <header class="header">
     <div class="wrap">
       <div class="brand">
@@ -82,6 +83,24 @@
         @if(isset($citasFiltradas) && $citasFiltradas->count())
           <div class="list-citas">
             @foreach($citasFiltradas as $cita)
+              @php
+                $serviciosStr = $cita->servicios->pluck('nombre')->join(', ');
+                $vehiculoStr = $cita->vehiculo ? strtoupper(trim(($cita->vehiculo->marca ?? '') . ' ' . ($cita->vehiculo->modelo ?? ''))) : '';
+                $fechaStr = $cita->fecha?->format('d/m/Y') ?? '';
+                $horaStr = trim(($cita->hora_inicio ?? '') . ($cita->hora_fin ? ' - '.$cita->hora_fin : ''));
+                $clienteNombre = $cita->cliente ? ($cita->cliente->user->name ?? 'Sin nombre') : 'Sin cliente';
+                $clienteAsistio = $cita->asistio === true;
+                $observacionesPayload = $cita->observaciones->map(function ($obs) {
+                  $fecha = $obs->created_at
+                    ? $obs->created_at->copy()->timezone(CitaModel::LOCAL_TIMEZONE)->format('d/m/Y H:i')
+                    : null;
+                  return [
+                    'texto' => $obs->observacion,
+                    'fecha' => $fecha,
+                    'mecanico' => optional(optional($obs->mecanico)->user)->name,
+                  ];
+                })->values();
+              @endphp
               <div class="cita-item" style="border:1px solid #eef2f6; padding:12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
                 <div>
                   <strong>{{ $cita->servicios->pluck('nombre')->join(', ') }}</strong>
@@ -94,8 +113,8 @@
                   </div>
                 </div>
                 <div style="text-align:right; min-width:140px;">
-                  <div style="font-size:13px; color:#777;">Cliente: {{ $cita->cliente ? ($cita->cliente->user->name ?? 'Sin nombre') : 'Sin cliente' }}</div>
-                  <div style="margin-top:8px;"><button type="button" class="button" onclick="abrirModalCita({{ $cita->id }}, '{{ addslashes($cita->servicios->pluck('nombre')->join(', ')) }}', '{{ $cita->vehiculo ? strtoupper($cita->vehiculo->marca.' '.$cita->vehiculo->modelo) : '' }}', '{{ $cita->fecha?->format('d/m/Y') }}', '{{ $cita->hora_inicio ?? '' }} {{ $cita->hora_fin ? '- '.$cita->hora_fin : '' }}', '{{ $cita->estatus }}', {{ $cita->mecanico_id ?? 'null' }}, '', '{{ addslashes($cita->cliente?->user?->name ?? '') }}')">Ver</button></div>
+                  <div style="font-size:13px; color:#777;">Cliente: {{ $clienteNombre }}</div>
+                  <div style="margin-top:8px;"><button type="button" class="button" onclick='abrirModalCita({{ $cita->id }}, @json($serviciosStr), @json($vehiculoStr), @json($fechaStr), @json($horaStr), @json($cita->estatus), {{ $cita->mecanico_id ?? 'null' }}, @json($observacionesPayload), @json($clienteNombre), @json($clienteAsistio))'>Ver</button></div>
                 </div>
               </div>
             @endforeach
@@ -119,6 +138,23 @@
           @foreach($citasHoy as $cita)
             @php
               $esHoy = $cita->fecha && $cita->fecha->format('Y-m-d') === today()->format('Y-m-d');
+              $serviciosStr = $cita->servicios->pluck('nombre')->join(', ');
+              $vehiculoStr = $cita->vehiculo ? strtoupper(trim(($cita->vehiculo->marca ?? '') . ' ' . ($cita->vehiculo->modelo ?? ''))) : '';
+              $fechaStr = $cita->fecha?->format('d/m/Y') ?? '';
+              $horaStr = trim(($cita->hora_inicio ?? '') . ($cita->hora_fin ? ' - '.$cita->hora_fin : ''));
+              $clienteNombre = $cita->cliente ? ($cita->cliente->user->name ?? 'Sin nombre') : 'Sin cliente';
+              $clienteAsistio = $cita->asistio === true;
+              $clienteAsistio = $cita->asistio === true;
+              $observacionesPayload = $cita->observaciones->map(function ($obs) {
+                $fecha = $obs->created_at
+                  ? $obs->created_at->copy()->timezone(CitaModel::LOCAL_TIMEZONE)->format('d/m/Y H:i')
+                  : null;
+                return [
+                  'texto' => $obs->observacion,
+                  'fecha' => $fecha,
+                  'mecanico' => optional(optional($obs->mecanico)->user)->name,
+                ];
+              })->values();
             @endphp
             <div class="cita-item" style="border:1px solid #eef2f6; padding:12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; {{ $esHoy ? 'background:#fff9e6; border-left:4px solid #ffc107;' : '' }}">
               <div>
@@ -136,8 +172,8 @@
                 </div>
               </div>
               <div style="text-align:right; min-width:140px;">
-                <div style="font-size:13px; color:#777;">Cliente: {{ $cita->cliente ? ($cita->cliente->user->name ?? 'Sin nombre') : 'Sin cliente' }}</div>
-                <div style="margin-top:8px;"><button type="button" class="button" onclick="abrirModalCita({{ $cita->id }}, '{{ addslashes($cita->servicios->pluck('nombre')->join(', ')) }}', '{{ $cita->vehiculo ? strtoupper($cita->vehiculo->marca.' '.$cita->vehiculo->modelo) : '' }}', '{{ $cita->fecha?->format('d/m/Y') }}', '{{ $cita->hora_inicio ?? '' }} {{ $cita->hora_fin ? '- '.$cita->hora_fin : '' }}', '{{ $cita->estatus }}', {{ $cita->mecanico_id ?? 'null' }}, '', '{{ addslashes($cita->cliente?->user?->name ?? '') }}')">Ver</button></div>
+                <div style="font-size:13px; color:#777;">Cliente: {{ $clienteNombre }}</div>
+                <div style="margin-top:8px;"><button type="button" class="button" onclick='abrirModalCita({{ $cita->id }}, @json($serviciosStr), @json($vehiculoStr), @json($fechaStr), @json($horaStr), @json($cita->estatus), {{ $cita->mecanico_id ?? 'null' }}, @json($observacionesPayload), @json($clienteNombre), @json($clienteAsistio))'>Ver</button></div>
               </div>
             </div>
           @endforeach
@@ -158,6 +194,23 @@
       @if(isset($citasSemana) && $citasSemana->count())
         <div class="list-citas">
           @foreach($citasSemana as $cita)
+            @php
+              $serviciosStr = $cita->servicios->pluck('nombre')->join(', ');
+              $vehiculoStr = $cita->vehiculo ? strtoupper(trim(($cita->vehiculo->marca ?? '') . ' ' . ($cita->vehiculo->modelo ?? ''))) : '';
+              $fechaStr = $cita->fecha?->format('d/m/Y') ?? '';
+              $horaStr = trim(($cita->hora_inicio ?? '') . ($cita->hora_fin ? ' - '.$cita->hora_fin : ''));
+              $clienteNombre = $cita->cliente ? ($cita->cliente->user->name ?? 'Sin nombre') : 'Sin cliente';
+              $observacionesPayload = $cita->observaciones->map(function ($obs) {
+                $fecha = $obs->created_at
+                  ? $obs->created_at->copy()->timezone(CitaModel::LOCAL_TIMEZONE)->format('d/m/Y H:i')
+                  : null;
+                return [
+                  'texto' => $obs->observacion,
+                  'fecha' => $fecha,
+                  'mecanico' => optional(optional($obs->mecanico)->user)->name,
+                ];
+              })->values();
+            @endphp
             <div class="cita-item" style="border:1px solid #eef2f6; padding:12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
               <div>
                 <strong>{{ $cita->servicios->pluck('nombre')->join(', ') }}</strong>
@@ -171,8 +224,8 @@
                 </div>
               </div>
               <div style="text-align:right; min-width:140px;">
-                <div style="font-size:13px; color:#777;">Cliente: {{ $cita->cliente ? ($cita->cliente->user->name ?? 'Sin nombre') : 'Sin cliente' }}</div>
-                <div style="margin-top:8px;"><button type="button" class="button" onclick="abrirModalCita({{ $cita->id }}, '{{ addslashes($cita->servicios->pluck('nombre')->join(', ')) }}', '{{ $cita->vehiculo ? strtoupper($cita->vehiculo->marca.' '.$cita->vehiculo->modelo) : '' }}', '{{ $cita->fecha?->format('d/m/Y') }}', '{{ $cita->hora_inicio ?? '' }} {{ $cita->hora_fin ? '- '.$cita->hora_fin : '' }}', '{{ $cita->estatus }}', {{ $cita->mecanico_id ?? 'null' }}, '', '{{ addslashes($cita->cliente?->user?->name ?? '') }}')">Ver</button></div>
+                <div style="font-size:13px; color:#777;">Cliente: {{ $clienteNombre }}</div>
+                <div style="margin-top:8px;"><button type="button" class="button" onclick='abrirModalCita({{ $cita->id }}, @json($serviciosStr), @json($vehiculoStr), @json($fechaStr), @json($horaStr), @json($cita->estatus), {{ $cita->mecanico_id ?? 'null' }}, @json($observacionesPayload), @json($clienteNombre), @json($clienteAsistio))'>Ver</button></div>
               </div>
             </div>
           @endforeach
@@ -216,11 +269,27 @@
         <div style="margin-bottom:16px;">
           <label style="display:block; font-weight:600; margin-bottom:8px;">Estado</label>
           <select id="citaEstatus" onchange="actualizarEstatus()" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
-            <option value="pendiente">Pendiente de Confirmación</option>
-            <option value="confirmada">Confirmada</option>
             <option value="en_proceso">En Proceso</option>
             <option value="completada">Completada</option>
           </select>
+          <small id="estatusHelper" style="display:block; margin-top:6px; color:#777;">Recepción debe registrar la llegada del cliente para habilitar este cambio.</small>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label style="display:block; font-weight:600; margin-bottom:8px;">Observaciones del mecánico</label>
+          <textarea id="citaObservaciones" rows="3" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; resize:vertical;" placeholder="Describe hallazgos adicionales o recomendaciones"></textarea>
+          <small style="color:#777;">Esta nota no cambia el estado de la cita ni la confirma.</small>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label style="display:block; font-weight:600; margin-bottom:8px;">Historial de observaciones</label>
+          <div id="observacionesHistorial" style="background:#f8f9fb; border:1px solid #e1e6ef; border-radius:4px; padding:10px; max-height:200px; overflow-y:auto;">
+            <p style="margin:0; color:#777;">Sin observaciones registradas.</p>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-bottom:16px;">
+          <button type="button" onclick="guardarObservacion()" id="btnGuardarObservacion" class="button primary" style="flex:1;">Guardar observación</button>
         </div>
 
         <div style="margin-bottom:16px;">

@@ -113,6 +113,9 @@ Route::middleware(['auth', 'role:2'])
         Route::patch('/citas/{id}/mecanico', [App\Http\Controllers\Mecanico\MecanicoController::class, 'assignMecanico'])
             ->name('citas.assignMecanico');
 
+        Route::post('/citas/{cita}/observaciones', [App\Http\Controllers\Mecanico\MecanicoController::class, 'storeObservacion'])
+            ->name('citas.observaciones');
+
         Route::get('/mecanicos-list', [App\Http\Controllers\Mecanico\MecanicoController::class, 'getMecanicosList'])
             ->name('mecanicos.list');
     });

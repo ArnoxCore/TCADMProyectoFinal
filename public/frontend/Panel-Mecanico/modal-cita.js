@@ -2,26 +2,53 @@
 let citaIdActual = null;
 let estatusActual = '';
 let mecanicoIdActual = null; // Ya no se usa para asignar mecánico, se mantiene por compatibilidad
+let observacionesActuales = [];
+let clienteAsistioActual = false;
+
+const escapeHtml = (input = '') => input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+
+const getBaseUrl = () => window.location.pathname.includes('test-mecanico') ? '/test-mecanico' : '/mecanico';
 
 /**
  * Abre el modal con los detalles de la cita
  */
-function abrirModalCita(id, servicio, vehiculo, fecha, horaHora, estatus, mecanicoId, observaciones, clienteNombre) {
+function abrirModalCita(id, servicio, vehiculo, fecha, horaHora, estatus, mecanicoId, observaciones = [], clienteNombre = '', clienteAsistio = false) {
     citaIdActual = id;
     estatusActual = estatus;
     mecanicoIdActual = mecanicoId;
+    observacionesActuales = Array.isArray(observaciones) ? observaciones : [];
+    clienteAsistioActual = Boolean(clienteAsistio);
 
     // Llenar campos del modal
     document.getElementById('citaTitle').innerText = servicio;
     document.getElementById('citaServicio').innerText = servicio || 'N/A';
     document.getElementById('citaVehiculo').innerText = vehiculo || 'N/A';
     document.getElementById('citaFechaHora').innerText = (fecha ? fecha + ' - ' : '') + (horaHora || 'N/A');
-    document.getElementById('citaEstatus').value = estatus;
-    // Mostrar nombre del cliente si se pasa
     const clienteDiv = document.getElementById('citaCliente');
-    if (clienteDiv && clienteNombre) {
-        clienteDiv.innerText = clienteNombre;
+    if (clienteDiv) {
+        clienteDiv.innerText = clienteNombre || 'Sin cliente asignado';
     }
+    const textarea = document.getElementById('citaObservaciones');
+    if (textarea) {
+        textarea.value = '';
+    }
+    renderObservaciones(observacionesActuales);
+    syncEstatusControls();
+
+    const select = document.getElementById('citaEstatus');
+    const allowedStatuses = ['en_proceso', 'completada'];
+    if (allowedStatuses.includes(estatus)) {
+        select.value = estatus;
+    } else {
+        select.value = allowedStatuses[0];
+        estatusActual = allowedStatuses[0];
+    }
+    // Mostrar nombre del cliente si se pasa
 
     // Mostrar modal
     const modal = document.getElementById('citaModal');
@@ -35,12 +62,61 @@ function abrirModalCita(id, servicio, vehiculo, fecha, horaHora, estatus, mecani
     };
 }
 
+function renderObservaciones(lista = []) {
+    const contenedor = document.getElementById('observacionesHistorial');
+    if (!contenedor) {
+        return;
+    }
+
+    if (!lista.length) {
+        contenedor.innerHTML = '<p style="margin:0; color:#777;">Sin observaciones registradas.</p>';
+        return;
+    }
+
+    contenedor.innerHTML = lista.map((item) => {
+        const fecha = escapeHtml(item.fecha || 'Sin fecha');
+        const texto = escapeHtml(item.texto || '');
+        const autor = escapeHtml(item.mecanico || 'Mecánico');
+        return `
+            <div style="padding:8px 10px; border-bottom:1px solid #e4e7ed;">
+                <div style="font-size:12px; color:#6c757d; margin-bottom:4px;">${fecha} · ${autor}</div>
+                <div style="font-size:14px; color:#2f3542; white-space:pre-wrap;">${texto}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function syncEstatusControls() {
+    const select = document.getElementById('citaEstatus');
+    const helper = document.getElementById('estatusHelper');
+    if (!select) {
+        return;
+    }
+
+    if (clienteAsistioActual) {
+        select.disabled = false;
+        if (helper) {
+            helper.textContent = 'Cliente presente. Puedes actualizar el estado.';
+            helper.style.color = '#198754';
+        }
+    } else {
+        select.disabled = true;
+        select.value = estatusActual;
+        if (helper) {
+            helper.textContent = 'Recepción debe registrar la llegada del cliente para habilitar este cambio.';
+            helper.style.color = '#d9534f';
+        }
+    }
+}
+
 /**
  * Cierra el modal
  */
 function cerrarModal() {
     document.getElementById('citaModal').style.display = 'none';
     citaIdActual = null;
+    observacionesActuales = [];
+    clienteAsistioActual = false;
 }
 
 /**
@@ -54,122 +130,94 @@ function cerrarModal() {
 function actualizarEstatus() {
     const nuevoEstatus = document.getElementById('citaEstatus').value;
     
+    if (!clienteAsistioActual) {
+        toast.warning('Debes esperar a que recepción marque la llegada del cliente.');
+        document.getElementById('citaEstatus').value = estatusActual;
+        return;
+    }
+
     if (nuevoEstatus === estatusActual) {
         return; // Sin cambios
     }
-    // Si el mecánico intenta confirmar la cita, pedir confirmación explícita
-    const proceedToUpdate = () => {
-        const baseUrl = window.location.pathname.includes('test-mecanico') ? '/test-mecanico' : '/mecanico';
-        
-        fetch(`${baseUrl}/citas/${citaIdActual}/estatus`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-            },
-            body: JSON.stringify({ estatus: nuevoEstatus })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                estatusActual = nuevoEstatus;
-                console.log('Estado actualizado:', data.message);
-                toast.success(data.message || 'Estado actualizado');
-            } else {
-                alert('Error: ' + (data.message || 'No se pudo actualizar el estado'));
-                // Revertir select al estado anterior
-                document.getElementById('citaEstatus').value = estatusActual;
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al actualizar el estado');
-            document.getElementById('citaEstatus').value = estatusActual;
-        });
-    };
+    const baseUrl = getBaseUrl();
 
-    if (nuevoEstatus === 'confirmada') {
-        // Mostrar modal de confirmación personalizado
-        mostrarConfirmacion('¿Seguro que quieres confirmar esta cita?', 'Sí, confirmar', 'No')
-            .then(confirmed => {
-                if (confirmed) {
-                    proceedToUpdate();
-                } else {
-                    // Revertir selección
-                    document.getElementById('citaEstatus').value = estatusActual;
-                }
-            });
-    } else {
-        proceedToUpdate();
-    }
+    fetch(`${baseUrl}/citas/${citaIdActual}/estatus`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        },
+        body: JSON.stringify({ estatus: nuevoEstatus })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            estatusActual = nuevoEstatus;
+            console.log('Estado actualizado:', data.message);
+            toast.success(data.message || 'Estado actualizado');
+        } else {
+            alert('Error: ' + (data.message || 'No se pudo actualizar el estado'));
+            document.getElementById('citaEstatus').value = estatusActual;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al actualizar el estado');
+        document.getElementById('citaEstatus').value = estatusActual;
+    });
 }
 
+function guardarObservacion() {
+    if (!citaIdActual) {
+        toast.error('Selecciona una cita antes de guardar tu comentario.');
+        return;
+    }
 
-/**
- * Muestra un modal de confirmación reutilizable.
- * Devuelve una Promise que resuelve true si el usuario confirma, false si cancela.
- */
-function mostrarConfirmacion(mensaje, textoConfirmar = 'Sí', textoCancelar = 'No') {
-    return new Promise((resolve) => {
-        // Crear elementos si no existen
-        let confirmModal = document.getElementById('confirmModal');
-        if (!confirmModal) {
-            confirmModal = document.createElement('div');
-            confirmModal.id = 'confirmModal';
-            confirmModal.style.position = 'fixed';
-            confirmModal.style.top = '0';
-            confirmModal.style.left = '0';
-            confirmModal.style.right = '0';
-            confirmModal.style.bottom = '0';
-            confirmModal.style.background = 'rgba(0,0,0,0.5)';
-            confirmModal.style.zIndex = '1100';
-            confirmModal.style.display = 'flex';
-            confirmModal.style.justifyContent = 'center';
-            confirmModal.style.alignItems = 'center';
+    const textarea = document.getElementById('citaObservaciones');
+    const btn = document.getElementById('btnGuardarObservacion');
+    const texto = textarea ? textarea.value.trim() : '';
 
-            confirmModal.innerHTML = `
-                <div style="background:white; padding:22px; border-radius:8px; width:420px; max-width:90%; box-shadow:0 8px 30px rgba(0,0,0,0.15);">
-                    <div style="font-size:16px; color:#333; margin-bottom:12px;">${mensaje}</div>
-                    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px;">
-                        <button id="confirmNo" class="button ghost">${textoCancelar}</button>
-                        <button id="confirmYes" class="button primary">${textoConfirmar}</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(confirmModal);
-        } else {
-            // actualizar texto
-            confirmModal.querySelector('div > div').innerText = mensaje;
-            confirmModal.style.display = 'flex';
-            const yesBtn = confirmModal.querySelector('#confirmYes');
-            const noBtn = confirmModal.querySelector('#confirmNo');
-            if (yesBtn) yesBtn.innerText = textoConfirmar;
-            if (noBtn) noBtn.innerText = textoCancelar;
+    if (!texto || texto.length < 5) {
+        toast.warning('La observación debe tener al menos 5 caracteres.');
+        return;
+    }
+
+    const baseUrl = getBaseUrl();
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Guardando...';
+    }
+
+    fetch(`${baseUrl}/citas/${citaIdActual}/observaciones`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        },
+        body: JSON.stringify({ observacion: texto })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            throw new Error(data.message || 'No se pudo guardar la observación.');
         }
 
-        // Attach handlers
-        const yesHandler = () => {
-            confirmModal.style.display = 'none';
-            cleanup();
-            resolve(true);
-        };
-
-        const noHandler = () => {
-            confirmModal.style.display = 'none';
-            cleanup();
-            resolve(false);
-        };
-
-        function cleanup() {
-            const yes = confirmModal.querySelector('#confirmYes');
-            const no = confirmModal.querySelector('#confirmNo');
-            if (yes) yes.removeEventListener('click', yesHandler);
-            if (no) no.removeEventListener('click', noHandler);
+        toast.success(data.message || 'Observación registrada.');
+        textarea.value = '';
+        if (data.observacion) {
+            observacionesActuales = [data.observacion, ...observacionesActuales];
+            renderObservaciones(observacionesActuales);
         }
-
-        // Add listeners
-        confirmModal.querySelector('#confirmYes').addEventListener('click', yesHandler);
-        confirmModal.querySelector('#confirmNo').addEventListener('click', noHandler);
+    })
+    .catch(error => {
+        console.error(error);
+        toast.error(error.message || 'Error al guardar la observación.');
+    })
+    .finally(() => {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Guardar observación';
+        }
     });
 }
 

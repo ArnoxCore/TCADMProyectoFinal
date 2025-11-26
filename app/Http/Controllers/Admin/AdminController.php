@@ -167,8 +167,24 @@ class AdminController extends Controller
             ? Carbon::parse($request->input('hasta'))->endOfDay()
             : Carbon::now()->endOfMonth();
 
-        if ($rangeStart->greaterThan($rangeEnd)) {
-            [$rangeStart, $rangeEnd] = [$rangeEnd, $rangeStart];
+        $rangeError = null;
+        if ($request->filled('desde') && $request->filled('hasta') && $rangeStart->greaterThan($rangeEnd)) {
+            $rangeError = 'La fecha "Hasta" debe ser mayor o igual que la fecha "Desde".';
+        }
+
+        $periodoSeleccionado = [
+            'inicio' => $request->filled('desde') ? $request->input('desde') : $rangeStart->toDateString(),
+            'fin' => $request->filled('hasta') ? $request->input('hasta') : $rangeEnd->toDateString(),
+        ];
+
+        if ($rangeError) {
+            return view('Panel-admin.reportes', [
+                'chartData' => ['labels' => [], 'totals' => []],
+                'topService' => null,
+                'totalSolicitudes' => 0,
+                'periodoSeleccionado' => $periodoSeleccionado,
+                'rangeError' => $rangeError,
+            ]);
         }
 
         $estatusValidos = ['confirmada', 'en_proceso', 'completada'];
@@ -201,6 +217,7 @@ class AdminController extends Controller
                 'inicio' => $rangeStart->toDateString(),
                 'fin' => $rangeEnd->toDateString(),
             ],
+            'rangeError' => null,
         ]);
     }
 

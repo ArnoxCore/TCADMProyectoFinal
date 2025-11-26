@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mecanico;
 use App\Http\Controllers\Controller;
 use App\Models\Cita;
 use App\Models\Mecanico;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 
 class MecanicoController extends Controller
@@ -12,22 +13,20 @@ class MecanicoController extends Controller
     public function dashboard(Request $request)
     {
         // Obtener o crear el perfil de mecánico usando el usuario autenticado
-        $mecanico = null;
-        if (auth()->check()) {
-            $mecanico = Mecanico::firstOrCreate(
-                ['user_id' => auth()->id()],
-                [
-                    'numero_empleado' => 'MECH-' . str_pad((string) auth()->id(), 4, '0', STR_PAD_LEFT),
-                    'especialidad' => null,
-                    'activo' => true,
-                ]
-            );
-        }
+        $mecanico = $this->resolveMecanico();
 
         // Base query builder function para evitar problemas con clones
         $getBaseQuery = function() use ($mecanico) {
             // eager-load mecanico->user to ensure mechanic name is available without extra queries
-            $q = Cita::with(['cliente.user', 'vehiculo', 'servicios', 'mecanico.user']);
+            $q = Cita::with([
+                'cliente.user',
+                'vehiculo',
+                'servicios',
+                'mecanico.user',
+                'observaciones' => function ($query) {
+                    $query->with('mecanico.user')->latest();
+                },
+            ]);
             if ($mecanico) {
                 $q->where('mecanico_id', $mecanico->id);
             }
@@ -94,13 +93,58 @@ class MecanicoController extends Controller
         }
 
         $validated = $request->validate([
-            'estatus' => 'required|in:pendiente,confirmada,en_proceso,completada',
+            'estatus' => 'required|in:en_proceso,completada',
         ]);
 
         $cita = Cita::findOrFail($id);
+
+        if ($cita->asistio !== true) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Recepción debe registrar la llegada del cliente antes de cambiar el estado.',
+            ], 422);
+        }
+
         $cita->update(['estatus' => $validated['estatus']]);
 
         return response()->json(['success' => true, 'message' => 'Estado actualizado', 'estatus' => $cita->estatus_texto]);
+    }
+
+    public function storeObservacion(Request $request, Cita $cita)
+    {
+        $mecanico = $this->resolveMecanico();
+
+        if (! $mecanico) {
+            abort(403, 'No se encontró el perfil de mecánico.');
+        }
+
+        if ($cita->mecanico_id && $cita->mecanico_id !== $mecanico->id) {
+            abort(403, 'Esta cita no está asignada a tu perfil.');
+        }
+
+        $validated = $request->validate([
+            'observacion' => 'required|string|min:5|max:2000',
+        ]);
+
+        $observacion = $cita->observaciones()->create([
+            'mecanico_id' => $mecanico->id,
+            'tipo' => 'observacion',
+            'observacion' => $validated['observacion'],
+        ]);
+
+        $payload = [
+            'texto' => $observacion->observacion,
+            'fecha' => optional($observacion->created_at)
+                ? $observacion->created_at->copy()->timezone(Cita::LOCAL_TIMEZONE)->format('d/m/Y H:i')
+                : Carbon::now(Cita::LOCAL_TIMEZONE)->format('d/m/Y H:i'),
+            'mecanico' => optional($mecanico->user)->name,
+        ];
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Observación registrada correctamente.',
+            'observacion' => $payload,
+        ]);
     }
 
     /**
@@ -137,5 +181,21 @@ class MecanicoController extends Controller
         });
 
         return response()->json($mecanicos);
+    }
+
+    private function resolveMecanico(): ?Mecanico
+    {
+        if (! auth()->check()) {
+            return null;
+        }
+
+        return Mecanico::firstOrCreate(
+            ['user_id' => auth()->id()],
+            [
+                'numero_empleado' => 'MECH-' . str_pad((string) auth()->id(), 4, '0', STR_PAD_LEFT),
+                'especialidad' => null,
+                'activo' => true,
+            ]
+        );
     }
 }

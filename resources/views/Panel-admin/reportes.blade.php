@@ -42,6 +42,12 @@
   </header>
 
   <main class="main">
+    @if(!empty($rangeError))
+      <div style="background:#fdecea; color:#b71c1c; border:1px solid #f5c6cb; padding:12px 16px; border-radius:6px; margin-bottom:16px;">
+        {{ $rangeError }}
+      </div>
+    @endif
+
     @php
       $inicio = $periodoSeleccionado['inicio'] ?? now()->startOfMonth()->toDateString();
       $fin = $periodoSeleccionado['fin'] ?? now()->endOfMonth()->toDateString();
