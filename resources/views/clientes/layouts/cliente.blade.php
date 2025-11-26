@@ -71,6 +71,10 @@
     @if(session('info'))
     toast.info("{{ session('info') }}");
     @endif
+
+    @if($errors->any())
+    toast.error(@json($errors->first()));
+    @endif
 </script>
 
 <!-- CARGA CLIENTE.JS AL FINAL -->

@@ -37,11 +37,12 @@ class VehiculoController extends Controller
             'modelo'       => ['required', 'string', 'max:150'],
             'ano'          => ['required', 'integer', 'min:1900', 'max:2100'],
             'placa'        => 'required|string|max:20|unique:vehiculos,placa|regex:/^[A-Z]{3}-\d{3}-[A-Z0-9]{1,2}$/',
-            'vin'          => 'required|string|size:17|regex:/^[A-HJ-NPR-Z0-9]{17}$/',
+            'vin'          => ['required', 'string', 'size:17', 'regex:/^[A-HJ-NPR-Z0-9]{17}$/', Rule::unique('vehiculos', 'vin')],
             'color'        => 'required|string|max:50',
             'kilometraje'  => 'required|integer|min:0',
         ], [
             'placa.regex' => 'El formato de la placa es inválido. Ejemplo: ABC-123-A',
+            'vin.unique'  => 'Este VIN ya está registrado en la plataforma.',
         ]);
 
         $validator->after(function ($validator) use ($request) {
@@ -107,6 +108,9 @@ class VehiculoController extends Controller
             'modelo' => 'required|string|max:100',
             'ano'   => 'required|integer|min:1900|max:2100',
             'placa'  => 'required|string|max:20|unique:vehiculos,placa,' . $id,
+            'vin'    => ['required', 'string', 'size:17', 'regex:/^[A-HJ-NPR-Z0-9]{17}$/', Rule::unique('vehiculos', 'vin')->ignore($id)],
+        ], [
+            'vin.unique' => 'Este VIN ya está registrado en la plataforma.',
         ]);
 
         $user = auth()->user();
