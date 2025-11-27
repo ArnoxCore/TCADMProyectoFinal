@@ -9,6 +9,7 @@ use App\Models\Servicio;
 use App\Models\Vehiculo;
 use App\Models\Cliente;
 use Carbon\Carbon;
+use App\Services\CitaNotificationService;
 
 class CitaController extends Controller
 {
@@ -171,6 +172,8 @@ class CitaController extends Controller
         // ✅ Si la cita es de hoy o futura, sí se puede cancelar
         $cita->estatus = 'cancelada';
         $cita->save();
+
+        CitaNotificationService::notificarCancelacionPorCliente($cita);
 
         // Si viene desde fetch/AJAX
         if ($request->expectsJson()) {

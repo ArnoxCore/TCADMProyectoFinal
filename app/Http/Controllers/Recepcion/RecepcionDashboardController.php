@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Recepcion;
 use App\Http\Controllers\Controller;
 use App\Models\Cita;
 use App\Models\Mecanico;
+use App\Services\CitaNotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -181,6 +182,8 @@ class RecepcionDashboardController extends Controller
         $cita->inicio_real_at = null;
         $cita->asistio = null;
         $cita->save();
+
+        CitaNotificationService::notificarCancelacionPorRecepcion($cita);
 
         return $this->attendanceSuccess($cita, 'La cita fue cancelada desde recepción.');
     }
