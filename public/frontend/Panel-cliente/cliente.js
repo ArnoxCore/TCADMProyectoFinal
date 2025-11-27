@@ -542,6 +542,52 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ==========================================================
+    //   VALIDACIÓN DE RFC EN PERFIL
+    // ==========================================================
+    const perfilForm = document.getElementById("editar-perfil-form");
+    const rfcInput = perfilForm ? perfilForm.querySelector('input[name="rfc"]') : null;
+
+    if (perfilForm && rfcInput) {
+        const RFC_REGEX = /^([A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3})$/;
+
+        const sanitizeRfc = (value = "") =>
+            value
+                .toUpperCase()
+                .replace(/[^A-ZÑ&0-9]/g, "")
+                .slice(0, 13);
+
+        rfcInput.addEventListener("input", () => {
+            const sanitized = sanitizeRfc(rfcInput.value);
+            if (sanitized !== rfcInput.value) {
+                rfcInput.value = sanitized;
+            }
+        });
+
+        const notifyInvalidRfc = () => {
+            if (!rfcInput.value) {
+                return true;
+            }
+            if (!RFC_REGEX.test(rfcInput.value)) {
+                toast?.error?.("RFC inválido. Ejemplo: ABCD010203XYZ");
+                return false;
+            }
+            return true;
+        };
+
+        rfcInput.addEventListener("blur", () => {
+            rfcInput.value = sanitizeRfc(rfcInput.value);
+            notifyInvalidRfc();
+        });
+
+        perfilForm.addEventListener("submit", (event) => {
+            rfcInput.value = sanitizeRfc(rfcInput.value);
+            if (!notifyInvalidRfc()) {
+                event.preventDefault();
+            }
+        });
+    }
+
+    // ==========================================================
     //   IMÁGENES (CarsXE) — PARCHEADO
     // ==========================================================
     const carPhotos = document.querySelectorAll(".car-photo");
