@@ -115,32 +115,65 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (actions?.can_check_in) {
             buttons.push(`
-                <button type="button" class="btn-accion btn-checkin" data-cita-id="${citaId}">
-                    Registrar llegada
+                <button
+                    type="button"
+                    class="btn-accion btn-icon btn-checkin"
+                    data-cita-id="${citaId}"
+                    title="Registrar llegada"
+                    aria-label="Registrar llegada"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M5 12l4 4 10-10" />
+                    </svg>
                 </button>
             `);
         }
 
         if (actions?.can_start) {
             buttons.push(`
-                <button type="button" class="btn-accion btn-start" data-cita-id="${citaId}">
-                    Iniciar servicio
+                <button
+                    type="button"
+                    class="btn-accion btn-icon btn-start"
+                    data-cita-id="${citaId}"
+                    title="Iniciar servicio"
+                    aria-label="Iniciar servicio"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M8 5v14l10-7z" />
+                    </svg>
                 </button>
             `);
         }
 
         if (actions?.can_mark_no_show) {
             buttons.push(`
-                <button type="button" class="btn-accion btn-no-show" data-cita-id="${citaId}">
-                    No asistió
+                <button
+                    type="button"
+                    class="btn-accion btn-icon btn-no-show"
+                    data-cita-id="${citaId}"
+                    title="Marcar inasistencia"
+                    aria-label="Marcar inasistencia"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M6 6l12 12" />
+                    </svg>
                 </button>
             `);
         }
 
         if (actions?.can_cancel) {
             buttons.push(`
-                <button type="button" class="btn-accion btn-cancelar" data-cita-id="${citaId}">
-                    Cancelar
+                <button
+                    type="button"
+                    class="btn-accion btn-icon btn-cancelar"
+                    data-cita-id="${citaId}"
+                    title="Cancelar cita"
+                    aria-label="Cancelar cita"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 6l12 12M18 6l-12 12" />
+                    </svg>
                 </button>
             `);
         }
