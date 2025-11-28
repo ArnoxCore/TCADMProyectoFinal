@@ -5,6 +5,53 @@ document.addEventListener("DOMContentLoaded", () => {
     if (a.dataset.nav === current) a.classList.add("active");
   });
 
+  const ensureToast = () => {
+    if (!window.Notyf) {
+      console.warn("Notyf no está disponible en el panel de administración.");
+      return null;
+    }
+
+    if (!window.toast) {
+      window.toast = new Notyf({
+        duration: 4000,
+        dismissible: true,
+        position: { x: "right", y: "top" }
+      });
+    }
+
+    return window.toast;
+  };
+
+  const toastNodes = document.querySelectorAll("[data-toast]");
+  if (toastNodes.length) {
+    const toastInstance = ensureToast();
+    if (toastInstance) {
+      toastNodes.forEach(node => {
+        const type = (node.dataset.toast || "success").toLowerCase();
+        const message = (node.dataset.message || node.textContent || "").trim();
+        if (!message) {
+          node.remove();
+          return;
+        }
+
+        if (type === "error") {
+          toastInstance.error(message);
+        } else if (type === "warning") {
+          toastInstance.open({
+            message,
+            background: "#f59e0b",
+            duration: 4000,
+            dismissible: true
+          });
+        } else {
+          toastInstance.success(message);
+        }
+
+        node.remove();
+      });
+    }
+  }
+
   // Modales (abrir/cerrar)
   document.querySelectorAll("[data-open]").forEach(btn => {
     btn.addEventListener("click", () => {

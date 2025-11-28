@@ -8,6 +8,7 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;600;700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="{{ asset('frontend/Panel-admin/admin.css') }}" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css" />
 
 	<!-- ====== FAVICON / PWA ====== -->
 		<link rel="icon" type="image/png" sizes="96x96" href="{{ asset('frontend/icons/favicon-96x96.png') }}">
@@ -33,6 +34,7 @@
 				<a href="{{ route('admin.personal') }}" data-nav="personal">Gestión de Personal</a>
 				<a href="{{ route('admin.reportes') }}" data-nav="reportes">Reportes</a>
 				<a href="{{ route('admin.estadisticas') }}" data-nav="estadisticas">Estadísticas</a>
+				<a href="{{ route('admin.perfil') }}" data-nav="perfil">Mis datos</a>
 				<form method="POST" action="{{ route('logout') }}">
 					@csrf
 					<button type="submit" class="button ghost">Cerrar sesión</button>
@@ -43,20 +45,13 @@
 
 	<main class="main">
 		@if(session('success'))
-			<div style="background:#dcfce7;color:#065f46;padding:12px 16px;border-radius:8px;border:1px solid #86efac;">
-				{{ session('success') }}
-			</div>
+			<div data-toast="success" data-message="{{ session('success') }}" style="display:none"></div>
 		@endif
 
 		@if($errors->any())
-			<div style="background:#fee2e2;color:#991b1b;padding:12px 16px;border-radius:8px;border:1px solid #fecaca;">
-				<strong>Revisa el formulario:</strong>
-				<ul style="margin:8px 0 0 18px;">
-					@foreach($errors->all() as $error)
-						<li>{{ $error }}</li>
-					@endforeach
-				</ul>
-			</div>
+			@foreach($errors->all() as $error)
+				<div data-toast="error" data-message="{{ $error }}" style="display:none"></div>
+			@endforeach
 		@endif
 
 		<section class="section">
@@ -245,6 +240,7 @@
 		</div>
 	</div>
 
+	<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
 	<script src="{{ asset('frontend/Panel-admin/admin.js') }}"></script>
 	<script>
 		document.addEventListener('DOMContentLoaded', () => {

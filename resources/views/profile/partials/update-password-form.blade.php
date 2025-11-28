@@ -7,6 +7,9 @@
         <p class="mt-1 text-sm text-gray-600">
             {{ __('Ensure your account is using a long, random password to stay secure.') }}
         </p>
+        <p class="mt-1 text-sm text-gray-500">
+            {{ __('You will be signed out after saving a new password.') }}
+        </p>
     </header>
 
     <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-6">

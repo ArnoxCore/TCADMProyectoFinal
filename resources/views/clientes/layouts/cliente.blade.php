@@ -56,25 +56,32 @@
 
 {{-- DISPARAR TOASTS DESDE BACKEND --}}
 <script>
-    @if(session('success'))
-    toast.success("{{ session('success') }}");
-    @endif
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('[data-toast]').forEach(node => {
+            const type = (node.dataset.toast || 'success').toLowerCase();
+            const message = (node.dataset.message || node.textContent || '').trim();
+            if (!message) {
+                node.remove();
+                return;
+            }
 
-    @if(session('error'))
-    toast.error("{{ session('error') }}");
-    @endif
+            switch (type) {
+                case 'error':
+                    toast.error(message);
+                    break;
+                case 'warning':
+                    toast.warning(message);
+                    break;
+                case 'info':
+                    toast.info ? toast.info(message) : toast.open({ message, duration: 3500 });
+                    break;
+                default:
+                    toast.success(message);
+            }
 
-    @if(session('warning'))
-    toast.warning("{{ session('warning') }}");
-    @endif
-
-    @if(session('info'))
-    toast.info("{{ session('info') }}");
-    @endif
-
-    @if($errors->any())
-    toast.error(@json($errors->first()));
-    @endif
+            node.remove();
+        });
+    });
 </script>
 
 <!-- CARGA CLIENTE.JS AL FINAL -->

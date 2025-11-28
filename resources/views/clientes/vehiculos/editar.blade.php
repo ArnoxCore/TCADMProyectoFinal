@@ -39,6 +39,9 @@
                             </option>
                         @endforeach
                     </select>
+                    @error('marca')
+                        <small style="color:#b91c1c;font-size:13px;margin-top:4px;display:block;">{{ $message }}</small>
+                    @enderror
                 </label>
 
                 {{-- MODELO --}}
@@ -47,6 +50,9 @@
                     <select name="modelo" id="modelo" {{ $marcaSeleccionada ? '' : 'disabled' }} required>
                         <option value="">Selecciona un modelo</option>
                     </select>
+                    @error('modelo')
+                        <small style="color:#b91c1c;font-size:13px;margin-top:4px;display:block;">{{ $message }}</small>
+                    @enderror
                 </label>
 
                 {{-- AÑO --}}
@@ -55,6 +61,9 @@
                     <select name="ano" id="ano" {{ old('modelo', $vehiculo->modelo) ? '' : 'disabled' }} required>
                         <option value="">Selecciona un año</option>
                     </select>
+                    @error('ano')
+                        <small style="color:#b91c1c;font-size:13px;margin-top:4px;display:block;">{{ $message }}</small>
+                    @enderror
                 </label>
 
                 {{-- PLACA --}}
@@ -102,6 +111,9 @@
                                value="{{ $placaPartes[2] }}"
                                required>
                     </div>
+                    @error('placa')
+                        <small style="color:#b91c1c;font-size:13px;margin-top:4px;display:block;">{{ $message }}</small>
+                    @enderror
                 </label>
 
                 {{-- VIN + BOTÓN --}}
@@ -133,6 +145,9 @@
                            margin-top:4px;
                        ">
                     </small>
+                    @error('vin')
+                        <small style="color:#b91c1c;font-size:13px;margin-top:4px;display:block;">{{ $message }}</small>
+                    @enderror
                 </label>
 
                 {{-- COLOR --}}
@@ -142,6 +157,9 @@
                               name="color"
                               id="color"
                               value="{{ old('color', $vehiculo->color) }}">
+                    @error('color')
+                        <small style="color:#b91c1c;font-size:13px;margin-top:4px;display:block;">{{ $message }}</small>
+                    @enderror
                 </label>
 
                 {{-- KILOMETRAJE --}}
@@ -151,6 +169,9 @@
                               name="kilometraje"
                               min="0"
                               value="{{ old('kilometraje', $vehiculo->kilometraje) }}">
+                    @error('kilometraje')
+                        <small style="color:#b91c1c;font-size:13px;margin-top:4px;display:block;">{{ $message }}</small>
+                    @enderror
                 </label>
 
             </div>

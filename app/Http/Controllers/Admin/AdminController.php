@@ -10,6 +10,7 @@ use App\Models\Mecanico;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
@@ -75,7 +76,10 @@ class AdminController extends Controller
     public function personal(Request $request)
     {
         $personalTotals = $this->getPersonalTotals();
+        $currentUserId = Auth::id();
+
         $personalList = User::whereIn('role_id', array_keys(self::PERSONAL_ROLES))
+            ->when($currentUserId, fn ($query) => $query->where('id', '!=', $currentUserId))
             ->orderBy('name')
             ->simplePaginate(5);
 
@@ -397,6 +401,10 @@ class AdminController extends Controller
      */
     public function updatePersonal(Request $request, User $user)
     {
+        if ($user->id === Auth::id()) {
+            abort(403);
+        }
+
         if (! array_key_exists($user->role_id, self::PERSONAL_ROLES)) {
             abort(404);
         }
@@ -411,18 +419,27 @@ class AdminController extends Controller
             'password' => 'nullable|string|min:8',
         ]);
 
-        $payload = [
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'phone' => $validated['phone'] ?: null,
-            'role_id' => $validated['role_id'],
-        ];
+        $wasEmailChanged = $user->email !== $validated['email'];
+        $passwordProvided = ! empty($validated['password']);
 
-        if (! empty($validated['password'])) {
-            $payload['password'] = $validated['password'];
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->phone = $validated['phone'] ?: null;
+        $user->role_id = $validated['role_id'];
+
+        if ($passwordProvided) {
+            $user->password = $validated['password'];
         }
 
-        $user->update($payload);
+        if ($wasEmailChanged) {
+            $user->email_verified_at = null;
+        }
+
+        if ($wasEmailChanged || $passwordProvided) {
+            $user->force_logout_at = now();
+        }
+
+        $user->save();
 
         if ((int) $user->role_id === 2) {
             $this->ensureMechanicProfilesExist();
@@ -437,6 +454,10 @@ class AdminController extends Controller
      */
     public function destroyPersonal(User $user)
     {
+        if ($user->id === Auth::id()) {
+            abort(403);
+        }
+
         if (! array_key_exists($user->role_id, self::PERSONAL_ROLES)) {
             abort(404);
         }

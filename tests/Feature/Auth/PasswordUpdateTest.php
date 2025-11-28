@@ -17,9 +17,12 @@ test('password can be updated', function () {
 
     $response
         ->assertSessionHasNoErrors()
-        ->assertRedirect('/profile');
+        ->assertRedirect('/login');
+
+    $this->assertGuest();
 
     $this->assertTrue(Hash::check('new-password', $user->refresh()->password));
+    $this->assertNotNull($user->force_logout_at);
 });
 
 test('correct password must be provided to update password', function () {

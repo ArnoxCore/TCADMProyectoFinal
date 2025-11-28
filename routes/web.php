@@ -10,6 +10,7 @@ use App\Http\Controllers\Cliente\VehiculoController;
 use App\Http\Controllers\Recepcion\RecepcionDashboardController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\AdminProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -94,6 +95,8 @@ Route::middleware(['auth', 'role:1'])
         Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil');
 
         Route::patch('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
+
+        Route::put('/perfil/password', [PerfilController::class, 'updatePassword'])->name('perfil.password');
     });
 
 // ======================================================
@@ -161,6 +164,15 @@ Route::middleware(['auth', 'role:4'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        Route::get('/perfil', [AdminProfileController::class, 'edit'])
+            ->name('perfil');
+
+        Route::put('/perfil', [AdminProfileController::class, 'update'])
+            ->name('perfil.update');
+
+        Route::put('/perfil/password', [AdminProfileController::class, 'updatePassword'])
+            ->name('perfil.password');
+
         Route::get('/', [AdminController::class, 'dashboard'])
             ->name('dashboard');
 

@@ -44,6 +44,12 @@
                 </div>
             @endif
 
+            @if (session('status'))
+                <div style="background:#e0f2fe;color:#075985;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;">
+                    {{ session('status') }}
+                </div>
+            @endif
+
             <!-- Mostrar errores de validación -->
             @if ($errors->any())
                 <div style="background:#ffe5e5;color:#b00020;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;">

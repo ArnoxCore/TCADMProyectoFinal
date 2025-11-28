@@ -26,13 +26,30 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $user->fill($request->validated());
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $shouldLogout = false;
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+            $shouldLogout = true;
         }
 
-        $request->user()->save();
+        if ($shouldLogout) {
+            $user->force_logout_at = now();
+        }
+
+        $user->save();
+
+        if ($shouldLogout) {
+            Auth::logout();
+
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return Redirect::route('login')->with('status', __('Tu correo fue actualizado. Inicia sesión nuevamente.'));
+        }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }

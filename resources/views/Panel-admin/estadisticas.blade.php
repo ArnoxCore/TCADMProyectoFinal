@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ asset('frontend/Panel-admin/admin.css') }}" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css" />
 
   <!-- ====== FAVICON / PWA ====== -->
     <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('frontend/icons/favicon-96x96.png') }}">
@@ -33,6 +34,7 @@
         <a href="{{ route('admin.personal') }}" data-nav="personal">Gestión de Personal</a>
         <a href="{{ route('admin.reportes') }}" data-nav="reportes">Reportes</a>
         <a href="{{ route('admin.estadisticas') }}" data-nav="estadisticas">Estadísticas</a>
+        <a href="{{ route('admin.perfil') }}" data-nav="perfil">Mis datos</a>
         <form method="POST" action="{{ route('logout') }}">
           @csrf
           <button type="submit" class="button ghost">Cerrar sesión</button>
@@ -150,6 +152,7 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
   <script src="{{ asset('frontend/Panel-admin/admin.js') }}"></script>
 </body>
 </html>

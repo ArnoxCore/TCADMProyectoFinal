@@ -32,6 +32,9 @@
                             </option>
                         @endforeach
                     </select>
+                    @error('marca')
+                        <small style="color:#b91c1c;font-size:13px;margin-top:4px;display:block;">{{ $message }}</small>
+                    @enderror
                 </label>
 
                 {{-- MODELO --}}
@@ -40,6 +43,9 @@
                     <select name="modelo" id="modelo" {{ $marcaSeleccionada ? '' : 'disabled' }} required>
                         <option value="">Selecciona un modelo</option>
                     </select>
+                    @error('modelo')
+                        <small style="color:#b91c1c;font-size:13px;margin-top:4px;display:block;">{{ $message }}</small>
+                    @enderror
                 </label>
 
                 {{-- AÑO --}}
@@ -48,6 +54,9 @@
                     <select name="ano" id="ano" {{ old('modelo') ? '' : 'disabled' }} required>
                         <option value="">Selecciona un año</option>
                     </select>
+                    @error('ano')
+                        <small style="color:#b91c1c;font-size:13px;margin-top:4px;display:block;">{{ $message }}</small>
+                    @enderror
                 </label>
 
                 {{-- PLACA --}}
@@ -92,6 +101,9 @@
                                value="{{ $placaPartes[2] }}"
                                required>
                     </div>
+                    @error('placa')
+                        <small style="color:#b91c1c;font-size:13px;margin-top:4px;display:block;">{{ $message }}</small>
+                    @enderror
                 </label>
 
                 {{-- VIN + BOTÓN --}}
@@ -122,18 +134,27 @@
                            margin-top:4px;
                        ">
                     </small>
+                    @error('vin')
+                        <small style="color:#b91c1c;font-size:13px;margin-top:4px;display:block;">{{ $message }}</small>
+                    @enderror
                 </label>
 
                 {{-- COLOR --}}
                 <label class="perfil-label">
                     <span>Color</span>
                     <input type="text" name="color" id="color" placeholder="GRIS OXFORD">
+                    @error('color')
+                        <small style="color:#b91c1c;font-size:13px;margin-top:4px;display:block;">{{ $message }}</small>
+                    @enderror
                 </label>
 
                 {{-- KILOMETRAJE --}}
                 <label class="perfil-label">
                     <span>Kilometraje</span>
                     <input type="number" name="kilometraje" min="0" PLACEHOLDER="85000">
+                    @error('kilometraje')
+                        <small style="color:#b91c1c;font-size:13px;margin-top:4px;display:block;">{{ $message }}</small>
+                    @enderror
                 </label>
 
             </div>
