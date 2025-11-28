@@ -188,6 +188,112 @@ class RecepcionDashboardController extends Controller
         return $this->attendanceSuccess($cita, 'La cita fue cancelada desde recepción.');
     }
 
+
+    public function citasCalendario(Request $request)
+    {
+            $startParam = $request->input('start');
+            $endParam = $request->input('end');
+
+            if (! $startParam || ! $endParam) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El calendario requiere un rango de fechas válido.',
+                ], 422);
+            }
+
+            try {
+                $start = Carbon::parse($startParam)->startOfDay();
+                $end = Carbon::parse($endParam)->endOfDay();
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Rango de fechas inválido para el calendario.',
+                ], 422);
+            }
+
+            $query = Cita::with(['cliente.user', 'vehiculo', 'servicios', 'mecanico.user'])
+                ->whereBetween('fecha', [$start->toDateString(), $end->toDateString()]);
+
+            if ($request->filled('estatus')) {
+                $query->where('estatus', $request->input('estatus'));
+            }
+
+            if ($request->filled('mecanico')) {
+                $query->whereHas('mecanico.user', function ($q) use ($request) {
+                    $q->where('name', $request->input('mecanico'));
+                });
+            }
+
+            if ($request->filled('cliente')) {
+                $clienteBusqueda = $request->input('cliente');
+                $query->whereHas('cliente.user', function ($q) use ($clienteBusqueda) {
+                    $q->where('name', 'like', '%'.$clienteBusqueda.'%');
+                });
+            }
+
+            $statusColors = [
+                'pendiente'   => '#facc15',
+                'confirmada'  => '#38bdf8',
+                'en_proceso'  => '#818cf8',
+                'completada'  => '#34d399',
+                'cancelada'   => '#f87171',
+            ];
+
+            $events = $query
+                ->orderBy('fecha')
+                ->orderBy('hora_inicio')
+                ->get()
+                ->map(function (Cita $cita) use ($statusColors) {
+                    $fecha = $cita->fecha instanceof Carbon
+                        ? $cita->fecha->format('Y-m-d')
+                        : (string) $cita->fecha;
+
+                    $inicio = Carbon::parse($fecha.' '.($cita->hora_inicio ?? '08:00:00'), Cita::LOCAL_TIMEZONE)
+                        ->setTimezone(config('app.timezone'));
+
+                    $finBase = $cita->hora_fin ?? $cita->hora_inicio;
+                    $fin = Carbon::parse($fecha.' '.($finBase ?? '09:00:00'), Cita::LOCAL_TIMEZONE)
+                        ->setTimezone(config('app.timezone'));
+
+                    if ($fin->lessThanOrEqualTo($inicio)) {
+                        $fin = $inicio->copy()->addHour();
+                    }
+
+                    $servicios = $cita->servicios->pluck('nombre')->filter()->implode(', ');
+                    $attendanceLabel = $cita->attendance_label;
+
+                    if ($cita->estatus === 'cancelada') {
+                        $attendanceLabel = 'No aplica (cancelada)';
+                    }
+
+                    return [
+                        'id' => $cita->id,
+                        'title' => optional(optional($cita->cliente)->user)->name ?? 'Cliente sin nombre',
+                        'start' => $inicio->toIso8601String(),
+                        'end' => $fin->toIso8601String(),
+                        'backgroundColor' => $statusColors[$cita->estatus] ?? '#94a3b8',
+                        'borderColor' => $statusColors[$cita->estatus] ?? '#94a3b8',
+                        'textColor' => '#0f172a',
+                        'extendedProps' => [
+                            'folio' => $cita->id,
+                            'estatus' => $cita->estatus_texto ?? ucfirst($cita->estatus),
+                            'cliente' => optional(optional($cita->cliente)->user)->name ?? '—',
+                            'mecanico' => optional(optional($cita->mecanico)->user)->name ?? 'Sin asignar',
+                            'servicios' => $servicios ?: '—',
+                            'vehiculo' => $cita->vehiculo
+                                ? trim(($cita->vehiculo->marca ?? '').' '.($cita->vehiculo->modelo ?? ''))
+                                : '—',
+                            'asistencia' => $attendanceLabel,
+                        ],
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'data' => $events,
+            ]);
+    }
+
     private function attendanceSuccess(Cita $cita, string $message)
     {
         return response()->json([

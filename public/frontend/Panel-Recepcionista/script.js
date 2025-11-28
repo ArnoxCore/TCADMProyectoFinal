@@ -9,6 +9,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const labelResultados = document.getElementById("labelResultados");
     const formFiltros     = document.getElementById("formFiltros");
     const inputShowAll    = document.getElementById("show_all");
+    const viewToggles     = document.querySelectorAll(".view-toggle");
+    const tableView       = document.getElementById("tableView");
+    const calendarView    = document.getElementById("calendarView");
+    const calendarElement = document.getElementById("recepcionCalendar");
 
     const csrfToken = document
         .querySelector('meta[name="csrf-token"]')
@@ -16,19 +20,235 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const ROUTES = window.APP_ROUTES || {};
 
+    let rows = [];
+    let activeView = "tableView";
+    let calendarInstance = null;
+    let lastCalendarRange = null;
+    let calendarNeedsRefresh = true;
+    let calendarRequestId = 0;
+
     function buildRoute(template, id) {
         if (!template) return "";
         return template.replace('__ID__', id).replace(':id', id);
     }
 
-    let rows = [];
+    function normalizeStatusValue(value) {
+        if (!value) return "";
+        const key = value.toLowerCase().trim();
+        const map = {
+            'pendiente': 'pendiente',
+            'confirmada': 'confirmada',
+            'en proceso': 'en_proceso',
+            'en_proceso': 'en_proceso',
+            'completada': 'completada',
+            'cancelada': 'cancelada',
+        };
+        return map[key] || "";
+    }
+
+    function updateTableIndicators(count) {
+        if (labelResultados) {
+            labelResultados.textContent = `Mostrando ${count} citas`;
+        }
+
+        if (activeView === 'tableView' && kpiFiltrados) {
+            kpiFiltrados.textContent = count;
+        }
+    }
+
+    function collectCalendarFilters() {
+        return {
+            cliente: (searchCliente?.value || "").trim(),
+            mecanico: (searchMecanico?.value || "").trim(),
+            estatus: normalizeStatusValue(searchEstatus?.value || ""),
+        };
+    }
+
+    function switchView(targetId) {
+        if (!targetId) return;
+
+        activeView = targetId;
+
+        viewToggles.forEach(btn => {
+            const isActive = btn.dataset.target === targetId;
+            btn.classList.toggle("active", isActive);
+        });
+
+        if (tableView) {
+            tableView.style.display = targetId === 'tableView' ? '' : 'none';
+        }
+
+        if (calendarView) {
+            calendarView.style.display = targetId === 'calendarView' ? '' : 'none';
+        }
+
+        if (targetId === 'calendarView') {
+            initCalendar();
+
+            if (calendarNeedsRefresh && lastCalendarRange) {
+                refreshCalendarEvents();
+            }
+        } else {
+            aplicarFiltros();
+        }
+    }
+
+    function initCalendar() {
+        if (!calendarElement || calendarInstance) {
+            return;
+        }
+
+        const Calendar = window.FullCalendar?.Calendar;
+
+        if (!Calendar) {
+            console.warn('FullCalendar no está disponible.');
+            return;
+        }
+
+        calendarInstance = new Calendar(calendarElement, {
+            initialView: 'dayGridMonth',
+            locale: 'es',
+            timeZone: 'local',
+            firstDay: 1,
+            height: 'auto',
+            navLinks: false,
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: ''
+            },
+            eventDisplay: 'block',
+            eventTimeFormat: {
+                hour: '2-digit',
+                minute: '2-digit',
+                meridiem: false
+            },
+            datesSet(info) {
+                lastCalendarRange = info;
+
+                if (activeView === 'calendarView') {
+                    fetchCalendarEvents(info);
+                } else {
+                    calendarNeedsRefresh = true;
+                }
+            },
+            eventClick(info) {
+                info.jsEvent?.preventDefault();
+                mostrarDetallesEvento(info.event);
+            }
+        });
+
+        calendarInstance.render();
+    }
+
+    async function fetchCalendarEvents(rangeInfo) {
+        if (!ROUTES.calendarEvents || !rangeInfo) {
+            calendarNeedsRefresh = true;
+            return;
+        }
+
+        calendarRequestId += 1;
+        const requestId = calendarRequestId;
+
+        const params = new URLSearchParams({
+            start: rangeInfo.startStr,
+            end: rangeInfo.endStr,
+        });
+
+        const filters = collectCalendarFilters();
+
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value) {
+                params.append(key, value);
+            }
+        });
+
+        try {
+            const response = await fetch(`${ROUTES.calendarEvents}?${params.toString()}`, {
+                headers: {
+                    'Accept': 'application/json',
+                },
+            });
+
+            const payload = await response.json();
+
+            if (requestId !== calendarRequestId) {
+                return;
+            }
+
+            if (!response.ok || !payload?.success) {
+                throw new Error(payload?.message || 'No se pudo cargar el calendario.');
+            }
+
+            const events = Array.isArray(payload.data) ? payload.data : [];
+
+            calendarInstance.removeAllEvents();
+            calendarInstance.addEventSource(events);
+
+            calendarNeedsRefresh = false;
+
+            if (activeView === 'calendarView' && kpiFiltrados) {
+                kpiFiltrados.textContent = events.length;
+            }
+        } catch (error) {
+            console.error('Error al cargar el calendario', error);
+            calendarNeedsRefresh = true;
+            Swal.fire('Error', error.message || 'No se pudieron cargar las citas del calendario.', 'error');
+        }
+    }
+
+    function refreshCalendarEvents() {
+        if (activeView !== 'calendarView') {
+            calendarNeedsRefresh = true;
+            return;
+        }
+
+        if (!calendarInstance || !lastCalendarRange) {
+            calendarNeedsRefresh = true;
+            return;
+        }
+
+        fetchCalendarEvents(lastCalendarRange);
+    }
+
+    function mostrarDetallesEvento(evento) {
+        if (typeof Swal === 'undefined' || !evento) {
+            return;
+        }
+
+        const props = evento.extendedProps || {};
+        const detalle = `
+            <div class="calendar-event-details">
+                <p><strong>Cliente:</strong> ${props.cliente || '—'}</p>
+                <p><strong>Mecánico:</strong> ${props.mecanico || 'Sin asignar'}</p>
+                <p><strong>Estatus:</strong> ${props.estatus || '—'}</p>
+                <p><strong>Servicios:</strong> ${props.servicios || '—'}</p>
+                <p><strong>Vehículo:</strong> ${props.vehiculo || '—'}</p>
+                <p><strong>Asistencia:</strong> ${props.asistencia || 'Pendiente'}</p>
+            </div>
+        `;
+
+        Swal.fire({
+            title: `Cita #${props.folio ?? evento.id}`,
+            html: detalle,
+            confirmButtonText: 'Cerrar',
+            width: 480,
+        });
+    }
 
     function actualizarRows() {
+        if (!tableBody) return;
+
         rows = Array.from(tableBody.querySelectorAll("tr"));
         aplicarFiltros();
     }
 
     function aplicarFiltros() {
+        if (!rows.length) {
+            updateTableIndicators(0);
+            return;
+        }
+
         const clienteFiltro  = (searchCliente?.value || "").toLowerCase().trim();
         const mecanicoFiltro = (searchMecanico?.value || "").trim();
         const estatusFiltro  = (searchEstatus?.value || "").toLowerCase().trim();
@@ -38,13 +258,11 @@ document.addEventListener("DOMContentLoaded", () => {
         rows.forEach(row => {
             const cells = row.children;
 
-            // Fila "No hay citas..." -> la dejamos visible y no la contamos
             if (cells.length < 9) {
                 row.style.display = "";
                 return;
             }
 
-            // [Fecha, Hora, Cliente, Vehículo, Servicio, Mecánico, Asistencia, Estatus, Acciones]
             const colCliente  = cells[2];
             const colMecanico = cells[5];
             const colEstatus  = cells[7];
@@ -71,16 +289,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (mostrar) visibles++;
         });
 
-        if (kpiFiltrados) {
-            kpiFiltrados.textContent = visibles;
-        }
-
-        if (labelResultados) {
-            labelResultados.textContent = `Mostrando ${visibles} citas`;
-        }
+        updateTableIndicators(visibles);
     }
-
-    // ========= Handlers de acciones: asistencia =========
 
     function updateStatusCell(cell, estatus) {
         if (!cell || !estatus) return;
@@ -245,6 +455,7 @@ document.addEventListener("DOMContentLoaded", () => {
         applyActionPayload(row, data);
         Swal.fire("Listo", data.message || "Asistencia registrada.", "success");
         actualizarRows();
+        refreshCalendarEvents();
     }
 
     async function manejarInicioServicio(citaId, row) {
@@ -271,6 +482,7 @@ document.addEventListener("DOMContentLoaded", () => {
         applyActionPayload(row, data);
         Swal.fire("Registrado", data.message || "Inicio registrado.", "success");
         actualizarRows();
+        refreshCalendarEvents();
     }
 
     async function manejarNoShow(citaId, row) {
@@ -297,6 +509,7 @@ document.addEventListener("DOMContentLoaded", () => {
         applyActionPayload(row, data);
         Swal.fire("Actualizado", data.message || "Se registró la inasistencia.", "success");
         actualizarRows();
+        refreshCalendarEvents();
     }
 
     async function manejarCancelarCita(citaId, row) {
@@ -323,24 +536,27 @@ document.addEventListener("DOMContentLoaded", () => {
         applyActionPayload(row, data);
         Swal.fire("Cancelada", data.message || "La cita fue cancelada.", "success");
         actualizarRows();
+        refreshCalendarEvents();
     }
 
-    // ====== Cambio de fecha -> recargar con paginación de Laravel ======
     if (searchFecha && formFiltros) {
         searchFecha.addEventListener("change", () => {
-            if (inputShowAll) inputShowAll.value = "0"; // modo "solo esa fecha"
+            if (inputShowAll) inputShowAll.value = "0";
             formFiltros.submit();
         });
     }
 
-    // Filtros en vivo (cliente, mecánico, estatus) - solo front
+    const onLiveFilterChange = () => {
+        aplicarFiltros();
+        refreshCalendarEvents();
+    };
+
     [searchCliente, searchMecanico, searchEstatus].forEach(input => {
         if (!input) return;
-        input.addEventListener("input", aplicarFiltros);
-        input.addEventListener("change", aplicarFiltros);
+        input.addEventListener("input", onLiveFilterChange);
+        input.addEventListener("change", onLiveFilterChange);
     });
 
-    // Limpiar filtros -> ver TODAS las citas (sin fecha, con paginación)
     if (btnClear && formFiltros) {
         btnClear.addEventListener("click", () => {
             if (searchCliente)  searchCliente.value = "";
@@ -348,13 +564,12 @@ document.addEventListener("DOMContentLoaded", () => {
             if (searchEstatus)  searchEstatus.value = "";
             if (searchFecha)    searchFecha.value = "";
 
-            if (inputShowAll) inputShowAll.value = "1"; // modo "ver todas"
+            if (inputShowAll) inputShowAll.value = "1";
 
             formFiltros.submit();
         });
     }
 
-    // Delegación de eventos para botones de asistencia
     document.addEventListener("click", (event) => {
         const target = event.target;
 
@@ -390,6 +605,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Inicial: usar las filas que pintó Blade para la página actual
+    viewToggles.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.dataset.target;
+            switchView(target);
+        });
+    });
+
     actualizarRows();
+    switchView('tableView');
 });

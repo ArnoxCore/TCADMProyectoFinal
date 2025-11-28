@@ -230,6 +230,53 @@ body {
     padding: 1.5rem 1.8rem;
 }
 
+.view-switcher {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding: 0 0.25rem;
+}
+
+.view-switcher__buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.view-toggle {
+    border: 1px solid var(--line);
+    background: var(--white);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 0.45rem 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.view-toggle.active {
+    background: var(--primary);
+    color: var(--white);
+    border-color: var(--primary);
+}
+
+.calendar-section {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1.5rem 1.8rem;
+    margin-top: 1.5rem;
+}
+
+.calendar-wrapper {
+    margin-top: 1rem;
+}
+
+#recepcionCalendar {
+    width: 100%;
+    min-height: 600px;
+}
+
 .tabla-header {
     display: flex;
     justify-content: space-between;

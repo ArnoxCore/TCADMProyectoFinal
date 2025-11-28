@@ -10,6 +10,7 @@
 
     {{-- CSS del panel de recepción --}}
     <link rel="stylesheet" href="{{ asset('frontend/Panel-Recepcionista/recepcion.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css">
 
     <!-- ====== FAVICON / PWA ====== -->
     <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('frontend/icons/favicon-96x96.png') }}">
@@ -130,8 +131,16 @@
             </form>
         </section>
 
+        <section class="view-switcher">
+            <span>Vista:</span>
+            <div class="view-switcher__buttons">
+                <button type="button" class="view-toggle active" data-target="tableView">Tabla</button>
+                <button type="button" class="view-toggle" data-target="calendarView">Calendario</button>
+            </div>
+        </section>
+
         {{-- TABLA DE CITAS --}}
-        <section class="tabla-citas">
+        <section class="tabla-citas" id="tableView">
             <div class="tabla-header">
                 <h2>Resultados</h2>
                 <span id="labelResultados">Mostrando {{ $stats['filtered'] ?? 0 }} citas</span>
@@ -294,6 +303,17 @@
                 </div>
             @endif
         </section>
+
+        {{-- CALENDARIO DE CITAS --}}
+        <section class="calendar-section" id="calendarView" style="display:none;">
+            <div class="tabla-header">
+                <h2>Calendario</h2>
+                <span>Visualiza disponibilidad y evita traslapes</span>
+            </div>
+            <div class="calendar-wrapper">
+                <div id="recepcionCalendar"></div>
+            </div>
+        </section>
     </main>
 </div>
 
@@ -305,11 +325,15 @@
         checkIn: "{{ route('recepcion.citas.check-in', ['cita' => '__ID__']) }}",
         startService: "{{ route('recepcion.citas.start-service', ['cita' => '__ID__']) }}",
         noShow: "{{ route('recepcion.citas.no-show', ['cita' => '__ID__']) }}",
+        calendarEvents: "{{ route('recepcion.citas.calendario') }}",
     };
 </script>
 
 {{-- SweetAlert2 --}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{{-- FullCalendar --}}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 
 {{-- JS del panel de recepción --}}
 <script src="{{ asset('frontend/Panel-Recepcionista/script.js') }}"></script>

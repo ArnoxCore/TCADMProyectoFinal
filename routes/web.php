@@ -139,6 +139,10 @@ Route::middleware(['auth', 'role:3'])
         Route::get('/citas-por-fecha', [RecepcionDashboardController::class, 'citasPorFecha'])
             ->name('citas.fecha');
 
+        // Nuevo endpoint para citas en calendario
+        Route::get('/citas-calendario', [RecepcionDashboardController::class, 'citasCalendario'])
+            ->name('citas.calendario');
+
         // Cancelar cita desde recepción (AJAX)
         Route::patch('/citas/{cita}/cancelar', [RecepcionDashboardController::class, 'cancelar'])
             ->name('citas.cancelar');
