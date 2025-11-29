@@ -104,6 +104,9 @@
                     @error('placa')
                         <small style="color:#b91c1c;font-size:13px;margin-top:4px;display:block;">{{ $message }}</small>
                     @enderror
+                    @if($errors->has('placa'))
+                        <div data-toast="error" data-message="{{ $errors->first('placa') }}" style="display:none;"></div>
+                    @endif
                 </label>
 
                 {{-- VIN + BOTÓN --}}
@@ -137,6 +140,9 @@
                     @error('vin')
                         <small style="color:#b91c1c;font-size:13px;margin-top:4px;display:block;">{{ $message }}</small>
                     @enderror
+                    @if($errors->has('vin'))
+                        <div data-toast="error" data-message="{{ $errors->first('vin') }}" style="display:none;"></div>
+                    @endif
                 </label>
 
                 {{-- COLOR --}}

@@ -4,6 +4,7 @@ let estatusActual = '';
 let mecanicoIdActual = null; // Ya no se usa para asignar mecánico, se mantiene por compatibilidad
 let observacionesActuales = [];
 let clienteAsistioActual = false;
+let servicioIniciadoActual = false;
 
 const escapeHtml = (input = '') => input
     .replace(/&/g, '&amp;')
@@ -17,12 +18,13 @@ const getBaseUrl = () => window.location.pathname.includes('test-mecanico') ? '/
 /**
  * Abre el modal con los detalles de la cita
  */
-function abrirModalCita(id, servicio, vehiculo, fecha, horaHora, estatus, mecanicoId, observaciones = [], clienteNombre = '', clienteAsistio = false) {
+function abrirModalCita(id, servicio, vehiculo, fecha, horaHora, estatus, mecanicoId, observaciones = [], clienteNombre = '', clienteAsistio = false, servicioIniciado = false) {
     citaIdActual = id;
     estatusActual = estatus;
     mecanicoIdActual = mecanicoId;
     observacionesActuales = Array.isArray(observaciones) ? observaciones : [];
     clienteAsistioActual = Boolean(clienteAsistio);
+    servicioIniciadoActual = Boolean(servicioIniciado);
 
     // Llenar campos del modal
     document.getElementById('citaTitle').innerText = servicio;
@@ -93,18 +95,23 @@ function syncEstatusControls() {
         return;
     }
 
-    if (clienteAsistioActual) {
+    if (clienteAsistioActual && servicioIniciadoActual) {
         select.disabled = false;
         if (helper) {
-            helper.textContent = 'Cliente presente. Puedes actualizar el estado.';
+            helper.textContent = 'Servicio en curso. Puedes actualizar el estado.';
             helper.style.color = '#198754';
         }
     } else {
         select.disabled = true;
         select.value = estatusActual;
         if (helper) {
-            helper.textContent = 'Recepción debe registrar la llegada del cliente para habilitar este cambio.';
-            helper.style.color = '#d9534f';
+            if (!clienteAsistioActual) {
+                helper.textContent = 'Recepción debe registrar la llegada del cliente para habilitar este cambio.';
+                helper.style.color = '#d9534f';
+            } else {
+                helper.textContent = 'Recepción debe iniciar el servicio antes de habilitar este cambio.';
+                helper.style.color = '#d97706';
+            }
         }
     }
 }
@@ -132,6 +139,12 @@ function actualizarEstatus() {
     
     if (!clienteAsistioActual) {
         toast.warning('Debes esperar a que recepción marque la llegada del cliente.');
+        document.getElementById('citaEstatus').value = estatusActual;
+        return;
+    }
+
+    if (!servicioIniciadoActual) {
+        toast.warning('Recepción debe iniciar el servicio antes de que puedas cambiar el estado.');
         document.getElementById('citaEstatus').value = estatusActual;
         return;
     }
@@ -230,7 +243,21 @@ function guardarObservacion() {
  * Guarda los cambios realizados en el modal
  */
 function guardarCambios() {
+    const reload = () => {
+        cerrarModal();
+        location.reload();
+    };
+
+    if (window.Swal && typeof window.Swal.fire === 'function') {
+        Swal.fire({
+            icon: 'success',
+            title: 'Cambios aplicados',
+            text: 'La página se recargará para mostrar la información actualizada.',
+            confirmButtonText: 'Continuar',
+        }).then(reload);
+        return;
+    }
+
     alert('Los cambios se han guardado. La página se recargará para reflejar los cambios.');
-    cerrarModal();
-    location.reload();
+    reload();
 }

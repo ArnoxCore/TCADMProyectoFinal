@@ -10,6 +10,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ asset('frontend/Panel-Mecanico/style.css') }}">
 
+  <!-- ====== FAVICON / PWA ====== -->
+    <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('frontend/icons/favicon-96x96.png') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('frontend/icons/favicon.svg') }}">
+    <link rel="shortcut icon" href="{{ asset('frontend/icons/favicon.ico') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('frontend/icons/apple-touch-icon.png') }}">
+    <meta name="apple-mobile-web-app-title" content="TCADM">
+    <link rel="manifest" href="{{ asset('frontend/icons/site.webmanifest') }}">
+
 </head>
 <body data-page="mecanico">
 @php use App\Models\Cita as CitaModel; @endphp
@@ -90,6 +98,7 @@
                 $horaStr = trim(($cita->hora_inicio ?? '') . ($cita->hora_fin ? ' - '.$cita->hora_fin : ''));
                 $clienteNombre = $cita->cliente ? ($cita->cliente->user->name ?? 'Sin nombre') : 'Sin cliente';
                 $clienteAsistio = $cita->asistio === true;
+                $servicioIniciado = $cita->inicio_real_at !== null;
                 $observacionesPayload = $cita->observaciones->map(function ($obs) {
                   $fecha = $obs->created_at
                     ? $obs->created_at->copy()->timezone(CitaModel::LOCAL_TIMEZONE)->format('d/m/Y H:i')
@@ -114,7 +123,7 @@
                 </div>
                 <div style="text-align:right; min-width:140px;">
                   <div style="font-size:13px; color:#777;">Cliente: {{ $clienteNombre }}</div>
-                  <div style="margin-top:8px;"><button type="button" class="button" onclick='abrirModalCita({{ $cita->id }}, @json($serviciosStr), @json($vehiculoStr), @json($fechaStr), @json($horaStr), @json($cita->estatus), {{ $cita->mecanico_id ?? 'null' }}, @json($observacionesPayload), @json($clienteNombre), @json($clienteAsistio))'>Ver</button></div>
+                  <div style="margin-top:8px;"><button type="button" class="button" onclick='abrirModalCita({{ $cita->id }}, @json($serviciosStr), @json($vehiculoStr), @json($fechaStr), @json($horaStr), @json($cita->estatus), {{ $cita->mecanico_id ?? 'null' }}, @json($observacionesPayload), @json($clienteNombre), @json($clienteAsistio), @json($servicioIniciado))'>Ver</button></div>
                 </div>
               </div>
             @endforeach
@@ -144,7 +153,7 @@
               $horaStr = trim(($cita->hora_inicio ?? '') . ($cita->hora_fin ? ' - '.$cita->hora_fin : ''));
               $clienteNombre = $cita->cliente ? ($cita->cliente->user->name ?? 'Sin nombre') : 'Sin cliente';
               $clienteAsistio = $cita->asistio === true;
-              $clienteAsistio = $cita->asistio === true;
+              $servicioIniciado = $cita->inicio_real_at !== null;
               $observacionesPayload = $cita->observaciones->map(function ($obs) {
                 $fecha = $obs->created_at
                   ? $obs->created_at->copy()->timezone(CitaModel::LOCAL_TIMEZONE)->format('d/m/Y H:i')
@@ -173,7 +182,7 @@
               </div>
               <div style="text-align:right; min-width:140px;">
                 <div style="font-size:13px; color:#777;">Cliente: {{ $clienteNombre }}</div>
-                <div style="margin-top:8px;"><button type="button" class="button" onclick='abrirModalCita({{ $cita->id }}, @json($serviciosStr), @json($vehiculoStr), @json($fechaStr), @json($horaStr), @json($cita->estatus), {{ $cita->mecanico_id ?? 'null' }}, @json($observacionesPayload), @json($clienteNombre), @json($clienteAsistio))'>Ver</button></div>
+                <div style="margin-top:8px;"><button type="button" class="button" onclick='abrirModalCita({{ $cita->id }}, @json($serviciosStr), @json($vehiculoStr), @json($fechaStr), @json($horaStr), @json($cita->estatus), {{ $cita->mecanico_id ?? 'null' }}, @json($observacionesPayload), @json($clienteNombre), @json($clienteAsistio), @json($servicioIniciado))'>Ver</button></div>
               </div>
             </div>
           @endforeach
@@ -200,6 +209,8 @@
               $fechaStr = $cita->fecha?->format('d/m/Y') ?? '';
               $horaStr = trim(($cita->hora_inicio ?? '') . ($cita->hora_fin ? ' - '.$cita->hora_fin : ''));
               $clienteNombre = $cita->cliente ? ($cita->cliente->user->name ?? 'Sin nombre') : 'Sin cliente';
+              $clienteAsistio = $cita->asistio === true;
+              $servicioIniciado = $cita->inicio_real_at !== null;
               $observacionesPayload = $cita->observaciones->map(function ($obs) {
                 $fecha = $obs->created_at
                   ? $obs->created_at->copy()->timezone(CitaModel::LOCAL_TIMEZONE)->format('d/m/Y H:i')
@@ -225,7 +236,7 @@
               </div>
               <div style="text-align:right; min-width:140px;">
                 <div style="font-size:13px; color:#777;">Cliente: {{ $clienteNombre }}</div>
-                <div style="margin-top:8px;"><button type="button" class="button" onclick='abrirModalCita({{ $cita->id }}, @json($serviciosStr), @json($vehiculoStr), @json($fechaStr), @json($horaStr), @json($cita->estatus), {{ $cita->mecanico_id ?? 'null' }}, @json($observacionesPayload), @json($clienteNombre), @json($clienteAsistio))'>Ver</button></div>
+                <div style="margin-top:8px;"><button type="button" class="button" onclick='abrirModalCita({{ $cita->id }}, @json($serviciosStr), @json($vehiculoStr), @json($fechaStr), @json($horaStr), @json($cita->estatus), {{ $cita->mecanico_id ?? 'null' }}, @json($observacionesPayload), @json($clienteNombre), @json($clienteAsistio), @json($servicioIniciado))'>Ver</button></div>
               </div>
             </div>
           @endforeach
@@ -244,67 +255,74 @@
   
   <!-- Modal de Detalles de Cita -->
   <div id="citaModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
-    <div style="background:white; padding:30px; border-radius:8px; max-width:500px; width:90%; max-height:80vh; overflow-y:auto; box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+    <div style="background:white; padding:32px; border-radius:10px; max-width:720px; width:95%; max-height:80vh; overflow-y:auto; box-shadow:0 4px 24px rgba(15,23,42,0.2);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h2 id="citaTitle" style="margin:0;">Detalles de Cita</h2>
         <button onclick="cerrarModal()" style="background:none; border:none; font-size:24px; cursor:pointer; color:#999;">×</button>
       </div>
       
-      <form id="citaForm" onsubmit="return false;">
-        <div style="margin-bottom:16px;">
-          <label style="display:block; font-weight:600; margin-bottom:8px;">Servicio</label>
-          <div id="citaServicio" style="background:#f5f5f5; padding:10px; border-radius:4px;"></div>
-        </div>
+      <form id="citaForm" onsubmit="return false;" class="modal-grid">
+        <div class="modal-column">
+          <div class="modal-section-title">Información de la cita</div>
+          <div class="modal-field">
+            <label>Servicio</label>
+            <div id="citaServicio" class="modal-box"></div>
+          </div>
 
-        <div style="margin-bottom:16px;">
-          <label style="display:block; font-weight:600; margin-bottom:8px;">Vehículo</label>
-          <div id="citaVehiculo" style="background:#f5f5f5; padding:10px; border-radius:4px;"></div>
-        </div>
+          <div class="modal-field">
+            <label>Vehículo</label>
+            <div id="citaVehiculo" class="modal-box"></div>
+          </div>
 
-        <div style="margin-bottom:16px;">
-          <label style="display:block; font-weight:600; margin-bottom:8px;">Fecha y Hora</label>
-          <div id="citaFechaHora" style="background:#f5f5f5; padding:10px; border-radius:4px;"></div>
-        </div>
+          <div class="modal-field">
+            <label>Fecha y Hora</label>
+            <div id="citaFechaHora" class="modal-box"></div>
+          </div>
 
-        <div style="margin-bottom:16px;">
-          <label style="display:block; font-weight:600; margin-bottom:8px;">Estado</label>
-          <select id="citaEstatus" onchange="actualizarEstatus()" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
-            <option value="en_proceso">En Proceso</option>
-            <option value="completada">Completada</option>
-          </select>
-          <small id="estatusHelper" style="display:block; margin-top:6px; color:#777;">Recepción debe registrar la llegada del cliente para habilitar este cambio.</small>
-        </div>
-
-        <div style="margin-bottom:16px;">
-          <label style="display:block; font-weight:600; margin-bottom:8px;">Observaciones del mecánico</label>
-          <textarea id="citaObservaciones" rows="3" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; resize:vertical;" placeholder="Describe hallazgos adicionales o recomendaciones"></textarea>
-          <small style="color:#777;">Esta nota no cambia el estado de la cita ni la confirma.</small>
-        </div>
-
-        <div style="margin-bottom:16px;">
-          <label style="display:block; font-weight:600; margin-bottom:8px;">Historial de observaciones</label>
-          <div id="observacionesHistorial" style="background:#f8f9fb; border:1px solid #e1e6ef; border-radius:4px; padding:10px; max-height:200px; overflow-y:auto;">
-            <p style="margin:0; color:#777;">Sin observaciones registradas.</p>
+          <div class="modal-field">
+            <label>Cliente</label>
+            <div id="citaCliente" class="modal-box" style="min-height:38px;"></div>
           </div>
         </div>
 
-        <div style="display:flex; gap:10px; margin-bottom:16px;">
-          <button type="button" onclick="guardarObservacion()" id="btnGuardarObservacion" class="button primary" style="flex:1;">Guardar observación</button>
+        <div class="modal-column">
+          <div class="modal-section-title">Acciones del mecánico</div>
+          <div class="modal-field">
+            <label>Estado</label>
+            <select id="citaEstatus" onchange="actualizarEstatus()" class="modal-select">
+              <option value="en_proceso">En Proceso</option>
+              <option value="completada">Completada</option>
+            </select>
+            <small id="estatusHelper" class="modal-helper helper-warning">Recepción debe registrar la llegada del cliente para habilitar este cambio.</small>
+          </div>
+
+          <div class="modal-field">
+            <label>Observaciones del mecánico</label>
+            <textarea id="citaObservaciones" rows="3" class="modal-textarea" placeholder="Describe hallazgos adicionales o recomendaciones"></textarea>
+            <small class="modal-helper">Esta nota no cambia el estado de la cita ni la confirma.</small>
+          </div>
+
+          <div class="modal-field">
+            <label>Historial de observaciones</label>
+            <div id="observacionesHistorial" class="modal-history">
+              <p style="margin:0; color:#777;">Sin observaciones registradas.</p>
+            </div>
+          </div>
         </div>
 
-        <div style="margin-bottom:16px;">
-          <label style="display:block; font-weight:600; margin-bottom:8px;">Cliente</label>
-          <div id="citaCliente" style="background:#f5f5f5; padding:10px; border-radius:4px; min-height:38px;"></div>
+        <div class="modal-actions">
+          <button type="button" onclick="guardarObservacion()" id="btnGuardarObservacion" class="button primary ghosted">Guardar observación</button>
         </div>
 
-        <div style="display:flex; gap:10px;">
-          <button type="button" onclick="cerrarModal()" class="button ghost" style="flex:1;">Cerrar</button>
-          <button type="button" onclick="guardarCambios()" class="button primary" style="flex:1;">Guardar Cambios</button>
+        <div class="modal-footer">
+          <button type="button" onclick="cerrarModal()" class="button ghost">Cerrar</button>
+          <button type="button" onclick="guardarCambios()" class="button primary">Guardar Cambios</button>
         </div>
       </form>
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     // Instancia global de Notyf
     window.toast = new Notyf({

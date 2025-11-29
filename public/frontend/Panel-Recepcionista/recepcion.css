@@ -253,7 +253,7 @@ body {
     padding: 0.5rem;
     width: 44px;
     height: 44px;
-    color: var(--primary);
+    color: #b91c1c;
 }
 
 .btn-clear svg {

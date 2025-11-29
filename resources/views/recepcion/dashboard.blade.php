@@ -171,7 +171,6 @@
         </section>
 
         <section class="view-switcher">
-            <span>Vista:</span>
             <div class="view-switcher__buttons">
                 <button type="button" class="view-toggle active" data-target="tableView">Tabla</button>
                 <button type="button" class="view-toggle" data-target="calendarView">Calendario</button>

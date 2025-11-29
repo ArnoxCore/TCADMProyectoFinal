@@ -105,6 +105,13 @@ class MecanicoController extends Controller
             ], 422);
         }
 
+        if ($cita->inicio_real_at === null) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Recepción debe iniciar el servicio antes de que puedas actualizar el estado.',
+            ], 422);
+        }
+
         $cita->update(['estatus' => $validated['estatus']]);
 
         return response()->json(['success' => true, 'message' => 'Estado actualizado', 'estatus' => $cita->estatus_texto]);
