@@ -49,7 +49,17 @@
                 <h3>Total de citas del día</h3>
                 <div class="kpi">{{ $stats['total'] ?? 0 }}</div>
                 <div class="sub">
-                    {{ !empty($showAll) && $showAll ? 'Todas las fechas' : ($fecha ?? '') }}
+                    @if(!empty($showAll) && $showAll)
+                        Todas las fechas
+                    @elseif(!empty($fecha_inicio) && !empty($fecha_fin))
+                        {{ $fecha_inicio }} a {{ $fecha_fin }}
+                    @elseif(!empty($fecha_inicio))
+                        Desde {{ $fecha_inicio }}
+                    @elseif(!empty($fecha_fin))
+                        Hasta {{ $fecha_fin }}
+                    @else
+                        Sin rango definido
+                    @endif
                 </div>
             </article>
 
@@ -84,14 +94,24 @@
                     <input type="text" id="searchCliente" placeholder="Nombre del cliente">
                 </div>
 
-                <div class="campo">
-                    <label for="searchFecha">Fecha</label>
-                    <input
-                        type="date"
-                        id="searchFecha"
-                        name="fecha"
-                        value="{{ $fecha ?? '' }}"
-                    >
+                <div class="campo rango-fechas">
+                    <label>Rango de fechas</label>
+                    <div class="rango-fechas__inputs">
+                        <input
+                            type="date"
+                            id="searchFechaInicio"
+                            name="fecha_inicio"
+                            value="{{ request('fecha_inicio', $fecha_inicio ?? '') }}"
+                        >
+                        <span class="rango-fechas__divider">a</span>
+                        <input
+                            type="date"
+                            id="searchFechaFin"
+                            name="fecha_fin"
+                            value="{{ request('fecha_fin', $fecha_fin ?? '') }}"
+                        >
+                        <button type="button" class="rango-fechas__today" id="btnToday">Hoy</button>
+                    </div>
                 </div>
 
                 <div class="campo">
@@ -120,14 +140,33 @@
 
                 <div class="campo campo-acciones">
                     <label>&nbsp;</label>
-                    <button type="button" id="btnClear">Limpiar filtros</button>
+                    <button type="button"
+                            id="btnClear"
+                            class="btn-clear"
+                            title="Limpiar filtros"
+                            aria-label="Limpiar filtros">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7" />
+                                <path d="M10 11v6" />
+                                <path d="M14 11v6" />
+                                <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                                <path d="M4 7h16" />
+                            </g>
+                        </svg>
+                    </button>
                 </div>
 
                 {{-- Modo "ver todas" o "solo por fecha" --}}
-                <input type="hidden"
-                       name="show_all"
-                       id="show_all"
-                       value="{{ !empty($showAll) && $showAll ? 1 : 0 }}">
+                  <input type="hidden"
+                      name="show_all"
+                      id="show_all"
+                      value="{{ !empty($showAll) && $showAll ? 1 : 0 }}">
+
+                  <input type="hidden"
+                      id="rangeApplied"
+                      name="range_applied"
+                      value="{{ !empty($range_applied) ? 1 : 0 }}">
             </form>
         </section>
 

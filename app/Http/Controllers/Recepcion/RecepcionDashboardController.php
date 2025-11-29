@@ -18,12 +18,14 @@ class RecepcionDashboardController extends Controller
         // ¿Quiere ver todas las citas sin filtrar por fecha?
         $showAll = $request->boolean('show_all');
 
-        // Fecha que se está viendo (puede venir null)
-        $fecha = $request->input('fecha');
+        $fechaInicio = $request->input('fecha_inicio');
+        $fechaFin = $request->input('fecha_fin');
+        $rangeApplied = $request->filled('fecha_inicio') || $request->filled('fecha_fin');
 
-        // Si NO pidió "ver todas" y NO mandó fecha, usamos hoy
-        if (! $showAll && ! $fecha) {
-            $fecha = Carbon::now(self::LOCAL_TZ)->toDateString();
+        if (! $showAll && ! $fechaInicio && ! $fechaFin) {
+            $today = Carbon::now(self::LOCAL_TZ)->toDateString();
+            $fechaInicio = $today;
+            $fechaFin = $today;
         }
 
         $citasQuery = Cita::with([
@@ -33,9 +35,15 @@ class RecepcionDashboardController extends Controller
             'mecanico.user'
         ]);
 
-        // Solo filtramos por fecha si NO está en modo "ver todas"
-        if (! $showAll && $fecha) {
-            $citasQuery->whereDate('fecha', $fecha);
+        // Solo filtramos por fechas si NO está en modo "ver todas"
+        if (! $showAll) {
+            if ($fechaInicio && $fechaFin) {
+                $citasQuery->whereBetween('fecha', [$fechaInicio, $fechaFin]);
+            } elseif ($fechaInicio) {
+                $citasQuery->whereDate('fecha', '>=', $fechaInicio);
+            } elseif ($fechaFin) {
+                $citasQuery->whereDate('fecha', '<=', $fechaFin);
+            }
         }
 
         // Paginación (5 por página)
@@ -58,13 +66,22 @@ class RecepcionDashboardController extends Controller
             ->where('activo', true)
             ->get();
 
-        return view('recepcion.dashboard', compact('citas', 'mecanicos', 'fecha', 'stats', 'showAll'));
+        return view('recepcion.dashboard', [
+            'citas' => $citas,
+            'mecanicos' => $mecanicos,
+            'stats' => $stats,
+            'showAll' => $showAll,
+            'fecha_inicio' => $fechaInicio,
+            'fecha_fin' => $fechaFin,
+            'range_applied' => $rangeApplied,
+        ]);
     }
 
     // ========= AJAX: listado de citas (para el filtro de fecha) =========
     public function citasPorFecha(Request $request)
     {
-        $fecha = $request->input('fecha');
+        $fechaInicio = $request->input('fecha_inicio');
+        $fechaFin = $request->input('fecha_fin');
 
         $query = Cita::with([
             'cliente.user',
@@ -73,8 +90,12 @@ class RecepcionDashboardController extends Controller
             'mecanico.user'
         ]);
 
-        if (!empty($fecha)) {
-            $query->whereDate('fecha', $fecha);
+        if ($fechaInicio && $fechaFin) {
+            $query->whereBetween('fecha', [$fechaInicio, $fechaFin]);
+        } elseif ($fechaInicio) {
+            $query->whereDate('fecha', '>=', $fechaInicio);
+        } elseif ($fechaFin) {
+            $query->whereDate('fecha', '<=', $fechaFin);
         }
 
         $citas = $query
@@ -213,6 +234,21 @@ class RecepcionDashboardController extends Controller
 
             $query = Cita::with(['cliente.user', 'vehiculo', 'servicios', 'mecanico.user'])
                 ->whereBetween('fecha', [$start->toDateString(), $end->toDateString()]);
+
+            if ($request->filled('fecha_inicio') || $request->filled('fecha_fin')) {
+                $inicioFiltro = $request->input('fecha_inicio');
+                $finFiltro = $request->input('fecha_fin');
+
+                $query->where(function ($sub) use ($inicioFiltro, $finFiltro) {
+                    if ($inicioFiltro && $finFiltro) {
+                        $sub->whereBetween('fecha', [$inicioFiltro, $finFiltro]);
+                    } elseif ($inicioFiltro) {
+                        $sub->whereDate('fecha', '>=', $inicioFiltro);
+                    } elseif ($finFiltro) {
+                        $sub->whereDate('fecha', '<=', $finFiltro);
+                    }
+                });
+            }
 
             if ($request->filled('estatus')) {
                 $query->where('estatus', $request->input('estatus'));

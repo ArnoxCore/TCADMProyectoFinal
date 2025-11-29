@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const searchCliente   = document.getElementById("searchCliente");
-    const searchFecha     = document.getElementById("searchFecha");
+    const searchFechaInicio = document.getElementById("searchFechaInicio");
+    const searchFechaFin     = document.getElementById("searchFechaFin");
     const searchMecanico  = document.getElementById("searchMecanico");
     const searchEstatus   = document.getElementById("searchEstatus");
     const btnClear        = document.getElementById("btnClear");
@@ -9,10 +10,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const labelResultados = document.getElementById("labelResultados");
     const formFiltros     = document.getElementById("formFiltros");
     const inputShowAll    = document.getElementById("show_all");
-    const viewToggles     = document.querySelectorAll(".view-toggle");
-    const tableView       = document.getElementById("tableView");
-    const calendarView    = document.getElementById("calendarView");
-    const calendarElement = document.getElementById("recepcionCalendar");
+    const viewToggles        = document.querySelectorAll(".view-toggle");
+    const tableView          = document.getElementById("tableView");
+    const calendarView       = document.getElementById("calendarView");
+    const calendarElement    = document.getElementById("recepcionCalendar");
+    const rangeAppliedField  = document.getElementById("rangeApplied");
+    const btnToday           = document.getElementById("btnToday");
 
     const csrfToken = document
         .querySelector('meta[name="csrf-token"]')
@@ -26,10 +29,17 @@ document.addEventListener("DOMContentLoaded", () => {
     let lastCalendarRange = null;
     let calendarNeedsRefresh = true;
     let calendarRequestId = 0;
+    let rangeApplied = rangeAppliedField?.value === "1";
 
     function buildRoute(template, id) {
         if (!template) return "";
         return template.replace('__ID__', id).replace(':id', id);
+    }
+
+    function formatDateForInput(date) {
+        const tzOffset = date.getTimezoneOffset() * 60000;
+        const local = new Date(date.getTime() - tzOffset);
+        return local.toISOString().slice(0, 10);
     }
 
     function normalizeStatusValue(value) {
@@ -61,6 +71,8 @@ document.addEventListener("DOMContentLoaded", () => {
             cliente: (searchCliente?.value || "").trim(),
             mecanico: (searchMecanico?.value || "").trim(),
             estatus: normalizeStatusValue(searchEstatus?.value || ""),
+            fecha_inicio: rangeApplied ? (searchFechaInicio?.value || "") : "",
+            fecha_fin: rangeApplied ? (searchFechaFin?.value || "") : "",
         };
     }
 
@@ -105,12 +117,26 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        const today = new Date();
+        const minDate = new Date(today.getFullYear(), today.getMonth() - 3, 1);
+        const maxDate = new Date(today.getFullYear(), today.getMonth() + 4, 0);
+
         calendarInstance = new Calendar(calendarElement, {
             initialView: 'dayGridMonth',
             locale: 'es',
             timeZone: 'local',
             firstDay: 1,
             height: 'auto',
+            validRange() {
+                const toIso = date => new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+                    .toISOString()
+                    .slice(0, 10);
+
+                return {
+                    start: toIso(minDate),
+                    end: toIso(maxDate),
+                };
+            },
             navLinks: false,
             headerToolbar: {
                 left: 'prev,next today',
@@ -539,10 +565,39 @@ document.addEventListener("DOMContentLoaded", () => {
         refreshCalendarEvents();
     }
 
-    if (searchFecha && formFiltros) {
-        searchFecha.addEventListener("change", () => {
+    const setRangeApplied = (value) => {
+        rangeApplied = value;
+        if (rangeAppliedField) {
+            rangeAppliedField.value = value ? "1" : "0";
+        }
+    };
+
+    const onRangeChange = () => {
+        setRangeApplied(true);
+        if (inputShowAll) inputShowAll.value = "0";
+        formFiltros?.submit();
+    };
+
+    if (searchFechaInicio) {
+        searchFechaInicio.addEventListener("change", onRangeChange);
+    }
+
+    if (searchFechaFin) {
+        searchFechaFin.addEventListener("change", onRangeChange);
+    }
+
+    if (btnToday) {
+        btnToday.addEventListener("click", () => {
+            const todayValue = formatDateForInput(new Date());
+
+            if (searchFechaInicio) searchFechaInicio.value = todayValue;
+            if (searchFechaFin) searchFechaFin.value = todayValue;
+
+            setRangeApplied(true);
+
             if (inputShowAll) inputShowAll.value = "0";
-            formFiltros.submit();
+
+            formFiltros?.submit();
         });
     }
 
@@ -562,9 +617,11 @@ document.addEventListener("DOMContentLoaded", () => {
             if (searchCliente)  searchCliente.value = "";
             if (searchMecanico) searchMecanico.value = "";
             if (searchEstatus)  searchEstatus.value = "";
-            if (searchFecha)    searchFecha.value = "";
+            if (searchFechaInicio) searchFechaInicio.value = "";
+            if (searchFechaFin) searchFechaFin.value = "";
 
             if (inputShowAll) inputShowAll.value = "1";
+            setRangeApplied(false);
 
             formFiltros.submit();
         });

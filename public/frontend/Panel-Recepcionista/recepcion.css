@@ -169,8 +169,9 @@ body {
 
 .filtros-grid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 1rem;
+    grid-template-columns: minmax(220px, 1.3fr) minmax(260px, 1.6fr) minmax(180px, 1fr) minmax(180px, 1fr) auto;
+    gap: 1.1rem;
+    align-items: end;
 }
 
 .campo {
@@ -178,6 +179,38 @@ body {
     flex-direction: column;
     gap: 0.35rem;
     font-size: 14px;
+}
+
+.rango-fechas__inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.rango-fechas__inputs input[type="date"] {
+    flex: 1;
+    min-width: 0;
+}
+
+.rango-fechas__divider {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.rango-fechas__today {
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--white);
+    color: var(--text);
+    padding: 0.45rem 0.85rem;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s ease;
+    white-space: nowrap;
+}
+
+.rango-fechas__today:hover {
+    background: #f3f4f6;
 }
 
 .campo label {
@@ -205,20 +238,32 @@ body {
 
 .campo-acciones {
     align-self: flex-end;
+    justify-self: end;
 }
 
-#btnClear {
-    border-radius: 8px;
+.btn-clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
     border: 1px solid var(--line);
-    padding: 0.5rem 0.9rem;
-    font-size: 14px;
     background: var(--white);
     cursor: pointer;
     transition: 0.2s ease;
+    padding: 0.5rem;
+    width: 44px;
+    height: 44px;
+    color: var(--primary);
 }
 
-#btnClear:hover {
-    background: #f3f4f6;
+.btn-clear svg {
+    width: 20px;
+    height: 20px;
+}
+
+.btn-clear:hover {
+    background: #eff6ff;
+    border-color: rgba(30, 64, 175, 0.35);
 }
 
 /* ===== TABLA ===== */
