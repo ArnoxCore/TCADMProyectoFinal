@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\CarsXEController;
-use App\Http\Controllers\Api\VehicleCatalogController;
+use App\Http\Controllers\API\VehicleCatalogController;
 // Controladores del módulo Cliente
 use App\Http\Controllers\Cliente\CitaController;
 use App\Http\Controllers\Cliente\DashboardController;
